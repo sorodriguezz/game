@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reinos.invalid/schemas/battle-order-v1.json",
+  "title": "TacticalOrder v1 (referencia)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "formationId", "seq", "requestedTick"],
+  "properties": {
+    "type": {"enum": ["MOVE", "ATTACK", "HOLD", "RETREAT", "SET_FORMATION", "SUPPORT"]},
+    "formationId": {"type": "string", "format": "uuid"},
+    "seq": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+    "requestedTick": {"type": "integer", "minimum": 0},
+    "targetPosition": {
+      "type": "object", "additionalProperties": false,
+      "required": ["x", "z"],
+      "properties": {"x": {"type": "number"}, "z": {"type": "number"}}
+    },
+    "targetFormationId": {"type": "string", "format": "uuid"},
+    "formationPreset": {"enum": ["LINE", "WEDGE", "SKIRMISH"]}
+  },
+  "allOf": [
+    {"if": {"properties": {"type": {"const": "MOVE"}}}, "then": {"required": ["targetPosition"]}},
+    {"if": {"properties": {"type": {"const": "ATTACK"}}}, "then": {"required": ["targetFormationId"]}},
+    {"if": {"properties": {"type": {"const": "SET_FORMATION"}}}, "then": {"required": ["formationPreset"]}}
+  ]
+}

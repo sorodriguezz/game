@@ -73,9 +73,8 @@ export function createPrng(seed: string): Prng {
   const nextBigInt = (maxExclusive: bigint): bigint => {
     if (maxExclusive <= 0n) throw new RangeError('rango inválido');
     let bits = 0n;
-    let words = 0;
     while (1n << bits < maxExclusive) bits += 1n;
-    words = Math.max(1, Math.ceil(Number(bits) / 32));
+    const words = Math.max(1, Math.ceil(Number(bits) / 32));
     const range = 1n << BigInt(words * 32);
     const limit = range - (range % maxExclusive);
     for (;;) {

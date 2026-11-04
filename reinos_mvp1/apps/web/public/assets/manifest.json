@@ -1,0 +1,19 @@
+{
+  "$comment": "Catálogo de assets 3D (ADR-0008). status=APPROVED exige GLB validado + licencia + revisión humana. Mientras no exista un GLB aprobado, el cliente usa el kit procedural 'blockout' (NO es arte final).",
+  "styleVersion": "realistic-stylized-v1",
+  "assets": [
+    { "assetId": "city_hall", "kind": "building", "status": "BLOCKOUT", "file": null },
+    { "assetId": "farm", "kind": "building", "status": "BLOCKOUT", "file": null },
+    { "assetId": "sawmill", "kind": "building", "status": "BLOCKOUT", "file": null },
+    { "assetId": "quarry", "kind": "building", "status": "BLOCKOUT", "file": null },
+    { "assetId": "mine", "kind": "building", "status": "BLOCKOUT", "file": null },
+    { "assetId": "warehouse", "kind": "building", "status": "BLOCKOUT", "file": null },
+    { "assetId": "barracks", "kind": "building", "status": "BLOCKOUT", "file": null },
+    { "assetId": "hospital", "kind": "building", "status": "BLOCKOUT", "file": null },
+    { "assetId": "temple", "kind": "building", "status": "BLOCKOUT", "file": null },
+    { "assetId": "port", "kind": "building", "status": "BLOCKOUT", "file": null },
+    { "assetId": "wall", "kind": "building", "status": "BLOCKOUT", "file": null },
+    { "assetId": "imperial_bastion", "kind": "building", "status": "BLOCKOUT", "file": null },
+    { "assetId": "naval_arsenal", "kind": "building", "status": "BLOCKOUT", "file": null }
+  ]
+}

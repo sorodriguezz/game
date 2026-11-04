@@ -5,12 +5,7 @@ import { BUILDING_TYPES, CIVILIZATION_IDS, UNIT_TYPES } from '@reinos/game-confi
 // Auth
 // ---------------------------------------------------------------------------
 export const registerRequestSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .toLowerCase()
-    .max(254)
-    .pipe(z.email()),
+  email: z.string().trim().toLowerCase().max(254).pipe(z.email()),
   displayName: z
     .string()
     .trim()

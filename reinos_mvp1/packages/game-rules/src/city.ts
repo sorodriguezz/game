@@ -16,7 +16,8 @@ export interface PlacedBuilding {
   level: number;
 }
 
-export type RuleCheck<T> = { ok: true; value: T } | { ok: false; code: ErrorCode; details?: Record<string, unknown> };
+export type RuleCheck<T> =
+  { ok: true; value: T } | { ok: false; code: ErrorCode; details?: Record<string, unknown> };
 
 /**
  * Valida construir/mejorar `type` en `plot` (FR-CITY-01/03/08, ADR-0009).
@@ -35,7 +36,8 @@ export function validateConstruction(
   const plot = plotDef(r, input.plot);
   if (!plot) return { ok: false, code: 'PLOT_NOT_FOUND' };
   const def = buildingDef(r, input.type);
-  if (plot.kind !== def.plotKind) return { ok: false, code: 'PLOT_KIND_MISMATCH', details: { expected: def.plotKind } };
+  if (plot.kind !== def.plotKind)
+    return { ok: false, code: 'PLOT_KIND_MISMATCH', details: { expected: def.plotKind } };
   if (def.civilization && def.civilization !== input.civilization) {
     return { ok: false, code: 'CIVILIZATION_RESTRICTED' };
   }

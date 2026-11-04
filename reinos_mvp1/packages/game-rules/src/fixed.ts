@@ -11,7 +11,7 @@ export const RATIO_SCALE = 1_000_000n;
 export function floorDiv(a: bigint, b: bigint): bigint {
   if (b === 0n) throw new RangeError('división por cero');
   const q = a / b;
-  return (a % b !== 0n && (a < 0n) !== (b < 0n)) ? q - 1n : q;
+  return a % b !== 0n && a < 0n !== b < 0n ? q - 1n : q;
 }
 
 /** División entera con redondeo hacia +infinito. */

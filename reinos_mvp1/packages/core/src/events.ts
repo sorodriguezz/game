@@ -144,7 +144,11 @@ export async function processEventsUpTo(
       where id = ${ev.id} and status in ('PENDING', 'PROCESSING')
     `);
     if (done.rowCount !== 1) {
-      throw new DomainError('CONCURRENT_MODIFICATION', 409, `evento ${ev.id} cambió de estado durante su aplicación`);
+      throw new DomainError(
+        'CONCURRENT_MODIFICATION',
+        409,
+        `evento ${ev.id} cambió de estado durante su aplicación`,
+      );
     }
     ctx.log.info('event.applied', {
       event_id: ev.id,

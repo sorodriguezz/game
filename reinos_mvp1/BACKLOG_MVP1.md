@@ -2,10 +2,12 @@
 
 **Criterio:** completar gates secuenciales; ningún gate se aprueba solo con una imagen o demo que no use datos reales del backend.
 
+> Estado y evidencia de cada historia: [`docs/IMPLEMENTATION-STATUS.md`](docs/IMPLEMENTATION-STATUS.md). Una casilla marcada indica implementación con pruebas ejecutadas; **ningún gate está aprobado** todavía (Gate 0 requiere arte final aprobado).
+
 ## Gate 0 — Calidad artística y setup
-- [ ] G0-01 Crear monorepo con web PlayCanvas React, API NestJS, Postgres Docker y tests.
+- [x] G0-01 Crear monorepo con web PlayCanvas React, API NestJS, Postgres Docker y tests.
 - [ ] G0-02 Fijar guía artística por civilización, convenciones de cámara, escala y atlas de materiales.
-- [ ] G0-03 Definir contratos `asset-manifest`, naming, previews y checklist de licencias.
+- [x] G0-03 Definir contratos `asset-manifest`, naming, previews y checklist de licencias.
 - [ ] G0-04 Producir y aprobar castillo, granja, hospital, templo, puerto, barco, infante y arbolado.
 - [ ] G0-05 Pipeline automático de inspección GLB, optimización y capturas de render.
 - [ ] G0-06 Primera ciudad 3D navegable con edificios reales y selector de parcela.
@@ -13,13 +15,13 @@
 **Gate aprobado:** 3D profesional coherente, buen rendimiento medido en equipo de referencia y assets auditables.
 
 ## Gate 1 — Vertical slice con dos jugadores
-- [ ] G1-01 Auth seguro, `worlds`, `memberships`, inicialización de mundo.
-- [ ] G1-02 Economy ledger y liquidación temporal de cuatro recursos.
-- [ ] G1-03 Construcciones en parcelas y evento de finalización offline.
-- [ ] G1-04 Cuartel, reclutamiento, stacks y movimiento de ejército.
-- [ ] G1-05 Worker PostgreSQL `SKIP LOCKED`, idempotencia y reconciliación.
-- [ ] G1-06 Combate automático determinista + doctrina offline + reporte.
-- [ ] G1-07 Pruebas de carreras en ataque, gasto, finalización y reinicio.
+- [x] G1-01 Auth seguro, `worlds`, `memberships`, inicialización de mundo.
+- [x] G1-02 Economy ledger y liquidación temporal de cuatro recursos.
+- [x] G1-03 Construcciones en parcelas y evento de finalización offline.
+- [x] G1-04 Cuartel, reclutamiento, stacks y movimiento de ejército.
+- [x] G1-05 Worker PostgreSQL `SKIP LOCKED`, idempotencia y reconciliación.
+- [x] G1-06 Combate automático determinista + doctrina offline + reporte.
+- [x] G1-07 Pruebas de carreras en ataque, gasto, finalización y reinicio.
 
 **Gate aprobado:** dos usuarios con ciudades reales; ataque resuelto aunque el defensor esté desconectado; reinicio sin duplicados.
 

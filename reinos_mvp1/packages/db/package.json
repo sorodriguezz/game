@@ -10,8 +10,8 @@
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
     "generate": "drizzle-kit generate",
-    "migrate": "tsx src/cli/migrate.ts",
-    "seed": "tsx src/cli/seed.ts"
+    "migrate": "tsx --env-file-if-exists=../../.env src/cli/migrate.ts",
+    "seed": "tsx --env-file-if-exists=../../.env src/cli/seed.ts"
   },
   "dependencies": {
     "@reinos/game-config": "workspace:*",

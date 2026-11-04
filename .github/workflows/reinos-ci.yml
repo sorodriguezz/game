@@ -1,0 +1,51 @@
+# CI de Reinos de la Frontera (ADR-0018): bloquea merges sin lint, tipos,
+# tests de reglas e integración con PostgreSQL real, build y validación de assets.
+name: reinos-ci
+
+on:
+  push:
+    paths: ['reinos_mvp1/**', '.github/workflows/reinos-ci.yml']
+  pull_request:
+    paths: ['reinos_mvp1/**', '.github/workflows/reinos-ci.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: reinos_mvp1
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: reinos_dev
+          POSTGRES_PASSWORD: reinos_dev_change_me
+          POSTGRES_DB: reinos_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U reinos_dev -d reinos_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://reinos_dev:reinos_dev_change_me@127.0.0.1:5432/reinos_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: reinos_mvp1/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: reinos_mvp1/.nvmrc
+          cache: pnpm
+          cache-dependency-path: reinos_mvp1/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm assets:validate
+      - run: pnpm --filter @reinos/web build
+      - run: pnpm --filter @reinos/api build && pnpm --filter @reinos/worker build

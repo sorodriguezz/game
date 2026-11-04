@@ -16,7 +16,10 @@ export interface Database {
   close(): Promise<void>;
 }
 
-export function createDatabase(url: string, opts: { max?: number; applicationName?: string } = {}): Database {
+export function createDatabase(
+  url: string,
+  opts: { max?: number; applicationName?: string } = {},
+): Database {
   const pool = new pg.Pool({
     connectionString: url,
     max: opts.max ?? 10,

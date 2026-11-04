@@ -84,7 +84,10 @@ describe('liquidación económica (ADR-0004)', () => {
         fc.integer({ min: 1, max: 1e9 }),
         fc.bigInt({ min: -10_000_000n, max: 10_000_000n }),
         (elapsed, rate) => {
-          const s = settle(state({ rates: mapResources(() => rate), capacity: 500n * MILLI }), elapsed);
+          const s = settle(
+            state({ rates: mapResources(() => rate), capacity: 500n * MILLI }),
+            elapsed,
+          );
           for (const v of Object.values(s.amounts)) {
             expect(v >= 0n).toBe(true);
             expect(v <= 500n * MILLI).toBe(true);
@@ -104,7 +107,10 @@ describe('liquidación económica (ADR-0004)', () => {
 
   it('alimentos con consumo neto negativo se agotan en cero y marcan hambruna', () => {
     const s = settle(
-      state({ amounts: mapResources(() => 10n * MILLI), rates: { ...mapResources(() => 0n), food: -3600n * MILLI } }),
+      state({
+        amounts: mapResources(() => 10n * MILLI),
+        rates: { ...mapResources(() => 0n), food: -3600n * MILLI },
+      }),
       3_600_000,
     );
     expect(s.amounts.food).toBe(0n);
@@ -113,10 +119,21 @@ describe('liquidación económica (ADR-0004)', () => {
 
   it('débito rechaza saldo insuficiente y crédito respeta la capacidad', () => {
     const s = state({ capacity: 150n * MILLI });
-    expect(() => debit(s, mapResources(() => 101n * MILLI))).toThrow();
-    const after = debit(s, mapResources(() => 100n * MILLI));
+    expect(() =>
+      debit(
+        s,
+        mapResources(() => 101n * MILLI),
+      ),
+    ).toThrow();
+    const after = debit(
+      s,
+      mapResources(() => 100n * MILLI),
+    );
     expect(after.amounts.food).toBe(0n);
-    const c = credit(s, mapResources(() => 80n * MILLI));
+    const c = credit(
+      s,
+      mapResources(() => 80n * MILLI),
+    );
     expect(c.state.amounts.wood).toBe(150n * MILLI);
     expect(c.credited.wood).toBe(50n * MILLI);
   });
@@ -124,7 +141,12 @@ describe('liquidación económica (ADR-0004)', () => {
 
 describe('fórmulas del ruleset', () => {
   it('coste por nivel = ceil(base × 1.25^(nivel−1)) exacto', () => {
-    expect(buildingCost(r, 'farm', 1, 'imperial_crown')).toEqual({ wood: 60, stone: 30, iron: 15, food: 0 });
+    expect(buildingCost(r, 'farm', 1, 'imperial_crown')).toEqual({
+      wood: 60,
+      stone: 30,
+      iron: 15,
+      food: 0,
+    });
     // 60 × 1.25^2 = 93.75 → 94
     expect(buildingCost(r, 'farm', 3, 'imperial_crown').wood).toBe(94);
   });

@@ -15,7 +15,10 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     rules: {
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
       'no-restricted-properties': [
         'error',
         {
@@ -29,5 +32,21 @@ export default tseslint.config(
   {
     files: ['apps/web/**'],
     rules: { 'no-restricted-properties': 'off' },
+  },
+  {
+    files: ['scripts/**/*.mjs', 'apps/web/e2e/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        process: 'readonly',
+        console: 'readonly',
+        URL: 'readonly',
+        setTimeout: 'readonly',
+        performance: 'readonly',
+        requestAnimationFrame: 'readonly',
+        fetch: 'readonly',
+        crypto: 'readonly',
+        window: 'readonly',
+      },
+    },
   },
 );

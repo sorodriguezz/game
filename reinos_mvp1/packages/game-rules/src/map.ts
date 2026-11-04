@@ -41,7 +41,9 @@ function valueNoise(seed: number, x: number, y: number, cell: number, salt: numb
 
 function fractal(seed: number, x: number, y: number, salt: number): number {
   return Math.floor(
-    (4 * valueNoise(seed, x, y, 32, salt) + 2 * valueNoise(seed, x, y, 16, salt + 1) + valueNoise(seed, x, y, 8, salt + 2)) /
+    (4 * valueNoise(seed, x, y, 32, salt) +
+      2 * valueNoise(seed, x, y, 16, salt + 1) +
+      valueNoise(seed, x, y, 8, salt + 2)) /
       7,
   );
 }
@@ -98,7 +100,14 @@ export interface MapRegion {
   coastal: string;
 }
 
-export function renderRegion(seed: number, size: number, x0: number, y0: number, w: number, h: number): MapRegion {
+export function renderRegion(
+  seed: number,
+  size: number,
+  x0: number,
+  y0: number,
+  w: number,
+  h: number,
+): MapRegion {
   let tiles = '';
   let coastal = '';
   for (let y = y0; y < y0 + h; y++) {
@@ -112,8 +121,9 @@ export function renderRegion(seed: number, size: number, x0: number, y0: number,
 
 /**
  * Candidatos de aparición deterministas para el jugador número `ordinal`.
- * El anillo crece con la población del mundo para repartir a los jugadores.
- * El servidor comprueba distancia mínima y unicidad de celda en BD.
+ * Se reparten en un anillo a media distancia del centro (equidad respecto a
+ * las futuras sedes de Maravilla del centro y acceso razonable a la costa).
+ * El servidor comprueba distancia mínima, costa preferente y unicidad en BD.
  */
 export function spawnCandidates(
   seed: number,
@@ -123,8 +133,8 @@ export function spawnCandidates(
 ): Array<{ x: number; y: number }> {
   const prng = createPrng(`${seed}:spawn:${ordinal}`);
   const half = Math.floor(size / 2);
-  const outer = Math.min(half - 3, 6 + Math.floor(Math.sqrt(ordinal) * 4));
-  const inner = Math.max(0, outer - 8);
+  const outer = Math.max(4, half - 4);
+  const inner = Math.max(0, Math.floor(half * 0.4));
   const out: Array<{ x: number; y: number }> = [];
   let guard = 0;
   while (out.length < count && guard < count * 200) {

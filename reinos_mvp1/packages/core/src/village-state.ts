@@ -12,7 +12,13 @@ import {
   type DbOrTx,
   type Tx,
 } from '@reinos/db';
-import { getRuleset, type BuildingType, type ResourceKey, type Ruleset, type UnitType } from '@reinos/game-config';
+import {
+  getRuleset,
+  type BuildingType,
+  type ResourceKey,
+  type Ruleset,
+  type UnitType,
+} from '@reinos/game-config';
 import {
   capacityMilli,
   computeRates,
@@ -48,7 +54,11 @@ export function rulesetOf(w: WorldRow): Ruleset {
  * Bloquea (FOR UPDATE) las aldeas indicadas en orden estable de id para evitar
  * interbloqueos. Todas deben pertenecer a `worldId`.
  */
-export async function lockVillages(tx: Tx, worldId: string, ids: readonly string[]): Promise<Map<string, VillageRow>> {
+export async function lockVillages(
+  tx: Tx,
+  worldId: string,
+  ids: readonly string[],
+): Promise<Map<string, VillageRow>> {
   const unique = [...new Set(ids)].sort();
   const rows = await tx
     .select()
@@ -61,11 +71,22 @@ export async function lockVillages(tx: Tx, worldId: string, ids: readonly string
 }
 
 /** Bloquea una aldea comprobando propiedad y mundo; 404 si no es del actor (no revela existencia). */
-export async function lockOwnedVillage(tx: Tx, worldId: string, villageId: string, accountId: string): Promise<VillageRow> {
+export async function lockOwnedVillage(
+  tx: Tx,
+  worldId: string,
+  villageId: string,
+  accountId: string,
+): Promise<VillageRow> {
   const rows = await tx
     .select()
     .from(villages)
-    .where(and(eq(villages.worldId, worldId), eq(villages.id, villageId), eq(villages.ownerAccountId, accountId)))
+    .where(
+      and(
+        eq(villages.worldId, worldId),
+        eq(villages.id, villageId),
+        eq(villages.ownerAccountId, accountId),
+      ),
+    )
     .for('update');
   const v = rows[0];
   if (!v) throw err.notFound('VILLAGE_NOT_FOUND', 'Aldea no encontrada');
@@ -73,38 +94,65 @@ export async function lockOwnedVillage(tx: Tx, worldId: string, villageId: strin
 }
 
 export async function loadBuildings(db: DbOrTx, villageId: string): Promise<PlacedBuilding[]> {
-  const rows = await db.select().from(villageBuildings).where(eq(villageBuildings.villageId, villageId));
+  const rows = await db
+    .select()
+    .from(villageBuildings)
+    .where(eq(villageBuildings.villageId, villageId));
   return rows.map((b) => ({ plot: b.plot, type: b.type as BuildingType, level: b.level }));
 }
 
-export async function loadTroops(db: DbOrTx, villageId: string): Promise<Array<{ unitType: UnitType; quantity: number }>> {
+export async function loadTroops(
+  db: DbOrTx,
+  villageId: string,
+): Promise<Array<{ unitType: UnitType; quantity: number }>> {
   const rows = await db.select().from(troopStacks).where(eq(troopStacks.villageId, villageId));
-  return rows.filter((r) => r.quantity > 0).map((r) => ({ unitType: r.unitType as UnitType, quantity: r.quantity }));
+  return rows
+    .filter((r) => r.quantity > 0)
+    .map((r) => ({ unitType: r.unitType as UnitType, quantity: r.quantity }));
 }
 
-export async function loadWounded(db: DbOrTx, villageId: string): Promise<Array<{ unitType: UnitType; quantity: number }>> {
+export async function loadWounded(
+  db: DbOrTx,
+  villageId: string,
+): Promise<Array<{ unitType: UnitType; quantity: number }>> {
   const rows = await db.select().from(woundedStacks).where(eq(woundedStacks.villageId, villageId));
-  return rows.filter((r) => r.quantity > 0).map((r) => ({ unitType: r.unitType as UnitType, quantity: r.quantity }));
+  return rows
+    .filter((r) => r.quantity > 0)
+    .map((r) => ({ unitType: r.unitType as UnitType, quantity: r.quantity }));
 }
 
 /** Tropas propiedad de la aldea fuera de casa (en marcha o regresando). */
-export async function loadAwayTroops(db: DbOrTx, villageId: string): Promise<Array<{ unitType: UnitType; quantity: number }>> {
+export async function loadAwayTroops(
+  db: DbOrTx,
+  villageId: string,
+): Promise<Array<{ unitType: UnitType; quantity: number }>> {
   const rows = await db
     .select({ units: armyMovements.units })
     .from(armyMovements)
-    .where(and(eq(armyMovements.originVillageId, villageId), inArray(armyMovements.status, ['IN_TRANSIT', 'RETURNING'])));
+    .where(
+      and(
+        eq(armyMovements.originVillageId, villageId),
+        inArray(armyMovements.status, ['IN_TRANSIT', 'RETURNING']),
+      ),
+    );
   const out: Array<{ unitType: UnitType; quantity: number }> = [];
   for (const r of rows) {
-    for (const [unitType, quantity] of Object.entries(r.units)) out.push({ unitType: unitType as UnitType, quantity });
+    for (const [unitType, quantity] of Object.entries(r.units))
+      out.push({ unitType: unitType as UnitType, quantity });
   }
   return out;
 }
 
-export async function loadTrainingTroops(db: DbOrTx, villageId: string): Promise<Array<{ unitType: UnitType; quantity: number }>> {
+export async function loadTrainingTroops(
+  db: DbOrTx,
+  villageId: string,
+): Promise<Array<{ unitType: UnitType; quantity: number }>> {
   const rows = await db
     .select({ unitType: recruitmentOrders.unitType, quantity: recruitmentOrders.quantity })
     .from(recruitmentOrders)
-    .where(and(eq(recruitmentOrders.villageId, villageId), eq(recruitmentOrders.status, 'IN_PROGRESS')));
+    .where(
+      and(eq(recruitmentOrders.villageId, villageId), eq(recruitmentOrders.status, 'IN_PROGRESS')),
+    );
   return rows.map((r) => ({ unitType: r.unitType as UnitType, quantity: r.quantity }));
 }
 
@@ -124,7 +172,10 @@ function rowToState(a: AccountRow): ResourceState {
 }
 
 export async function loadEconomy(db: DbOrTx, villageId: string): Promise<ResourceState> {
-  const [a] = await db.select().from(resourceAccounts).where(eq(resourceAccounts.villageId, villageId));
+  const [a] = await db
+    .select()
+    .from(resourceAccounts)
+    .where(eq(resourceAccounts.villageId, villageId));
   if (!a) throw new DomainError('INTERNAL_ERROR', 500, `Aldea ${villageId} sin cuenta de recursos`);
   return rowToState(a);
 }
@@ -245,7 +296,9 @@ export async function removeFromStacks(
       )
       .returning({ q: troopStacks.quantity });
     if (res.length !== 1) {
-      throw err.conflict('INSUFFICIENT_TROOPS', `Tropas insuficientes de ${s.unitType}`, { unitType: s.unitType });
+      throw err.conflict('INSUFFICIENT_TROOPS', `Tropas insuficientes de ${s.unitType}`, {
+        unitType: s.unitType,
+      });
     }
   }
 }

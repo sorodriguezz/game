@@ -28,9 +28,33 @@ import { randomUUID } from 'node:crypto';
 export const ruleset = getRuleset(DEFAULT_RULESET_VERSION);
 
 export const TEST_WORLDS: WorldSeed[] = [
-  { slug: 'test-a', name: 'Test A', profile: 'test', speedMultiplier: 10, mapSeed: 777, mapSize: 64, protectionHours: 0 },
-  { slug: 'test-b', name: 'Test B', profile: 'test', speedMultiplier: 10, mapSeed: 778, mapSize: 64, protectionHours: 0 },
-  { slug: 'test-protected', name: 'Test P', profile: 'alpha', speedMultiplier: 1, mapSeed: 779, mapSize: 64, protectionHours: 72 },
+  {
+    slug: 'test-a',
+    name: 'Test A',
+    profile: 'test',
+    speedMultiplier: 10,
+    mapSeed: 777,
+    mapSize: 64,
+    protectionHours: 0,
+  },
+  {
+    slug: 'test-b',
+    name: 'Test B',
+    profile: 'test',
+    speedMultiplier: 10,
+    mapSeed: 778,
+    mapSize: 64,
+    protectionHours: 0,
+  },
+  {
+    slug: 'test-protected',
+    name: 'Test P',
+    profile: 'alpha',
+    speedMultiplier: 1,
+    mapSeed: 779,
+    mapSize: 64,
+    protectionHours: 72,
+  },
 ];
 
 export interface Harness {
@@ -68,7 +92,10 @@ export async function createHarness(): Promise<Harness> {
     queries: new GameQueries(ctx),
     worker: (id = 'w1', opts = {}) => new EventWorker(ctx, { workerId: id, pollMs: 1, ...opts }),
     worldId: async (slug) => {
-      const [w] = await database.db.select({ id: worlds.id }).from(worlds).where(eq(worlds.slug, slug));
+      const [w] = await database.db
+        .select({ id: worlds.id })
+        .from(worlds)
+        .where(eq(worlds.slug, slug));
       return w!.id;
     },
     close: () => database.close(),
@@ -78,7 +105,11 @@ export async function createHarness(): Promise<Harness> {
 export const key = () => randomUUID();
 
 export async function newPlayer(h: Harness, name: string): Promise<string> {
-  const s = await h.auth.register({ email: `${name.toLowerCase()}@example.test`, displayName: name, password: 'contraseña-segura-123' });
+  const s = await h.auth.register({
+    email: `${name.toLowerCase()}@example.test`,
+    displayName: name,
+    password: 'contraseña-segura-123',
+  });
   return s.account.id;
 }
 
@@ -90,28 +121,57 @@ export async function joinedPlayer(
 ): Promise<{ accountId: string; worldId: string; villageId: string }> {
   const accountId = await newPlayer(h, name);
   const worldId = await h.worldId(worldSlug);
-  const res = await h.commands.joinWorld({ accountId }, worldId, { civilization, villageName: `Aldea ${name}` }, key());
+  const res = await h.commands.joinWorld(
+    { accountId },
+    worldId,
+    { civilization, villageName: `Aldea ${name}` },
+    key(),
+  );
   return { accountId, worldId, villageId: res.villageId };
 }
 
 // ---- Fixtures directas en BD (solo tests: preparan escenarios sin esperar colas) ----
 
-export async function fixtureBuilding(h: Harness, worldId: string, villageId: string, plot: number, type: BuildingType, level: number) {
+export async function fixtureBuilding(
+  h: Harness,
+  worldId: string,
+  villageId: string,
+  plot: number,
+  type: BuildingType,
+  level: number,
+) {
   await h.database.db
     .insert(villageBuildings)
     .values({ worldId, villageId, plot, type, level })
-    .onConflictDoUpdate({ target: [villageBuildings.villageId, villageBuildings.plot], set: { type, level } });
+    .onConflictDoUpdate({
+      target: [villageBuildings.villageId, villageBuildings.plot],
+      set: { type, level },
+    });
 }
 
-export async function fixtureTroops(h: Harness, worldId: string, villageId: string, unitType: UnitType, quantity: number) {
+export async function fixtureTroops(
+  h: Harness,
+  worldId: string,
+  villageId: string,
+  unitType: UnitType,
+  quantity: number,
+) {
   await h.database.db
     .insert(troopStacks)
     .values({ worldId, villageId, unitType, quantity })
-    .onConflictDoUpdate({ target: [troopStacks.villageId, troopStacks.unitType], set: { quantity } });
+    .onConflictDoUpdate({
+      target: [troopStacks.villageId, troopStacks.unitType],
+      set: { quantity },
+    });
 }
 
 /** Fija recursos (unidades enteras) liquidando primero hasta ahora. */
-export async function fixtureResources(h: Harness, villageId: string, units: { wood: number; stone: number; iron: number; food: number }, capacity?: number) {
+export async function fixtureResources(
+  h: Harness,
+  villageId: string,
+  units: { wood: number; stone: number; iron: number; food: number },
+  capacity?: number,
+) {
   const s = settle(await loadEconomy(h.database.db, villageId), h.clock.now().getTime());
   await h.database.db
     .update(resourceAccounts)
@@ -149,8 +209,13 @@ export async function wholeResources(h: Harness, villageId: string) {
 }
 
 export async function troopsOf(h: Harness, villageId: string): Promise<Record<string, number>> {
-  const rows = await h.database.db.select().from(troopStacks).where(eq(troopStacks.villageId, villageId));
-  return Object.fromEntries(rows.filter((r) => r.quantity > 0).map((r) => [r.unitType, r.quantity]));
+  const rows = await h.database.db
+    .select()
+    .from(troopStacks)
+    .where(eq(troopStacks.villageId, villageId));
+  return Object.fromEntries(
+    rows.filter((r) => r.quantity > 0).map((r) => [r.unitType, r.quantity]),
+  );
 }
 
 export async function expectDomainError(p: Promise<unknown>, code: string): Promise<void> {
@@ -158,7 +223,7 @@ export async function expectDomainError(p: Promise<unknown>, code: string): Prom
     await p;
   } catch (e) {
     const c = (e as { code?: string }).code;
-    if (c !== code) throw new Error(`Se esperaba ${code} y llegó ${c ?? String(e)}`);
+    if (c !== code) throw new Error(`Se esperaba ${code} y llegó ${c ?? String(e)}`, { cause: e });
     return;
   }
   throw new Error(`Se esperaba error ${code} y la operación tuvo éxito`);

@@ -17,7 +17,9 @@ export function slowestSpeed(
   r: Ruleset,
   units: ReadonlyArray<{ unitType: UnitType; quantity: number }>,
 ): number {
-  const speeds = units.filter((u) => u.quantity > 0).map((u) => unitDef(r, u.unitType).speedTilesPerHour);
+  const speeds = units
+    .filter((u) => u.quantity > 0)
+    .map((u) => unitDef(r, u.unitType).speedTilesPerHour);
   if (speeds.length === 0) throw new RangeError('ejército vacío');
   return Math.min(...speeds);
 }
@@ -26,7 +28,11 @@ export function slowestSpeed(
  * Segundos de viaje terrestre: ceil(dist / velocidad_más_lenta * 3600 / velocidad_mundo).
  * Gate 2 sustituirá la distancia directa por el grafo de rutas (ADR-0010).
  */
-export function travelSeconds(distMilli: bigint, slowestTilesPerHour: number, worldSpeed: number): number {
+export function travelSeconds(
+  distMilli: bigint,
+  slowestTilesPerHour: number,
+  worldSpeed: number,
+): number {
   const secs = ceilDiv(distMilli * 3600n, BigInt(slowestTilesPerHour) * 1000n * BigInt(worldSpeed));
   return Math.max(1, Number(secs));
 }

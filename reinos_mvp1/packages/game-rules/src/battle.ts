@@ -183,7 +183,10 @@ export function resolveBattle(r: Ruleset, snap: BattleSnapshot): BattleResult {
   const attack = (expectedAttack * BigInt(1000 + luck)) / 1000n;
 
   // --- Defensa --------------------------------------------------------------
-  const reservePct = Math.max(0, Math.min(snap.defender.doctrine.reservePercent, c.maxReservePercent));
+  const reservePct = Math.max(
+    0,
+    Math.min(snap.defender.doctrine.reservePercent, c.maxReservePercent),
+  );
   const reserve = present.map((s) => ({
     unitType: s.unitType,
     quantity: Math.floor((s.quantity * reservePct) / 100),
@@ -194,7 +197,8 @@ export function resolveBattle(r: Ruleset, snap: BattleSnapshot): BattleResult {
     ? civilizationDef(r, snap.defender.civilization).modifiers.wallBonusPermillePerLevel
     : c.wallBonusPermillePerLevel;
   const wallPermille =
-    wallPerLevel * snap.defenses.wallLevel + c.bastionBonusPermillePerLevel * snap.defenses.bastionLevel;
+    wallPerLevel * snap.defenses.wallLevel +
+    c.bastionBonusPermillePerLevel * snap.defenses.bastionLevel;
 
   const defenseOf = (units: readonly UnitStack[]): { power: bigint; morale: number } => {
     let inf = 0n;
@@ -207,7 +211,9 @@ export function resolveBattle(r: Ruleset, snap: BattleSnapshot): BattleResult {
     const unitsPower = attRaw > 0n ? (inf * attInf + cav * attCav) / attRaw : inf;
     const morale = moralePermille(r, units);
     const power =
-      ((unitsPower + BigInt(c.baseVillageDefense)) * BigInt(1000 + wallPermille) * BigInt(1000 + morale)) /
+      ((unitsPower + BigInt(c.baseVillageDefense)) *
+        BigInt(1000 + wallPermille) *
+        BigInt(1000 + morale)) /
       1_000_000n;
     return { power, morale };
   };
@@ -215,7 +221,11 @@ export function resolveBattle(r: Ruleset, snap: BattleSnapshot): BattleResult {
   let def = defenseOf(engaged);
   let retreated = false;
   const threshold = snap.defender.doctrine.retreatThresholdPercent;
-  if (threshold !== null && engaged.some((s) => s.quantity > 0) && expectedAttack * 100n >= def.power * BigInt(threshold)) {
+  if (
+    threshold !== null &&
+    engaged.some((s) => s.quantity > 0) &&
+    expectedAttack * 100n >= def.power * BigInt(threshold)
+  ) {
     retreated = true;
     engaged = engaged.map((s) => ({ unitType: s.unitType, quantity: 0 }));
     def = defenseOf([]);
@@ -245,13 +255,22 @@ export function resolveBattle(r: Ruleset, snap: BattleSnapshot): BattleResult {
     defLoss = outcome === 'ATTACKER' ? loserLoss : winnerLoss;
   }
 
-  const lost = sent.map((s) => ({ unitType: s.unitType, quantity: lossCount(prng, s.quantity, attLoss) }));
-  const dead = engaged.map((s) => ({ unitType: s.unitType, quantity: lossCount(prng, s.quantity, defLoss) }));
+  const lost = sent.map((s) => ({
+    unitType: s.unitType,
+    quantity: lossCount(prng, s.quantity, attLoss),
+  }));
+  const dead = engaged.map((s) => ({
+    unitType: s.unitType,
+    quantity: lossCount(prng, s.quantity, defLoss),
+  }));
 
   const hospital = snap.defenses.hospitalLevel;
   const woundedPermille =
     hospital > 0
-      ? Math.min(c.hospitalWoundedMaxPermille, c.hospitalWoundedBasePermille + c.hospitalWoundedPermillePerLevel * hospital)
+      ? Math.min(
+          c.hospitalWoundedMaxPermille,
+          c.hospitalWoundedBasePermille + c.hospitalWoundedPermillePerLevel * hospital,
+        )
       : 0;
   const wounded = dead.map((s) => ({
     unitType: s.unitType,
@@ -263,7 +282,10 @@ export function resolveBattle(r: Ruleset, snap: BattleSnapshot): BattleResult {
 
   // --- Botín -----------------------------------------------------------------
   const carryPermille = civilizationDef(r, snap.attacker.civilization).modifiers.carryPermille;
-  const carryRaw = survivorsAtt.reduce((acc, s) => acc + unitDef(r, s.unitType).carry * s.quantity, 0);
+  const carryRaw = survivorsAtt.reduce(
+    (acc, s) => acc + unitDef(r, s.unitType).carry * s.quantity,
+    0,
+  );
   const carryCapacity = Math.floor((carryRaw * carryPermille) / 1000);
   const loot: ResourceBundle = { wood: 0, stone: 0, iron: 0, food: 0 };
   if (outcome === 'ATTACKER' && carryCapacity > 0) {
@@ -300,7 +322,9 @@ export function resolveBattle(r: Ruleset, snap: BattleSnapshot): BattleResult {
   let t = 1;
   if (retreated) milestones.push({ t: t++, kind: 'RETREAT', side: 'DEFENDER' });
   const phases: BattlePhase[] = [];
-  const anyRanged = [...sent, ...engaged].some((s) => s.quantity > 0 && unitDef(r, s.unitType).ranged);
+  const anyRanged = [...sent, ...engaged].some(
+    (s) => s.quantity > 0 && unitDef(r, s.unitType).ranged,
+  );
   const anyCav = sent.some((s) => s.quantity > 0 && unitDef(r, s.unitType).unitClass === 'cavalry');
   if (anyRanged) phases.push('VOLLEY');
   if (anyCav) phases.push('CHARGE');

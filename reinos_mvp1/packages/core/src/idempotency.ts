@@ -13,8 +13,10 @@ export interface IdempotencyScope {
 const KEY_RE = /^[A-Za-z0-9_-]{8,128}$/;
 
 export function assertIdempotencyKey(key: string | undefined): string {
-  if (!key) throw err.unprocessable('IDEMPOTENCY_KEY_REQUIRED', 'Falta la cabecera Idempotency-Key');
-  if (!KEY_RE.test(key)) throw err.unprocessable('IDEMPOTENCY_KEY_REQUIRED', 'Idempotency-Key inválida');
+  if (!key)
+    throw err.unprocessable('IDEMPOTENCY_KEY_REQUIRED', 'Falta la cabecera Idempotency-Key');
+  if (!KEY_RE.test(key))
+    throw err.unprocessable('IDEMPOTENCY_KEY_REQUIRED', 'Idempotency-Key inválida');
   return key;
 }
 
@@ -51,7 +53,10 @@ export async function runIdempotent<T>(
         ),
       );
     if (!existing || existing.requestHash !== requestHash) {
-      throw err.unprocessable('IDEMPOTENCY_KEY_REUSED', 'La Idempotency-Key ya se usó con otra petición');
+      throw err.unprocessable(
+        'IDEMPOTENCY_KEY_REUSED',
+        'La Idempotency-Key ya se usó con otra petición',
+      );
     }
     return { response: existing.response as T, replayed: true };
   }

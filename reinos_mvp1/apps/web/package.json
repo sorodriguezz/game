@@ -1,0 +1,30 @@
+{
+  "name": "@reinos/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Cliente web: React + PlayCanvas (ADR-0007).",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.json && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json",
+    "e2e": "node e2e/vertical-slice.e2e.mjs"
+  },
+  "dependencies": {
+    "@playcanvas/react": "^0.11.7",
+    "@reinos/contracts": "workspace:*",
+    "@reinos/game-config": "workspace:*",
+    "@reinos/game-rules": "workspace:*",
+    "playcanvas": "^2.23.3",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.2.1",
+    "vite": "^8.3.5",
+    "playwright": "1.63.0"
+  }
+}

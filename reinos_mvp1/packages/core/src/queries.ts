@@ -72,7 +72,10 @@ export class GameQueries {
       })
       .from(worlds)
       .orderBy(asc(worlds.createdAt), asc(worlds.slug));
-    const memberships = await this.ctx.db.select().from(worldPlayers).where(eq(worldPlayers.accountId, accountId));
+    const memberships = await this.ctx.db
+      .select()
+      .from(worldPlayers)
+      .where(eq(worldPlayers.accountId, accountId));
     const myVillages = await this.ctx.db
       .select({ id: villages.id, worldId: villages.worldId })
       .from(villages)
@@ -115,7 +118,13 @@ export class GameQueries {
     const [village] = await db
       .select()
       .from(villages)
-      .where(and(eq(villages.worldId, worldId), eq(villages.id, villageId), eq(villages.ownerAccountId, accountId)));
+      .where(
+        and(
+          eq(villages.worldId, worldId),
+          eq(villages.id, villageId),
+          eq(villages.ownerAccountId, accountId),
+        ),
+      );
     if (!village) throw err.notFound('VILLAGE_NOT_FOUND', 'Aldea no encontrada');
     const world = await loadWorld(db, worldId);
     const r = rulesetOf(world);
@@ -131,11 +140,21 @@ export class GameQueries {
     const [construction] = await db
       .select()
       .from(constructionOrders)
-      .where(and(eq(constructionOrders.villageId, villageId), eq(constructionOrders.status, 'IN_PROGRESS')));
+      .where(
+        and(
+          eq(constructionOrders.villageId, villageId),
+          eq(constructionOrders.status, 'IN_PROGRESS'),
+        ),
+      );
     const recruitment = await db
       .select()
       .from(recruitmentOrders)
-      .where(and(eq(recruitmentOrders.villageId, villageId), eq(recruitmentOrders.status, 'IN_PROGRESS')))
+      .where(
+        and(
+          eq(recruitmentOrders.villageId, villageId),
+          eq(recruitmentOrders.status, 'IN_PROGRESS'),
+        ),
+      )
       .orderBy(asc(recruitmentOrders.completesAt));
 
     const movements = await this.movementsFor(worldId, villageId);
@@ -153,8 +172,18 @@ export class GameQueries {
       speedMultiplier: world.speedMultiplier,
       serverTime: iso(now),
       resources: {
-        amountsMilli: { wood: n(state.amounts.wood), stone: n(state.amounts.stone), iron: n(state.amounts.iron), food: n(state.amounts.food) },
-        ratesMilliPerHour: { wood: n(state.rates.wood), stone: n(state.rates.stone), iron: n(state.rates.iron), food: n(state.rates.food) },
+        amountsMilli: {
+          wood: n(state.amounts.wood),
+          stone: n(state.amounts.stone),
+          iron: n(state.amounts.iron),
+          food: n(state.amounts.food),
+        },
+        ratesMilliPerHour: {
+          wood: n(state.rates.wood),
+          stone: n(state.rates.stone),
+          iron: n(state.rates.iron),
+          food: n(state.rates.food),
+        },
         capacityMilli: n(state.capacity),
         settledAt: iso(new Date(state.lastSettledAt)),
         starving: isStarving(state),
@@ -204,8 +233,14 @@ export class GameQueries {
         and(
           eq(armyMovements.worldId, worldId),
           or(
-            and(eq(armyMovements.originVillageId, villageId), inArray(armyMovements.status, ['IN_TRANSIT', 'RETURNING'])),
-            and(eq(armyMovements.targetVillageId, villageId), eq(armyMovements.status, 'IN_TRANSIT')),
+            and(
+              eq(armyMovements.originVillageId, villageId),
+              inArray(armyMovements.status, ['IN_TRANSIT', 'RETURNING']),
+            ),
+            and(
+              eq(armyMovements.targetVillageId, villageId),
+              eq(armyMovements.status, 'IN_TRANSIT'),
+            ),
           ),
         ),
       )
@@ -225,8 +260,21 @@ export class GameQueries {
         departedAt: iso(m.departedAt),
         arrivesAt: iso(returning && m.returnsAt ? m.returnsAt : m.arrivesAt),
         // El defensor no ve la composición del ataque entrante.
-        units: mine ? Object.entries(m.units).map(([unitType, quantity]) => ({ unitType: unitType as UnitType, quantity })) : null,
-        loot: mine && m.loot ? { wood: m.loot.wood ?? 0, stone: m.loot.stone ?? 0, iron: m.loot.iron ?? 0, food: m.loot.food ?? 0 } : null,
+        units: mine
+          ? Object.entries(m.units).map(([unitType, quantity]) => ({
+              unitType: unitType as UnitType,
+              quantity,
+            }))
+          : null,
+        loot:
+          mine && m.loot
+            ? {
+                wood: m.loot.wood ?? 0,
+                stone: m.loot.stone ?? 0,
+                iron: m.loot.iron ?? 0,
+                food: m.loot.food ?? 0,
+              }
+            : null,
       };
     });
   }
@@ -252,8 +300,22 @@ export class GameQueries {
       })
       .from(villages)
       .leftJoin(accounts, eq(accounts.id, villages.ownerAccountId))
-      .leftJoin(worldPlayers, and(eq(worldPlayers.worldId, villages.worldId), eq(worldPlayers.accountId, villages.ownerAccountId)))
-      .where(and(eq(villages.worldId, worldId), gte(villages.x, x0), lte(villages.x, x1), gte(villages.y, y0), lte(villages.y, y1)));
+      .leftJoin(
+        worldPlayers,
+        and(
+          eq(worldPlayers.worldId, villages.worldId),
+          eq(worldPlayers.accountId, villages.ownerAccountId),
+        ),
+      )
+      .where(
+        and(
+          eq(villages.worldId, worldId),
+          gte(villages.x, x0),
+          lte(villages.x, x1),
+          gte(villages.y, y0),
+          lte(villages.y, y1),
+        ),
+      );
     return {
       ...region,
       villages: rows.map((v) => ({
@@ -268,7 +330,12 @@ export class GameQueries {
     };
   }
 
-  private async reportRows(worldId: string, accountId: string, battleId?: string, limit = 50): Promise<ReportRow[]> {
+  private async reportRows(
+    worldId: string,
+    accountId: string,
+    battleId?: string,
+    limit = 50,
+  ): Promise<ReportRow[]> {
     const av = aliasedTable(villages, 'av');
     const dv = aliasedTable(villages, 'dv');
     const aa = aliasedTable(accounts, 'aa');
@@ -325,11 +392,21 @@ export class GameQueries {
     return rows.map((r) => this.toSummary(accountId, r));
   }
 
-  async getReport(accountId: string, worldId: string, battleId: string): Promise<BattleReportDetail> {
+  async getReport(
+    accountId: string,
+    worldId: string,
+    battleId: string,
+  ): Promise<BattleReportDetail> {
     await this.requireMembership(accountId, worldId);
-    if (!/^[0-9a-f-]{36}$/i.test(battleId)) throw err.notFound('REPORT_NOT_FOUND', 'Informe no encontrado');
+    if (!/^[0-9a-f-]{36}$/i.test(battleId))
+      throw err.notFound('REPORT_NOT_FOUND', 'Informe no encontrado');
     const [row] = await this.reportRows(worldId, accountId, battleId, 1);
     if (!row) throw err.notFound('REPORT_NOT_FOUND', 'Informe no encontrado');
-    return { ...this.toSummary(accountId, row), rulesetVersion: row.rulesetVersion, seed: row.seed, result: row.result };
+    return {
+      ...this.toSummary(accountId, row),
+      rulesetVersion: row.rulesetVersion,
+      seed: row.seed,
+      result: row.result,
+    };
   }
 }

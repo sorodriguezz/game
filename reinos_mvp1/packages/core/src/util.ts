@@ -28,11 +28,19 @@ export const iso = (d: Date): string => d.toISOString();
 export function pgErrorCode(e: unknown): string | undefined {
   let cur: unknown = e;
   for (let i = 0; i < 4 && cur; i++) {
-    if (typeof cur === 'object' && cur !== null && 'code' in cur && typeof (cur as { code: unknown }).code === 'string') {
+    if (
+      typeof cur === 'object' &&
+      cur !== null &&
+      'code' in cur &&
+      typeof (cur as { code: unknown }).code === 'string'
+    ) {
       const code = (cur as { code: string }).code;
       if (/^[0-9A-Z]{5}$/.test(code)) return code;
     }
-    cur = typeof cur === 'object' && cur !== null && 'cause' in cur ? (cur as { cause: unknown }).cause : undefined;
+    cur =
+      typeof cur === 'object' && cur !== null && 'cause' in cur
+        ? (cur as { cause: unknown }).cause
+        : undefined;
   }
   return undefined;
 }
@@ -43,7 +51,10 @@ export function pgConstraint(e: unknown): string | undefined {
     if (typeof cur === 'object' && cur !== null && 'constraint' in cur) {
       return (cur as { constraint?: string }).constraint;
     }
-    cur = typeof cur === 'object' && cur !== null && 'cause' in cur ? (cur as { cause: unknown }).cause : undefined;
+    cur =
+      typeof cur === 'object' && cur !== null && 'cause' in cur
+        ? (cur as { cause: unknown }).cause
+        : undefined;
   }
   return undefined;
 }

@@ -48,7 +48,8 @@ export class AuthService {
     } catch (e) {
       if (pgErrorCode(e) === '23505') {
         const c = pgConstraint(e);
-        if (c === 'accounts_email_uq') throw err.conflict('EMAIL_TAKEN', 'El correo ya está registrado');
+        if (c === 'accounts_email_uq')
+          throw err.conflict('EMAIL_TAKEN', 'El correo ya está registrado');
         throw err.conflict('DISPLAY_NAME_TAKEN', 'El nombre ya está en uso');
       }
       throw e;
@@ -66,7 +67,8 @@ export class AuthService {
       throw new DomainError('INVALID_CREDENTIALS', 401, 'Credenciales inválidas');
     }
     const ok = await verify(acc.passwordHash, req.password).catch(() => false);
-    if (!ok || acc.status !== 'ACTIVE') throw new DomainError('INVALID_CREDENTIALS', 401, 'Credenciales inválidas');
+    if (!ok || acc.status !== 'ACTIVE')
+      throw new DomainError('INVALID_CREDENTIALS', 401, 'Credenciales inválidas');
     return this.createSession({ id: acc.id, email: acc.email, displayName: acc.displayName });
   }
 
@@ -101,7 +103,13 @@ export class AuthService {
       })
       .from(sessions)
       .innerJoin(accounts, eq(accounts.id, sessions.accountId))
-      .where(and(eq(sessions.tokenHash, sha256(token)), isNull(sessions.revokedAt), gt(sessions.expiresAt, now)));
+      .where(
+        and(
+          eq(sessions.tokenHash, sha256(token)),
+          isNull(sessions.revokedAt),
+          gt(sessions.expiresAt, now),
+        ),
+      );
     const s = rows[0];
     if (!s || s.status !== 'ACTIVE') return null;
     return {
@@ -112,6 +120,9 @@ export class AuthService {
   }
 
   async logout(sessionId: string): Promise<void> {
-    await this.ctx.db.update(sessions).set({ revokedAt: this.ctx.clock.now() }).where(eq(sessions.id, sessionId));
+    await this.ctx.db
+      .update(sessions)
+      .set({ revokedAt: this.ctx.clock.now() })
+      .where(eq(sessions.id, sessionId));
   }
 }

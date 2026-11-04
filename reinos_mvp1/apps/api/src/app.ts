@@ -1,0 +1,66 @@
+import 'reflect-metadata';
+import { Module, type INestApplication } from '@nestjs/common';
+import { APP_FILTER, APP_GUARD, NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import cookieParser from 'cookie-parser';
+import { API_PREFIX } from '@reinos/contracts';
+import { AuthService, GameCommands, GameQueries, type CoreContext } from '@reinos/core';
+import {
+  AuthController,
+  HealthController,
+  VillagesController,
+  WorldsController,
+} from './controllers.js';
+import {
+  ApiExceptionFilter,
+  SessionGuard,
+  requestIdMiddleware,
+  securityHeadersMiddleware,
+} from './http.js';
+import {
+  API_CONFIG,
+  AUTH_SERVICE,
+  CORE_CONTEXT,
+  GAME_COMMANDS,
+  GAME_QUERIES,
+  type ApiConfig,
+} from './tokens.js';
+
+/**
+ * Construye la aplicación Nest con un `CoreContext` inyectado (BD, reloj, logger).
+ * Los tests e2e la crean con un reloj falso y la BD de pruebas.
+ */
+export async function createApp(ctx: CoreContext, config: ApiConfig): Promise<INestApplication> {
+  @Module({
+    imports: [
+      ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: config.rateLimitPerMinute }]),
+    ],
+    controllers: [HealthController, AuthController, WorldsController, VillagesController],
+    providers: [
+      { provide: CORE_CONTEXT, useValue: ctx },
+      { provide: API_CONFIG, useValue: config },
+      { provide: AUTH_SERVICE, useValue: new AuthService(ctx) },
+      { provide: GAME_COMMANDS, useValue: new GameCommands(ctx) },
+      { provide: GAME_QUERIES, useValue: new GameQueries(ctx) },
+      { provide: APP_GUARD, useClass: SessionGuard },
+      { provide: APP_GUARD, useClass: ThrottlerGuard },
+      { provide: APP_FILTER, useClass: ApiExceptionFilter },
+    ],
+  })
+  class AppModule {}
+
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: false,
+    logger: ['error', 'warn'],
+  });
+  if (config.production) app.set('trust proxy', 1);
+  app.disable('x-powered-by');
+  app.useBodyParser('json', { limit: '32kb' });
+  app.use(cookieParser());
+  app.use(requestIdMiddleware);
+  app.use(securityHeadersMiddleware);
+  app.setGlobalPrefix(API_PREFIX.replace(/^\//, ''));
+  await app.init();
+  return app;
+}

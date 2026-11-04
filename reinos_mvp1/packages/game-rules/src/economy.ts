@@ -155,14 +155,19 @@ export function computeRates(
 export function capacityMilli(r: Ruleset, warehouseLevel: number): bigint {
   if (warehouseLevel <= 0) return BigInt(r.economy.baseCapacity) * MILLI;
   return (
-    floorGrowth(BigInt(r.economy.warehouseCapacityBase), r.economy.warehouseCapacityGrowth, warehouseLevel - 1) *
-    MILLI
+    floorGrowth(
+      BigInt(r.economy.warehouseCapacityBase),
+      r.economy.warehouseCapacityGrowth,
+      warehouseLevel - 1,
+    ) * MILLI
   );
 }
 
 export function populationCapacity(r: Ruleset, cityHallLevel: number): number {
   if (cityHallLevel <= 0) return 0;
-  return Number(floorGrowth(BigInt(r.population.cityHallBase), r.population.cityHallGrowth, cityHallLevel - 1));
+  return Number(
+    floorGrowth(BigInt(r.population.cityHallBase), r.population.cityHallGrowth, cityHallLevel - 1),
+  );
 }
 
 /** Coste (unidades enteras) de subir `type` a `level`. */
@@ -181,7 +186,12 @@ export function buildingCost(
 }
 
 /** Duración en segundos de subir `type` a `level` con la velocidad del mundo. */
-export function buildingSeconds(r: Ruleset, type: BuildingType, level: number, speed: number): number {
+export function buildingSeconds(
+  r: Ruleset,
+  type: BuildingType,
+  level: number,
+  speed: number,
+): number {
   const def = buildingDef(r, type);
   const raw = ceilGrowth(BigInt(def.baseSeconds), r.economy.buildingTimeGrowth, level - 1);
   return Math.max(1, Number(ceilDiv(raw, BigInt(speed))));

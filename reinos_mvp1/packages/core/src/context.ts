@@ -16,7 +16,8 @@ export class DomainError extends Error {
 
 export const err = {
   notFound: (code: ErrorCode, msg = 'No encontrado') => new DomainError(code, 404, msg),
-  conflict: (code: ErrorCode, msg: string, details?: Record<string, unknown>) => new DomainError(code, 409, msg, details),
+  conflict: (code: ErrorCode, msg: string, details?: Record<string, unknown>) =>
+    new DomainError(code, 409, msg, details),
   unprocessable: (code: ErrorCode, msg: string, details?: Record<string, unknown>) =>
     new DomainError(code, 422, msg, details),
   forbidden: (code: ErrorCode, msg: string) => new DomainError(code, 403, msg),

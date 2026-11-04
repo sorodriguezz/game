@@ -31,7 +31,13 @@ import {
 const ts = (name: string) => timestamp(name, { withTimezone: true, precision: 3, mode: 'date' });
 const big = (name: string) => bigint(name, { mode: 'bigint' });
 
-export const worldStatus = pgEnum('world_status', ['PLANNED', 'OPEN', 'WONDER_ERA', 'FINALIZING', 'ARCHIVED']);
+export const worldStatus = pgEnum('world_status', [
+  'PLANNED',
+  'OPEN',
+  'WONDER_ERA',
+  'FINALIZING',
+  'ARCHIVED',
+]);
 export const worldProfile = pgEnum('world_profile', ['test', 'alpha', 'seasonal']);
 export const villageKind = pgEnum('village_kind', ['PLAYER', 'NPC']);
 export const orderStatus = pgEnum('order_status', ['IN_PROGRESS', 'COMPLETED', 'CANCELLED']);
@@ -74,7 +80,10 @@ export const sessions = pgTable(
     revokedAt: ts('revoked_at'),
     lastSeenAt: ts('last_seen_at').notNull().defaultNow(),
   },
-  (t) => [uniqueIndex('sessions_token_hash_uq').on(t.tokenHash), index('sessions_account_idx').on(t.accountId)],
+  (t) => [
+    uniqueIndex('sessions_token_hash_uq').on(t.tokenHash),
+    index('sessions_account_idx').on(t.accountId),
+  ],
 );
 
 // ---------------------------------------------------------------------------
@@ -154,7 +163,10 @@ export const villages = pgTable(
       foreignColumns: [worldPlayers.worldId, worldPlayers.accountId],
     }),
     index('villages_owner_idx').on(t.worldId, t.ownerAccountId),
-    check('villages_owner_kind_ck', sql`(${t.kind} = 'PLAYER') = (${t.ownerAccountId} is not null)`),
+    check(
+      'villages_owner_kind_ck',
+      sql`(${t.kind} = 'PLAYER') = (${t.ownerAccountId} is not null)`,
+    ),
     check('villages_doctrine_reserve_ck', sql`${t.doctrineReservePercent} between 0 and 100`),
     check(
       'villages_doctrine_retreat_ck',
@@ -175,7 +187,11 @@ export const villageBuildings = pgTable(
   (t) => [
     primaryKey({ columns: [t.villageId, t.plot] }),
     unique('village_buildings_type_uq').on(t.villageId, t.type),
-    foreignKey({ name: 'village_buildings_village_fk', columns: [t.worldId, t.villageId], foreignColumns: [villages.worldId, villages.id] }),
+    foreignKey({
+      name: 'village_buildings_village_fk',
+      columns: [t.worldId, t.villageId],
+      foreignColumns: [villages.worldId, villages.id],
+    }),
     check('village_buildings_level_ck', sql`${t.level} >= 1`),
   ],
 );
@@ -189,10 +205,18 @@ export const resourceAccounts = pgTable(
     stone: big('stone_milli').notNull(),
     iron: big('iron_milli').notNull(),
     food: big('food_milli').notNull(),
-    woodRem: big('wood_rem').notNull().default(sql`0`),
-    stoneRem: big('stone_rem').notNull().default(sql`0`),
-    ironRem: big('iron_rem').notNull().default(sql`0`),
-    foodRem: big('food_rem').notNull().default(sql`0`),
+    woodRem: big('wood_rem')
+      .notNull()
+      .default(sql`0`),
+    stoneRem: big('stone_rem')
+      .notNull()
+      .default(sql`0`),
+    ironRem: big('iron_rem')
+      .notNull()
+      .default(sql`0`),
+    foodRem: big('food_rem')
+      .notNull()
+      .default(sql`0`),
     woodRate: big('wood_rate_milli_h').notNull(),
     stoneRate: big('stone_rate_milli_h').notNull(),
     ironRate: big('iron_rate_milli_h').notNull(),
@@ -202,8 +226,15 @@ export const resourceAccounts = pgTable(
     version: integer('version').notNull().default(0),
   },
   (t) => [
-    foreignKey({ name: 'resource_accounts_village_fk', columns: [t.worldId, t.villageId], foreignColumns: [villages.worldId, villages.id] }),
-    check('resource_accounts_nonneg_ck', sql`${t.wood} >= 0 and ${t.stone} >= 0 and ${t.iron} >= 0 and ${t.food} >= 0`),
+    foreignKey({
+      name: 'resource_accounts_village_fk',
+      columns: [t.worldId, t.villageId],
+      foreignColumns: [villages.worldId, villages.id],
+    }),
+    check(
+      'resource_accounts_nonneg_ck',
+      sql`${t.wood} >= 0 and ${t.stone} >= 0 and ${t.iron} >= 0 and ${t.food} >= 0`,
+    ),
     check(
       'resource_accounts_rem_ck',
       sql`${t.woodRem} between 0 and 3599999 and ${t.stoneRem} between 0 and 3599999 and ${t.ironRem} between 0 and 3599999 and ${t.foodRem} between 0 and 3599999`,
@@ -229,7 +260,11 @@ export const resourceLedger = pgTable(
     createdAt: ts('created_at').notNull().defaultNow(),
   },
   (t) => [
-    foreignKey({ name: 'resource_ledger_village_fk', columns: [t.worldId, t.villageId], foreignColumns: [villages.worldId, villages.id] }),
+    foreignKey({
+      name: 'resource_ledger_village_fk',
+      columns: [t.worldId, t.villageId],
+      foreignColumns: [villages.worldId, villages.id],
+    }),
     index('resource_ledger_village_idx').on(t.worldId, t.villageId, t.occurredAt),
     unique('resource_ledger_ref_uq').on(t.villageId, t.reason, t.refId),
   ],
@@ -257,9 +292,15 @@ export const constructionOrders = pgTable(
     completedAt: ts('completed_at'),
   },
   (t) => [
-    foreignKey({ name: 'construction_orders_village_fk', columns: [t.worldId, t.villageId], foreignColumns: [villages.worldId, villages.id] }),
+    foreignKey({
+      name: 'construction_orders_village_fk',
+      columns: [t.worldId, t.villageId],
+      foreignColumns: [villages.worldId, villages.id],
+    }),
     // FR-CITY-04: una construcción activa por aldea, garantizado por la BD.
-    uniqueIndex('construction_orders_one_active_uq').on(t.villageId).where(sql`${t.status} = 'IN_PROGRESS'`),
+    uniqueIndex('construction_orders_one_active_uq')
+      .on(t.villageId)
+      .where(sql`${t.status} = 'IN_PROGRESS'`),
     check('construction_orders_time_ck', sql`${t.completesAt} > ${t.startedAt}`),
   ],
 );
@@ -283,7 +324,11 @@ export const recruitmentOrders = pgTable(
     completedAt: ts('completed_at'),
   },
   (t) => [
-    foreignKey({ name: 'recruitment_orders_village_fk', columns: [t.worldId, t.villageId], foreignColumns: [villages.worldId, villages.id] }),
+    foreignKey({
+      name: 'recruitment_orders_village_fk',
+      columns: [t.worldId, t.villageId],
+      foreignColumns: [villages.worldId, villages.id],
+    }),
     index('recruitment_orders_queue_idx').on(t.villageId, t.trainedAt, t.status, t.completesAt),
     check('recruitment_orders_qty_ck', sql`${t.quantity} > 0`),
   ],
@@ -302,7 +347,11 @@ export const troopStacks = pgTable(
   },
   (t) => [
     primaryKey({ columns: [t.villageId, t.unitType] }),
-    foreignKey({ name: 'troop_stacks_village_fk', columns: [t.worldId, t.villageId], foreignColumns: [villages.worldId, villages.id] }),
+    foreignKey({
+      name: 'troop_stacks_village_fk',
+      columns: [t.worldId, t.villageId],
+      foreignColumns: [villages.worldId, villages.id],
+    }),
     check('troop_stacks_qty_ck', sql`${t.quantity} >= 0`),
   ],
 );
@@ -317,7 +366,11 @@ export const woundedStacks = pgTable(
   },
   (t) => [
     primaryKey({ columns: [t.villageId, t.unitType] }),
-    foreignKey({ name: 'wounded_stacks_village_fk', columns: [t.worldId, t.villageId], foreignColumns: [villages.worldId, villages.id] }),
+    foreignKey({
+      name: 'wounded_stacks_village_fk',
+      columns: [t.worldId, t.villageId],
+      foreignColumns: [villages.worldId, villages.id],
+    }),
     check('wounded_stacks_qty_ck', sql`${t.quantity} >= 0`),
   ],
 );
@@ -344,8 +397,16 @@ export const armyMovements = pgTable(
   },
   (t) => [
     unique('army_movements_world_id_uq').on(t.worldId, t.id),
-    foreignKey({ name: 'army_movements_origin_fk', columns: [t.worldId, t.originVillageId], foreignColumns: [villages.worldId, villages.id] }),
-    foreignKey({ name: 'army_movements_target_fk', columns: [t.worldId, t.targetVillageId], foreignColumns: [villages.worldId, villages.id] }),
+    foreignKey({
+      name: 'army_movements_origin_fk',
+      columns: [t.worldId, t.originVillageId],
+      foreignColumns: [villages.worldId, villages.id],
+    }),
+    foreignKey({
+      name: 'army_movements_target_fk',
+      columns: [t.worldId, t.targetVillageId],
+      foreignColumns: [villages.worldId, villages.id],
+    }),
     foreignKey({
       name: 'army_movements_owner_fk',
       columns: [t.worldId, t.ownerAccountId],
@@ -380,9 +441,21 @@ export const battles = pgTable(
   (t) => [
     // Un movimiento produce como máximo una batalla (idempotencia, FR-BAT-05).
     uniqueIndex('battles_movement_uq').on(t.movementId),
-    foreignKey({ name: 'battles_movement_fk', columns: [t.worldId, t.movementId], foreignColumns: [armyMovements.worldId, armyMovements.id] }),
-    foreignKey({ name: 'battles_attacker_village_fk', columns: [t.worldId, t.attackerVillageId], foreignColumns: [villages.worldId, villages.id] }),
-    foreignKey({ name: 'battles_defender_village_fk', columns: [t.worldId, t.defenderVillageId], foreignColumns: [villages.worldId, villages.id] }),
+    foreignKey({
+      name: 'battles_movement_fk',
+      columns: [t.worldId, t.movementId],
+      foreignColumns: [armyMovements.worldId, armyMovements.id],
+    }),
+    foreignKey({
+      name: 'battles_attacker_village_fk',
+      columns: [t.worldId, t.attackerVillageId],
+      foreignColumns: [villages.worldId, villages.id],
+    }),
+    foreignKey({
+      name: 'battles_defender_village_fk',
+      columns: [t.worldId, t.defenderVillageId],
+      foreignColumns: [villages.worldId, villages.id],
+    }),
     index('battles_attacker_idx').on(t.worldId, t.attackerAccountId, t.occurredAt),
     index('battles_defender_idx').on(t.worldId, t.defenderAccountId, t.occurredAt),
   ],
@@ -419,14 +492,22 @@ export const scheduledEvents = pgTable(
   },
   (t) => [
     uniqueIndex('scheduled_events_dedupe_uq').on(t.worldId, t.dedupeKey),
-    foreignKey({ name: 'scheduled_events_village_fk', columns: [t.worldId, t.villageId], foreignColumns: [villages.worldId, villages.id] }),
+    foreignKey({
+      name: 'scheduled_events_village_fk',
+      columns: [t.worldId, t.villageId],
+      foreignColumns: [villages.worldId, villages.id],
+    }),
     foreignKey({
       name: 'scheduled_events_secondary_village_fk',
       columns: [t.worldId, t.secondaryVillageId],
       foreignColumns: [villages.worldId, villages.id],
     }),
-    index('scheduled_events_claim_idx').on(t.status, t.availableAt).where(sql`${t.status} in ('PENDING','PROCESSING')`),
-    index('scheduled_events_village_idx').on(t.villageId, t.dueAt).where(sql`${t.status} in ('PENDING','PROCESSING')`),
+    index('scheduled_events_claim_idx')
+      .on(t.status, t.availableAt)
+      .where(sql`${t.status} in ('PENDING','PROCESSING')`),
+    index('scheduled_events_village_idx')
+      .on(t.villageId, t.dueAt)
+      .where(sql`${t.status} in ('PENDING','PROCESSING')`),
     index('scheduled_events_secondary_idx')
       .on(t.secondaryVillageId, t.dueAt)
       .where(sql`${t.status} in ('PENDING','PROCESSING')`),
@@ -463,5 +544,9 @@ export const outbox = pgTable(
     createdAt: ts('created_at').notNull().defaultNow(),
     publishedAt: ts('published_at'),
   },
-  (t) => [index('outbox_unpublished_idx').on(t.id).where(sql`${t.publishedAt} is null`)],
+  (t) => [
+    index('outbox_unpublished_idx')
+      .on(t.id)
+      .where(sql`${t.publishedAt} is null`),
+  ],
 );

@@ -46,13 +46,15 @@ export function validateRuleset(input: unknown): Ruleset {
   if (uTypes.size !== r.units.length) problems.push('unidades duplicadas');
   for (const b of r.buildings) {
     for (const req of b.requires) {
-      if (!bTypes.has(req.building)) problems.push(`${b.type} requiere ${req.building} inexistente`);
+      if (!bTypes.has(req.building))
+        problems.push(`${b.type} requiere ${req.building} inexistente`);
       if (req.building === b.type) problems.push(`${b.type} se requiere a sí mismo`);
     }
     if (b.effect === 'production' && !b.produces) problems.push(`${b.type} sin recurso producido`);
   }
   for (const u of r.units) {
-    if (!bTypes.has(u.trainedAt)) problems.push(`${u.type} se entrena en ${u.trainedAt} inexistente`);
+    if (!bTypes.has(u.trainedAt))
+      problems.push(`${u.type} se entrena en ${u.trainedAt} inexistente`);
   }
   for (const c of r.civilizations) {
     const ub = r.buildings.find((b) => b.type === c.uniqueBuilding);

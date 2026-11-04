@@ -15,7 +15,8 @@ describe('rulesets versionados', () => {
   });
 
   it('todos los rulesets registrados son válidos', () => {
-    for (const v of listRulesetVersions()) expect(() => validateRuleset(getRuleset(v))).not.toThrow();
+    for (const v of listRulesetVersions())
+      expect(() => validateRuleset(getRuleset(v))).not.toThrow();
   });
 
   it('rechaza versiones desconocidas', () => {
@@ -37,8 +38,12 @@ describe('rulesets versionados', () => {
     const r = getRuleset(DEFAULT_RULESET_VERSION);
     expect(r.civilizations).toHaveLength(2);
     for (const c of r.civilizations) {
-      expect(r.buildings.filter((b) => b.civilization === c.id).map((b) => b.type)).toEqual([c.uniqueBuilding]);
-      expect(r.units.filter((u) => u.civilization === c.id).map((u) => u.type)).toEqual([c.uniqueUnit]);
+      expect(r.buildings.filter((b) => b.civilization === c.id).map((b) => b.type)).toEqual([
+        c.uniqueBuilding,
+      ]);
+      expect(r.units.filter((u) => u.civilization === c.id).map((u) => u.type)).toEqual([
+        c.uniqueUnit,
+      ]);
     }
   });
 

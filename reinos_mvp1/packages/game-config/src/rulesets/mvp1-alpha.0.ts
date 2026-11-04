@@ -217,7 +217,8 @@ export const rulesetMvp1Alpha0: Ruleset = {
     {
       type: 'imperial_bastion',
       name: 'Bastión Imperial',
-      description: 'Exclusivo del Imperio: refuerza a los defensores y forma la Guardia de la Corona.',
+      description:
+        'Exclusivo del Imperio: refuerza a los defensores y forma la Guardia de la Corona.',
       maxLevel: 10,
       baseCost: { wood: 400, stone: 650, iron: 300, food: 150 },
       baseSeconds: 1800,
@@ -372,9 +373,10 @@ export const rulesetMvp1Alpha0: Ruleset = {
   cityLayout: {
     // Parcelas: 0 centro; 1–5 anillo interior; 6–11 anillo exterior;
     // 12 costera (puerto, sólo aldeas costeras); 13 muralla (anillo).
-    // El mar queda hacia -Z en la escena de ciudad.
+    // El mar queda hacia -Z en la escena de ciudad; el centro urbano mira a la puerta sur.
+    // (x, z, rotationY son presentación: no afectan a reglas ni balance.)
     plots: [
-      { id: 0, kind: 'center', x: 0, z: 0, rotationY: 0 },
+      { id: 0, kind: 'center', x: 0, z: 0, rotationY: 180 },
       { id: 1, kind: 'standard', x: -20, z: -6, rotationY: -107 },
       { id: 2, kind: 'standard', x: -14, z: 14, rotationY: -45 },
       { id: 3, kind: 'standard', x: 0, z: 21, rotationY: 0 },

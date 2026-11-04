@@ -70,9 +70,14 @@ export class EventWorker {
       )
       returning e.id, e.world_id, e.type, e.village_id, e.secondary_village_id, e.due_at, e.priority, e.payload, e.attempts
     `);
-    return (res.rows as never[]).map(rowToEvent).sort(
-      (a, b) => a.dueAt.getTime() - b.dueAt.getTime() || a.priority - b.priority || (a.id < b.id ? -1 : 1),
-    );
+    return (res.rows as never[])
+      .map(rowToEvent)
+      .sort(
+        (a, b) =>
+          a.dueAt.getTime() - b.dueAt.getTime() ||
+          a.priority - b.priority ||
+          (a.id < b.id ? -1 : 1),
+      );
   }
 
   /** Aplica un evento reclamado. Devuelve el desenlace para métricas/tests. */
@@ -95,13 +100,29 @@ export class EventWorker {
         return 'deferred';
       }
       const message = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
-      this.ctx.log.error('event.failed', { event_id: ev.id, world_id: ev.worldId, type: ev.type, attempts: ev.attempts, error: message });
-      await this.release(ev, Math.min(60_000, 1000 * 2 ** Math.max(0, ev.attempts - 1)), message, false);
+      this.ctx.log.error('event.failed', {
+        event_id: ev.id,
+        world_id: ev.worldId,
+        type: ev.type,
+        attempts: ev.attempts,
+        error: message,
+      });
+      await this.release(
+        ev,
+        Math.min(60_000, 1000 * 2 ** Math.max(0, ev.attempts - 1)),
+        message,
+        false,
+      );
       return 'failed';
     }
   }
 
-  private async release(ev: GameEvent, delayMs: number, error: string | null, refundAttempt: boolean): Promise<void> {
+  private async release(
+    ev: GameEvent,
+    delayMs: number,
+    error: string | null,
+    refundAttempt: boolean,
+  ): Promise<void> {
     const availableAt = new Date(this.ctx.clock.now().getTime() + delayMs);
     await this.ctx.db.execute(sql`
       update scheduled_events
@@ -116,7 +137,13 @@ export class EventWorker {
 
   async tick(): Promise<TickResult> {
     const claimed = await this.claim();
-    const out: TickResult = { claimed: claimed.length, applied: 0, skipped: 0, deferred: 0, failed: 0 };
+    const out: TickResult = {
+      claimed: claimed.length,
+      applied: 0,
+      skipped: 0,
+      deferred: 0,
+      failed: 0,
+    };
     for (const ev of claimed) out[await this.process(ev)]++;
     return out;
   }
@@ -139,9 +166,12 @@ export class EventWorker {
       try {
         const t = await this.tick();
         claimed = t.claimed;
-        if (t.claimed > 0) this.ctx.log.info('worker.tick', { worker_id: this.opts.workerId, ...t });
+        if (t.claimed > 0)
+          this.ctx.log.info('worker.tick', { worker_id: this.opts.workerId, ...t });
       } catch (e) {
-        this.ctx.log.error('worker.tick_failed', { error: e instanceof Error ? e.message : String(e) });
+        this.ctx.log.error('worker.tick_failed', {
+          error: e instanceof Error ? e.message : String(e),
+        });
       }
       if (claimed === 0) await sleep(this.pollMs, signal);
     }
@@ -160,7 +190,12 @@ export class EventWorker {
           filter (where status in ('PENDING','PROCESSING') and due_at <= ${now}::timestamptz), 0)::bigint as max_lag_ms
       from scheduled_events
     `);
-    const r = res.rows[0] as { pending: number; overdue: number; dead: number; max_lag_ms: string | number };
+    const r = res.rows[0] as {
+      pending: number;
+      overdue: number;
+      dead: number;
+      max_lag_ms: string | number;
+    };
     return { pending: r.pending, overdue: r.overdue, dead: r.dead, maxLagMs: Number(r.max_lag_ms) };
   }
 }
@@ -168,9 +203,13 @@ export class EventWorker {
 function sleep(ms: number, signal: AbortSignal): Promise<void> {
   return new Promise((resolve) => {
     const t = setTimeout(resolve, ms);
-    signal.addEventListener('abort', () => {
-      clearTimeout(t);
-      resolve();
-    }, { once: true });
+    signal.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(t);
+        resolve();
+      },
+      { once: true },
+    );
   });
 }

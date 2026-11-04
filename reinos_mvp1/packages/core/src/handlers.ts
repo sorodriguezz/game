@@ -27,7 +27,7 @@ import {
   travelSeconds,
   type BattleSnapshot,
 } from '@reinos/game-rules';
-import { DomainError, type CoreContext } from './context.js';
+import { DomainError } from './context.js';
 import { scheduleEvent, type EventHandler, type EventType, type GameEvent } from './events.js';
 import { addSeconds, newId } from './util.js';
 import {
@@ -53,7 +53,10 @@ async function settledEconomy(tx: Tx, villageId: string, ev: GameEvent) {
 
 const constructionComplete: EventHandler = async (tx, ctx, ev) => {
   const orderId = String(ev.payload.orderId);
-  const [order] = await tx.select().from(constructionOrders).where(eq(constructionOrders.id, orderId));
+  const [order] = await tx
+    .select()
+    .from(constructionOrders)
+    .where(eq(constructionOrders.id, orderId));
   if (!order || order.status !== 'IN_PROGRESS') return; // idempotente
   if (order.worldId !== ev.worldId || order.villageId !== ev.villageId) {
     throw new DomainError('WORLD_MISMATCH', 500, 'evento y orden de mundos/aldeas distintos');
@@ -65,17 +68,26 @@ const constructionComplete: EventHandler = async (tx, ctx, ev) => {
   const [current] = await tx
     .select()
     .from(villageBuildings)
-    .where(and(eq(villageBuildings.villageId, ev.villageId), eq(villageBuildings.plot, order.plot)));
+    .where(
+      and(eq(villageBuildings.villageId, ev.villageId), eq(villageBuildings.plot, order.plot)),
+    );
   if (current) {
     if (current.type !== order.buildingType || current.level !== order.targetLevel - 1) {
-      throw new DomainError('CONCURRENT_MODIFICATION', 500, 'estado de parcela inesperado al completar');
+      throw new DomainError(
+        'CONCURRENT_MODIFICATION',
+        500,
+        'estado de parcela inesperado al completar',
+      );
     }
     await tx
       .update(villageBuildings)
       .set({ level: order.targetLevel })
-      .where(and(eq(villageBuildings.villageId, ev.villageId), eq(villageBuildings.plot, order.plot)));
+      .where(
+        and(eq(villageBuildings.villageId, ev.villageId), eq(villageBuildings.plot, order.plot)),
+      );
   } else {
-    if (order.targetLevel !== 1) throw new DomainError('CONCURRENT_MODIFICATION', 500, 'nivel inicial inesperado');
+    if (order.targetLevel !== 1)
+      throw new DomainError('CONCURRENT_MODIFICATION', 500, 'nivel inicial inesperado');
     await tx.insert(villageBuildings).values({
       worldId: ev.worldId,
       villageId: ev.villageId,
@@ -94,19 +106,33 @@ const constructionComplete: EventHandler = async (tx, ctx, ev) => {
   await tx.insert(outbox).values({
     worldId: ev.worldId,
     type: 'BuildingCompleted',
-    payload: { villageId: ev.villageId, plot: order.plot, type: order.buildingType, level: order.targetLevel },
+    payload: {
+      villageId: ev.villageId,
+      plot: order.plot,
+      type: order.buildingType,
+      level: order.targetLevel,
+    },
   });
-  ctx.log.info('building.completed', { world_id: ev.worldId, village_id: ev.villageId, type: order.buildingType });
+  ctx.log.info('building.completed', {
+    world_id: ev.worldId,
+    village_id: ev.villageId,
+    type: order.buildingType,
+  });
 };
 
 const recruitmentComplete: EventHandler = async (tx, _ctx, ev) => {
   const orderId = String(ev.payload.orderId);
-  const [order] = await tx.select().from(recruitmentOrders).where(eq(recruitmentOrders.id, orderId));
+  const [order] = await tx
+    .select()
+    .from(recruitmentOrders)
+    .where(eq(recruitmentOrders.id, orderId));
   if (!order || order.status !== 'IN_PROGRESS') return;
   const world = await loadWorld(tx, ev.worldId);
   const r = rulesetOf(world);
   let state = await settledEconomy(tx, ev.villageId, ev);
-  await addToStacks(tx, troopStacks, ev.worldId, ev.villageId, [{ unitType: order.unitType, quantity: order.quantity }]);
+  await addToStacks(tx, troopStacks, ev.worldId, ev.villageId, [
+    { unitType: order.unitType, quantity: order.quantity },
+  ]);
   await tx
     .update(recruitmentOrders)
     .set({ status: 'COMPLETED', completedAt: ev.dueAt })
@@ -123,9 +149,14 @@ const recruitmentComplete: EventHandler = async (tx, _ctx, ev) => {
 
 const movementReturn: EventHandler = async (tx, _ctx, ev) => {
   const movementId = String(ev.payload.movementId);
-  const [m] = await tx.select().from(armyMovements).where(eq(armyMovements.id, movementId)).for('update');
+  const [m] = await tx
+    .select()
+    .from(armyMovements)
+    .where(eq(armyMovements.id, movementId))
+    .for('update');
   if (!m || m.status !== 'RETURNING') return;
-  if (m.originVillageId !== ev.villageId) throw new DomainError('WORLD_MISMATCH', 500, 'retorno a aldea distinta');
+  if (m.originVillageId !== ev.villageId)
+    throw new DomainError('WORLD_MISMATCH', 500, 'retorno a aldea distinta');
   let state = await settledEconomy(tx, ev.villageId, ev);
   await addToStacks(
     tx,
@@ -151,7 +182,10 @@ const movementReturn: EventHandler = async (tx, _ctx, ev) => {
     deltaMilli: c.credited,
     at: ev.dueAt,
   });
-  await tx.update(armyMovements).set({ status: 'COMPLETED' }).where(eq(armyMovements.id, movementId));
+  await tx
+    .update(armyMovements)
+    .set({ status: 'COMPLETED' })
+    .where(eq(armyMovements.id, movementId));
   // Tasas sin cambios: las tropas ya contaban para el mantenimiento mientras estaban fuera.
   await saveEconomy(tx, ev.villageId, state);
   await tx.insert(outbox).values({
@@ -163,17 +197,30 @@ const movementReturn: EventHandler = async (tx, _ctx, ev) => {
 
 const movementArrival: EventHandler = async (tx, ctx, ev) => {
   const movementId = String(ev.payload.movementId);
-  const [m] = await tx.select().from(armyMovements).where(eq(armyMovements.id, movementId)).for('update');
+  const [m] = await tx
+    .select()
+    .from(armyMovements)
+    .where(eq(armyMovements.id, movementId))
+    .for('update');
   if (!m || m.status !== 'IN_TRANSIT') return;
-  if (m.targetVillageId !== ev.villageId || m.originVillageId !== ev.secondaryVillageId || m.worldId !== ev.worldId) {
-    throw new DomainError('WORLD_MISMATCH', 500, 'evento de llegada inconsistente con el movimiento');
+  if (
+    m.targetVillageId !== ev.villageId ||
+    m.originVillageId !== ev.secondaryVillageId ||
+    m.worldId !== ev.worldId
+  ) {
+    throw new DomainError(
+      'WORLD_MISMATCH',
+      500,
+      'evento de llegada inconsistente con el movimiento',
+    );
   }
   const world = await loadWorld(tx, ev.worldId);
   const r = rulesetOf(world);
 
   const [target] = await tx.select().from(villages).where(eq(villages.id, m.targetVillageId));
   const [origin] = await tx.select().from(villages).where(eq(villages.id, m.originVillageId));
-  if (!target || !origin) throw new DomainError('VILLAGE_NOT_FOUND', 500, 'aldea del combate inexistente');
+  if (!target || !origin)
+    throw new DomainError('VILLAGE_NOT_FOUND', 500, 'aldea del combate inexistente');
 
   const civOf = async (accountId: string | null): Promise<CivilizationId | null> => {
     if (!accountId) return null;
@@ -203,7 +250,10 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
     mission: m.mission,
     attacker: {
       civilization: attackerCiv,
-      units: Object.entries(m.units).map(([unitType, quantity]) => ({ unitType: unitType as UnitType, quantity })),
+      units: Object.entries(m.units).map(([unitType, quantity]) => ({
+        unitType: unitType as UnitType,
+        quantity,
+      })),
     },
     defender: {
       civilization: defenderCiv,
@@ -241,7 +291,9 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
   }
 
   // --- Atacante: supervivientes regresan con el botín ----------------------
-  const survivors = Object.fromEntries(result.attacker.survivors.map((s) => [s.unitType, s.quantity]));
+  const survivors = Object.fromEntries(
+    result.attacker.survivors.map((s) => [s.unitType, s.quantity]),
+  );
   const anySurvivor = result.attacker.survivors.length > 0;
   let returnsAt: Date | null = null;
   if (anySurvivor) {
@@ -307,7 +359,9 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
     battle_id: battleId,
     movement_id: movementId,
     outcome: result.outcome,
-    loot_total: Number((lootMilli.wood + lootMilli.stone + lootMilli.iron + lootMilli.food) / MILLI),
+    loot_total: Number(
+      (lootMilli.wood + lootMilli.stone + lootMilli.iron + lootMilli.food) / MILLI,
+    ),
   });
 };
 

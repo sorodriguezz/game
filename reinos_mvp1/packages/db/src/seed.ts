@@ -36,7 +36,11 @@ export const DEV_WORLDS: WorldSeed[] = [
 ];
 
 /** Inserta mundos si no existen (idempotente por `slug`). */
-export async function seedWorlds(db: Db, seeds: WorldSeed[] = DEV_WORLDS, now = new Date()): Promise<void> {
+export async function seedWorlds(
+  db: Db,
+  seeds: WorldSeed[] = DEV_WORLDS,
+  now = new Date(),
+): Promise<void> {
   for (const s of seeds) {
     await db
       .insert(worlds)

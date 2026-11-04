@@ -40,7 +40,9 @@ describe('PRNG sembrado', () => {
 
 describe('mapa determinista', () => {
   it('genera el mismo terreno para la misma semilla', () => {
-    expect(renderRegion(SEED, 128, 10, 10, 30, 30)).toEqual(renderRegion(SEED, 128, 10, 10, 30, 30));
+    expect(renderRegion(SEED, 128, 10, 10, 30, 30)).toEqual(
+      renderRegion(SEED, 128, 10, 10, 30, 30),
+    );
   });
 
   it('tiene mar, tierra y bordes de mar con proporciones razonables', () => {
@@ -94,34 +96,131 @@ describe('validación de ciudad (servidor autoritativo)', () => {
   ];
 
   it('permite mejorar un edificio existente', () => {
-    const res = validateConstruction(r, { civilization: 'imperial_crown', coastal: false, buildings: base, plot: 2, type: 'warehouse' });
+    const res = validateConstruction(r, {
+      civilization: 'imperial_crown',
+      coastal: false,
+      buildings: base,
+      plot: 2,
+      type: 'warehouse',
+    });
     expect(res).toEqual({ ok: true, value: { targetLevel: 2 } });
   });
 
   it('rechaza parcela ocupada por otro tipo, tipo duplicado y tipo de parcela incorrecto', () => {
-    expect(validateConstruction(r, { civilization: 'imperial_crown', coastal: false, buildings: base, plot: 2, type: 'farm' })).toMatchObject({ ok: false, code: 'PLOT_OCCUPIED' });
-    expect(validateConstruction(r, { civilization: 'imperial_crown', coastal: false, buildings: base, plot: 3, type: 'warehouse' })).toMatchObject({ ok: false, code: 'BUILDING_ALREADY_EXISTS' });
-    expect(validateConstruction(r, { civilization: 'imperial_crown', coastal: false, buildings: base, plot: 0, type: 'farm' })).toMatchObject({ ok: false, code: 'PLOT_KIND_MISMATCH' });
-    expect(validateConstruction(r, { civilization: 'imperial_crown', coastal: false, buildings: base, plot: 99, type: 'farm' })).toMatchObject({ ok: false, code: 'PLOT_NOT_FOUND' });
+    expect(
+      validateConstruction(r, {
+        civilization: 'imperial_crown',
+        coastal: false,
+        buildings: base,
+        plot: 2,
+        type: 'farm',
+      }),
+    ).toMatchObject({ ok: false, code: 'PLOT_OCCUPIED' });
+    expect(
+      validateConstruction(r, {
+        civilization: 'imperial_crown',
+        coastal: false,
+        buildings: base,
+        plot: 3,
+        type: 'warehouse',
+      }),
+    ).toMatchObject({ ok: false, code: 'BUILDING_ALREADY_EXISTS' });
+    expect(
+      validateConstruction(r, {
+        civilization: 'imperial_crown',
+        coastal: false,
+        buildings: base,
+        plot: 0,
+        type: 'farm',
+      }),
+    ).toMatchObject({ ok: false, code: 'PLOT_KIND_MISMATCH' });
+    expect(
+      validateConstruction(r, {
+        civilization: 'imperial_crown',
+        coastal: false,
+        buildings: base,
+        plot: 99,
+        type: 'farm',
+      }),
+    ).toMatchObject({ ok: false, code: 'PLOT_NOT_FOUND' });
   });
 
   it('puerto solo en aldea costera y edificio único solo para su civilización', () => {
-    const lvl2 = [{ plot: 0, type: 'city_hall' as const, level: 5 }, { plot: 1, type: 'port' as const, level: 3 }];
-    expect(validateConstruction(r, { civilization: 'sea_league', coastal: false, buildings: lvl2, plot: 12, type: 'port' })).toMatchObject({ ok: false });
-    expect(validateConstruction(r, { civilization: 'sea_league', coastal: false, buildings: [{ plot: 0, type: 'city_hall', level: 2 }], plot: 12, type: 'port' })).toMatchObject({ ok: false, code: 'NOT_COASTAL' });
-    expect(validateConstruction(r, { civilization: 'imperial_crown', coastal: true, buildings: base, plot: 4, type: 'naval_arsenal' })).toMatchObject({ ok: false, code: 'CIVILIZATION_RESTRICTED' });
+    const lvl2 = [
+      { plot: 0, type: 'city_hall' as const, level: 5 },
+      { plot: 1, type: 'port' as const, level: 3 },
+    ];
+    expect(
+      validateConstruction(r, {
+        civilization: 'sea_league',
+        coastal: false,
+        buildings: lvl2,
+        plot: 12,
+        type: 'port',
+      }),
+    ).toMatchObject({ ok: false });
+    expect(
+      validateConstruction(r, {
+        civilization: 'sea_league',
+        coastal: false,
+        buildings: [{ plot: 0, type: 'city_hall', level: 2 }],
+        plot: 12,
+        type: 'port',
+      }),
+    ).toMatchObject({ ok: false, code: 'NOT_COASTAL' });
+    expect(
+      validateConstruction(r, {
+        civilization: 'imperial_crown',
+        coastal: true,
+        buildings: base,
+        plot: 4,
+        type: 'naval_arsenal',
+      }),
+    ).toMatchObject({ ok: false, code: 'CIVILIZATION_RESTRICTED' });
   });
 
   it('respeta requisitos', () => {
-    expect(validateConstruction(r, { civilization: 'imperial_crown', coastal: false, buildings: base, plot: 4, type: 'temple' })).toMatchObject({ ok: false, code: 'REQUIREMENTS_NOT_MET' });
+    expect(
+      validateConstruction(r, {
+        civilization: 'imperial_crown',
+        coastal: false,
+        buildings: base,
+        plot: 4,
+        type: 'temple',
+      }),
+    ).toMatchObject({ ok: false, code: 'REQUIREMENTS_NOT_MET' });
   });
 
   it('reclutamiento exige edificio y requisitos', () => {
-    expect(validateRecruitment(r, { civilization: 'imperial_crown', buildings: base, unitType: 'militia' })).toMatchObject({ ok: false, code: 'TRAINING_BUILDING_MISSING' });
+    expect(
+      validateRecruitment(r, {
+        civilization: 'imperial_crown',
+        buildings: base,
+        unitType: 'militia',
+      }),
+    ).toMatchObject({ ok: false, code: 'TRAINING_BUILDING_MISSING' });
     const withBarracks = [...base, { plot: 3, type: 'barracks' as const, level: 1 }];
-    expect(validateRecruitment(r, { civilization: 'imperial_crown', buildings: withBarracks, unitType: 'militia' })).toMatchObject({ ok: true });
-    expect(validateRecruitment(r, { civilization: 'imperial_crown', buildings: withBarracks, unitType: 'cavalry' })).toMatchObject({ ok: false, code: 'UNIT_NOT_AVAILABLE' });
-    expect(validateRecruitment(r, { civilization: 'imperial_crown', buildings: withBarracks, unitType: 'naval_escort' })).toMatchObject({ ok: false, code: 'CIVILIZATION_RESTRICTED' });
+    expect(
+      validateRecruitment(r, {
+        civilization: 'imperial_crown',
+        buildings: withBarracks,
+        unitType: 'militia',
+      }),
+    ).toMatchObject({ ok: true });
+    expect(
+      validateRecruitment(r, {
+        civilization: 'imperial_crown',
+        buildings: withBarracks,
+        unitType: 'cavalry',
+      }),
+    ).toMatchObject({ ok: false, code: 'UNIT_NOT_AVAILABLE' });
+    expect(
+      validateRecruitment(r, {
+        civilization: 'imperial_crown',
+        buildings: withBarracks,
+        unitType: 'naval_escort',
+      }),
+    ).toMatchObject({ ok: false, code: 'CIVILIZATION_RESTRICTED' });
   });
 
   it('etapas visuales 1–3', () => {

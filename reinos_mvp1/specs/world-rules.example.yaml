@@ -1,0 +1,30 @@
+# PROPOSAL ONLY: parameters are not balanced or final; version before opening any world.
+ruleset_version: 'mvp1-alpha.0'
+world:
+  speed_multiplier: 1
+  map_seed: 20261103
+  alliance_max_members: 40
+  confederation_max_alliances: 3
+  weekly_ranking_cutoff: 'MONDAY_00_00_UTC'
+  new_player_protection_hours: 72
+  wonder_sites: 3
+  wonder_max_level: 100
+  wonder_hold_hours: 24
+  pna_activation_delay_hours: 2
+  pna_termination_notice_hours: 24
+  alliance_switch_cooldown_hours: 48
+resources: [wood, stone, iron, food]
+units: [infantry, archer, cavalry, siege, priest, transport_ship]
+battle:
+  mode: AUTO
+  seed_required: true
+  snapshot_required: true
+  server_authoritative: true
+rewards:
+  weekly:
+    individual: [medal, title]
+    alliance: [banner, honor]
+    military_advantage: false
+notes:
+  - 'All values are proposed defaults and must pass balance tests.'
+  - 'No numerical multipliers for troops until simulation and QA.'

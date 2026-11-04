@@ -1,0 +1,20 @@
+# SOLO desarrollo local: no usar credenciales ni puerto publicado en producción.
+services:
+  db:
+    image: postgres:17
+    container_name: reinos-postgres-dev
+    environment:
+      POSTGRES_USER: reinos_dev
+      POSTGRES_PASSWORD: reinos_dev_change_me
+      POSTGRES_DB: reinos
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - reinos_pg_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U reinos_dev -d reinos']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  reinos_pg_dev:

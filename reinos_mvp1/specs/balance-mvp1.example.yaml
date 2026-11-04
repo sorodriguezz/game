@@ -1,0 +1,114 @@
+# HIPÓTESIS DE BALANCE, NO VALORES PUBLICABLES SIN PLAYTESTING.
+# Son ejemplos implementables para evitar que agentes inventen números incompatibles.
+# Multiplicadores expresados como enteros relativos o porcentajes declarados.
+version: mvp1.0.0-alpha
+units:
+  militia:
+    resources: {wood: 30, stone: 0, iron: 20, food: 25}
+    training_seconds: 120
+    attack: 20
+    infantry_defense: 25
+    cavalry_defense: 15
+    speed_tiles_per_hour: 4
+    food_upkeep_per_hour: 1
+    population: 1
+  spearman:
+    resources: {wood: 25, stone: 5, iron: 40, food: 35}
+    training_seconds: 180
+    attack: 15
+    infantry_defense: 30
+    cavalry_defense: 65
+    speed_tiles_per_hour: 4
+    food_upkeep_per_hour: 1
+    population: 1
+  archer:
+    resources: {wood: 50, stone: 0, iron: 25, food: 30}
+    training_seconds: 210
+    attack: 35
+    infantry_defense: 15
+    cavalry_defense: 10
+    speed_tiles_per_hour: 4
+    food_upkeep_per_hour: 1
+    population: 1
+  cavalry:
+    resources: {wood: 35, stone: 0, iron: 90, food: 100}
+    training_seconds: 420
+    attack: 75
+    infantry_defense: 35
+    cavalry_defense: 25
+    speed_tiles_per_hour: 9
+    food_upkeep_per_hour: 3
+    population: 2
+  priest:
+    resources: {wood: 20, stone: 30, iron: 10, food: 70}
+    training_seconds: 300
+    attack: 0
+    infantry_defense: 5
+    cavalry_defense: 5
+    speed_tiles_per_hour: 4
+    food_upkeep_per_hour: 1
+    population: 1
+    support:
+      morale_bonus_percent: 3
+      maximum_army_bonus_percent: 6
+  imperial_guard:
+    exclusive_civilization: imperial_crown
+    resources: {wood: 40, stone: 25, iron: 100, food: 100}
+    training_seconds: 480
+    attack: 60
+    infantry_defense: 75
+    cavalry_defense: 45
+    speed_tiles_per_hour: 4
+    food_upkeep_per_hour: 2
+    population: 2
+  naval_escort:
+    exclusive_civilization: sea_league
+    resources: {wood: 45, stone: 0, iron: 70, food: 60}
+    training_seconds: 320
+    attack: 30
+    infantry_defense: 30
+    cavalry_defense: 35
+    speed_tiles_per_hour: 4
+    food_upkeep_per_hour: 1
+    population: 1
+buildings:
+  farm: {base_cost: {wood: 60, stone: 30, iron: 15, food: 0}, base_seconds: 180, effect: food_per_hour}
+  sawmill: {base_cost: {wood: 50, stone: 30, iron: 10, food: 20}, base_seconds: 180, effect: wood_per_hour}
+  quarry: {base_cost: {wood: 40, stone: 50, iron: 15, food: 20}, base_seconds: 180, effect: stone_per_hour}
+  mine: {base_cost: {wood: 45, stone: 50, iron: 25, food: 30}, base_seconds: 240, effect: iron_per_hour}
+  barracks: {base_cost: {wood: 120, stone: 100, iron: 50, food: 30}, base_seconds: 600, effect: recruit}
+  warehouse: {base_cost: {wood: 100, stone: 90, iron: 35, food: 40}, base_seconds: 480, effect: resource_capacity}
+  hospital: {base_cost: {wood: 140, stone: 100, iron: 50, food: 80}, base_seconds: 720, effect: wound_recovery}
+  temple: {base_cost: {wood: 130, stone: 130, iron: 40, food: 70}, base_seconds: 720, effect: priest_recruitment}
+  port: {base_cost: {wood: 200, stone: 160, iron: 100, food: 80}, base_seconds: 1200, effect: naval_transport}
+  wall: {base_cost: {wood: 150, stone: 250, iron: 80, food: 0}, base_seconds: 1000, effect: defense}
+  city_hall: {base_cost: {wood: 100, stone: 100, iron: 50, food: 100}, base_seconds: 800, effect: population_capacity}
+  imperial_bastion: {unique: imperial_crown, base_seconds: 1800, effect: defense}
+  naval_arsenal: {unique: sea_league, base_seconds: 1800, effect: naval_capacity}
+formulas:
+  # level starts at 1; round up each input resource individually.
+  building_cost: "ceil(base_cost * pow(1.25, level - 1))"
+  building_duration: "ceil(base_seconds * pow(1.12, level - 1) / speed_multiplier)"
+  resource_production: "base_rate_per_hour * level * pow(1.08, level - 1)"
+  army_travel: "ceil(route_distance_tiles / slowest_speed_tiles_per_hour * 3600 / speed_multiplier)"
+  hospital_recovery: "min(wounded, capacity, available_supply_based_limit)"
+  oasis_bonus: "base_production * 0.15 per qualifying oasis, limited by per-city cap"
+  wonder_resources_at_level: "ceil(base_resource_amount * pow(1.05, level - 1))"
+  wonder_time_seconds_at_level: "ceil(base_seconds * pow(1.03, level - 1) / speed_multiplier)"
+wonder:
+  max_level: 100
+  base_resource_amount_each: {wood: 1500, stone: 2000, iron: 1000, food: 1000}
+  base_seconds: 900
+  visual_tiers: [1, 20, 40, 60, 80, 100]
+  validation_hours: 24
+ranking:
+  window: MONDAY_00_00_UTC
+  score_event_rules:
+    offense: "battle_result_validated_attacker_loss_value"
+    defense: "battle_result_validated_defender_loss_value"
+    loot: "valid_loot_resource_value"
+    economy: "net_earned_resources_capped_per_account"
+    commerce: "completed_trade_value_non_self"
+    wonder_support: "verified_wonder_resources_and_reforcements"
+  awards: [medal, title, alliance_banner]
+  gameplay_bonus: false

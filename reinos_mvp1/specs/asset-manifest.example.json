@@ -1,0 +1,26 @@
+{
+  "$comment": "Ejemplo de contrato no validado por JSON Schema; versión final debe tener schema y checks automatizados.",
+  "assetId": "league_port_level1",
+  "kind": "building",
+  "civilization": "league_of_seas",
+  "styleVersion": "realistic-stylized-v1",
+  "file": "assets/optimized/league_port_level1.glb",
+  "format": "glb",
+  "units": "meters",
+  "hasPbr": true,
+  "hasCollision": true,
+  "lodCount": 3,
+  "animations": [],
+  "source": {
+    "workflow": "AI-assisted + Blender QA",
+    "provider": "documented at generation time",
+    "license": "REQUIRED_BEFORE_APPROVAL"
+  },
+  "validation": {
+    "geometry": "PENDING",
+    "materials": "PENDING",
+    "engineScreenshot": "PENDING",
+    "performance": "PENDING",
+    "humanApproval": "PENDING"
+  }
+}

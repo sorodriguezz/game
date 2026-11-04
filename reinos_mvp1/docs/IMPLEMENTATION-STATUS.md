@@ -21,6 +21,10 @@ reinos_mvp1/
 └── scripts/bundle.mjs  Empaquetado de API/worker para producción
 ```
 
+Capturas reales del cliente (Chromium headless, render por software):
+[ciudad con todos los edificios del kit *blockout*](screenshots/ciudad-blockout.png) ·
+[informe de un saqueo resuelto con el defensor desconectado](screenshots/informe-batalla.png).
+
 ## 2. Backlog — estado verificable
 
 | Historia | Estado | Evidencia |

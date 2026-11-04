@@ -1,0 +1,17 @@
+{
+  "name": "@reinos/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "DTO/esquemas zod y códigos de error compartidos entre web y API.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@reinos/game-config": "workspace:*",
+    "zod": "^4.6.7"
+  }
+}

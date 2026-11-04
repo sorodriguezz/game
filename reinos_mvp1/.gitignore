@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+.vite/
+playwright-report/
+test-results/
+apps/web/tests/__screenshots__/*.actual.png
+assets/raw/

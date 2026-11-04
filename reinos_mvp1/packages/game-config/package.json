@@ -1,0 +1,16 @@
+{
+  "name": "@reinos/game-config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Catálogo y balance versionado por ruleset (sin NestJS/React/BD).",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  }
+}

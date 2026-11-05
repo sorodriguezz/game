@@ -4,9 +4,8 @@ name: reinos-ci
 
 on:
   push:
-    paths: ['reinos_mvp1/**', '.github/workflows/reinos-ci.yml']
+    branches: [main]
   pull_request:
-    paths: ['reinos_mvp1/**', '.github/workflows/reinos-ci.yml']
 
 permissions:
   contents: read
@@ -15,9 +14,6 @@ jobs:
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    defaults:
-      run:
-        working-directory: reinos_mvp1
     services:
       postgres:
         image: postgres:17-alpine
@@ -35,12 +31,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
-          package_json_file: reinos_mvp1/package.json
+          package_json_file: package.json
       - uses: actions/setup-node@v4
         with:
-          node-version-file: reinos_mvp1/.nvmrc
+          node-version-file: .nvmrc
           cache: pnpm
-          cache-dependency-path: reinos_mvp1/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
       - run: pnpm lint

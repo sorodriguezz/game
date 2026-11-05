@@ -12,6 +12,8 @@
     "e2e": "node e2e/vertical-slice.e2e.mjs"
   },
   "dependencies": {
+    "@colyseus/schema": "5.0.43",
+    "@colyseus/sdk": "0.18.9",
     "@playcanvas/react": "^0.11.7",
     "@reinos/contracts": "workspace:*",
     "@reinos/game-config": "workspace:*",
@@ -24,7 +26,7 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.2.1",
-    "vite": "^8.3.5",
-    "playwright": "1.63.0"
+    "playwright": "1.63.0",
+    "vite": "^8.3.5"
   }
 }

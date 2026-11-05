@@ -52,3 +52,16 @@ describe('rulesets versionados', () => {
     expect(r.units.map((u) => u.type).join(',')).not.toMatch(/hero|heroe|héroe/i);
   });
 });
+
+describe('ruleset táctico versionado (MVP 2)', () => {
+  it('es válido, está congelado y su base es un ruleset M1 existente', async () => {
+    const { DEFAULT_TACTICAL_RULESET_VERSION, getTacticalRuleset, validateTacticalRuleset } =
+      await import('../src/index.js');
+    const t = getTacticalRuleset(DEFAULT_TACTICAL_RULESET_VERSION);
+    expect(() => validateTacticalRuleset(t)).not.toThrow();
+    expect(Object.isFrozen(t)).toBe(true);
+    expect(() => getRuleset(t.baseRulesetVersion)).not.toThrow();
+    // Todas las unidades M1 tienen perfil táctico.
+    for (const u of getRuleset(t.baseRulesetVersion).units) expect(t.units[u.type]).toBeDefined();
+  });
+});

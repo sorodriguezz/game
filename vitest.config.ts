@@ -6,14 +6,20 @@ export default defineConfig({
       {
         test: {
           name: 'unit',
-          include: ['packages/{game-config,game-rules,contracts,asset-pipeline}/test/**/*.test.ts'],
+          include: [
+            'packages/{game-config,game-rules,contracts,asset-pipeline,tactical-sim}/test/**/*.test.ts',
+          ],
           environment: 'node',
         },
       },
       {
         test: {
           name: 'integration',
-          include: ['packages/core/test/**/*.test.ts', 'apps/api/test/**/*.test.ts'],
+          include: [
+            'packages/core/test/**/*.test.ts',
+            'apps/api/test/**/*.test.ts',
+            'apps/battle-server/test/**/*.test.ts',
+          ],
           environment: 'node',
           // Comparten una BD PostgreSQL real: sin paralelismo entre archivos.
           fileParallelism: false,

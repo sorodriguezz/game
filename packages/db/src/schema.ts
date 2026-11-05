@@ -550,3 +550,60 @@ export const outbox = pgTable(
       .where(sql`${t.publishedAt} is null`),
   ],
 );
+
+// ---------------------------------------------------------------------------
+// MVP 2 — Entrenamiento táctico (ADR-0037). Migración ADITIVA: no referencia
+// ninguna tabla de mundo (sin world_id): un entrenamiento nunca toca recursos,
+// tropas, rankings ni eventos del mundo.
+// ---------------------------------------------------------------------------
+export const trainingOpponent = pgEnum('training_opponent', ['DOCTRINE', 'PLAYER']);
+export const trainingStatus = pgEnum('training_status', [
+  'WAITING_OPPONENT',
+  'LIVE',
+  'FINISHED',
+  'EXPIRED',
+  'FAILED',
+]);
+
+export const trainingMatches = pgTable(
+  'training_matches',
+  {
+    id: uuid('id').primaryKey(),
+    inviteCode: text('invite_code').notNull(),
+    hostAccountId: uuid('host_account_id')
+      .notNull()
+      .references(() => accounts.id),
+    guestAccountId: uuid('guest_account_id').references(() => accounts.id),
+    opponent: trainingOpponent('opponent').notNull(),
+    status: trainingStatus('status').notNull(),
+    terrainId: text('terrain_id').notNull(),
+    hostCivilization: text('host_civilization').notNull(),
+    hostArmy: text('host_army').notNull(),
+    guestCivilization: text('guest_civilization'),
+    guestArmy: text('guest_army'),
+    tacticalRulesetVersion: text('tactical_ruleset_version').notNull(),
+    seed: text('seed').notNull(),
+    snapshot: jsonb('snapshot'),
+    snapshotHash: text('snapshot_hash'),
+    roomId: text('room_id'),
+    result: jsonb('result'),
+    resultHash: text('result_hash'),
+    replay: jsonb('replay'),
+    createdAt: ts('created_at').notNull(),
+    expiresAt: ts('expires_at').notNull(),
+    finishedAt: ts('finished_at'),
+  },
+  (t) => [
+    uniqueIndex('training_matches_invite_uq').on(t.inviteCode),
+    index('training_matches_host_idx').on(t.hostAccountId, t.createdAt),
+    index('training_matches_guest_idx').on(t.guestAccountId, t.createdAt),
+    check(
+      'training_matches_guest_ck',
+      sql`${t.guestAccountId} is null or ${t.guestAccountId} <> ${t.hostAccountId}`,
+    ),
+    check(
+      'training_matches_result_ck',
+      sql`(${t.status} = 'FINISHED') = (${t.result} is not null)`,
+    ),
+  ],
+);

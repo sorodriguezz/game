@@ -1,0 +1,26 @@
+{
+  "name": "@reinos/battle-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Servidor de salas tácticas Colyseus (MVP 2, ADR-0022). Sin acceso a tablas del mundo.",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=../../.env src/main.ts",
+    "start": "node --env-file-if-exists=../../.env dist/main.js",
+    "build": "node ../../scripts/bundle.mjs src/main.ts dist/main.js",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@colyseus/core": "0.18.26",
+    "@colyseus/schema": "5.0.43",
+    "@colyseus/ws-transport": "0.18.4",
+    "@reinos/contracts": "workspace:*",
+    "@reinos/game-config": "workspace:*",
+    "@reinos/tactical-sim": "workspace:*",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@colyseus/sdk": "0.18.9",
+    "tsx": "^4.23.15"
+  }
+}

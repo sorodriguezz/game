@@ -1,5 +1,6 @@
 export * from './errors.js';
 export * from './dto.js';
+export * from './tactical.js';
 
 export const API_PREFIX = '/api/v1';
 export const IDEMPOTENCY_HEADER = 'idempotency-key';

@@ -16,6 +16,8 @@
     "@reinos/db": "workspace:*",
     "@reinos/game-config": "workspace:*",
     "@reinos/game-rules": "workspace:*",
-    "drizzle-orm": "^0.45.4"
+    "drizzle-orm": "^0.45.4",
+    "@reinos/tactical-sim": "workspace:*",
+    "zod": "^4.6.7"
   }
 }

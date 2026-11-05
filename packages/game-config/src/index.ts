@@ -103,3 +103,4 @@ export function plotDef(r: Ruleset, id: number): PlotDef | undefined {
 export function isBuildingType(v: string): v is BuildingType {
   return (rulesetMvp1Alpha0.buildings as BuildingDef[]).some((b) => b.type === v);
 }
+export * from './tactical.js';

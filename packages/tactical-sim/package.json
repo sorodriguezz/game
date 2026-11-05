@@ -1,0 +1,21 @@
+{
+  "name": "@reinos/tactical-sim",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Simulación táctica pura por formaciones con tick fijo (MVP 2, ADR-0025). Sin Colyseus, PlayCanvas ni BD.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tickets": "./src/tickets.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@reinos/contracts": "workspace:*",
+    "@reinos/game-config": "workspace:*"
+  },
+  "devDependencies": {
+    "fast-check": "^4.3.0"
+  }
+}

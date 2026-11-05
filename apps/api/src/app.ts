@@ -5,7 +5,13 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import cookieParser from 'cookie-parser';
 import { API_PREFIX } from '@reinos/contracts';
-import { AuthService, GameCommands, GameQueries, type CoreContext } from '@reinos/core';
+import {
+  AuthService,
+  GameCommands,
+  GameQueries,
+  TrainingService,
+  type CoreContext,
+} from '@reinos/core';
 import {
   AuthController,
   HealthController,
@@ -19,11 +25,17 @@ import {
   securityHeadersMiddleware,
 } from './http.js';
 import {
+  BattleConfigController,
+  InternalTrainingController,
+  TrainingController,
+} from './tactical.controllers.js';
+import {
   API_CONFIG,
   AUTH_SERVICE,
   CORE_CONTEXT,
   GAME_COMMANDS,
   GAME_QUERIES,
+  TRAINING_SERVICE,
   type ApiConfig,
 } from './tokens.js';
 
@@ -31,18 +43,44 @@ import {
  * Construye la aplicación Nest con un `CoreContext` inyectado (BD, reloj, logger).
  * Los tests e2e la crean con un reloj falso y la BD de pruebas.
  */
-export async function createApp(ctx: CoreContext, config: ApiConfig): Promise<INestApplication> {
+export async function createApp(
+  ctx: CoreContext,
+  config: ApiConfig,
+  training?: TrainingService,
+): Promise<INestApplication> {
   @Module({
     imports: [
       ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: config.rateLimitPerMinute }]),
     ],
-    controllers: [HealthController, AuthController, WorldsController, VillagesController],
+    controllers: [
+      HealthController,
+      AuthController,
+      WorldsController,
+      VillagesController,
+      BattleConfigController,
+      TrainingController,
+      InternalTrainingController,
+    ],
     providers: [
       { provide: CORE_CONTEXT, useValue: ctx },
       { provide: API_CONFIG, useValue: config },
       { provide: AUTH_SERVICE, useValue: new AuthService(ctx) },
       { provide: GAME_COMMANDS, useValue: new GameCommands(ctx) },
       { provide: GAME_QUERIES, useValue: new GameQueries(ctx) },
+      {
+        provide: TRAINING_SERVICE,
+        useValue:
+          training ??
+          new TrainingService(ctx, {
+            enabled: false,
+            signingKey: 'x'.repeat(32),
+            publicBattleServerUrl: '',
+            gateway: {
+              createRoom: () => Promise.reject(new Error('sin battle-server')),
+              health: async () => ({ ok: false, capacityAvailable: false }),
+            },
+          }),
+      },
       { provide: APP_GUARD, useClass: SessionGuard },
       { provide: APP_GUARD, useClass: ThrottlerGuard },
       { provide: APP_FILTER, useClass: ApiExceptionFilter },

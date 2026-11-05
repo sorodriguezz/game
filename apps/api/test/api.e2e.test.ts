@@ -21,6 +21,12 @@ beforeAll(async () => {
     allowedOrigins: [ORIGIN],
     rateLimitPerMinute: 10_000,
     authRateLimitPerMinute: 10,
+    tactical: {
+      trainingEnabled: false,
+      worldPvpEnabled: false,
+      serviceToken: '',
+      health: async () => ({ ok: false, capacityAvailable: false }),
+    },
   });
 });
 afterAll(async () => {

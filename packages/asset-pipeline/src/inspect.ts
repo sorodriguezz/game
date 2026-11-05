@@ -113,7 +113,8 @@ export async function inspectDocument(
     problems.push(`pivote: la base no está en y=0 (min.y=${min[1].toFixed(3)})`);
   const cx = (min[0] + max[0]) / 2;
   const cz = (min[2] + max[2]) / 2;
-  if (Math.hypot(cx, cz) > 0.1 * Math.max(size[0]!, size[2]!, 1))
+  // En unidades el pivote es el punto entre los pies; armas y escudos desplazan la caja.
+  if (entry.kind !== 'unit' && Math.hypot(cx, cz) > 0.1 * Math.max(size[0]!, size[2]!, 1))
     problems.push('pivote: no centrado en XZ');
 
   for (const clip of entry.animations ?? [])

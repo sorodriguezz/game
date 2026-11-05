@@ -34,7 +34,7 @@ REPORT_DIR = os.path.join(ROOT, 'assets', 'reports')
 PREVIEW_DIR = os.path.join(ROOT, 'assets', 'previews')
 CIVS = {'imperial_crown': 'corona', 'sea_league': 'liga'}
 # piezas que bajan del suelo a propósito (pilotes del puerto bajo el agua)
-BELOW_GROUND_OK = {'port', 'quarry', 'mine', 'palisade'}
+BELOW_GROUND_OK = {'port', 'quarry', 'mine', 'palisade', 'ship_cog', 'ship_galley'}
 
 
 def cmd_textures(args) -> None:
@@ -46,9 +46,10 @@ def cmd_textures(args) -> None:
 
 def build_building(kind: str, civ: str, stage: int, preview: bool) -> dict:
     from assets.buildings import GENERATORS
+    from assets.ships import SHIPS
     from assets.walls import WALL_PIECES
 
-    GENERATORS = {**GENERATORS, **WALL_PIECES}
+    GENERATORS = {**GENERATORS, **WALL_PIECES, **{k: (lambda fn: lambda st, stage: fn(st))(fn) for k, fn in SHIPS.items()}}
 
     X.reset_scene()
     st = arch.STYLES[civ]
@@ -62,7 +63,7 @@ def build_building(kind: str, civ: str, stage: int, preview: bool) -> dict:
     dims = lods[0].dimensions
     report = {
         'assetId': asset_id,
-        'kind': 'building',
+        'kind': 'ship' if kind.startswith('ship_') else 'building',
         'type': kind,
         'civilization': civ,
         'visualStage': stage,
@@ -125,6 +126,65 @@ def build_nature(kind: str, variant: int, preview: bool) -> dict:
     return report
 
 
+def build_unit(kind: str, civ: str, preview: bool) -> dict:
+    import bpy
+    from assets.units import UNITS, clips
+    from reinos_assets import character as C
+
+    X.reset_scene()
+    bpy.context.scene.render.fps = 30
+    asset_id = f'{kind}.{CIVS[civ]}'
+    t0 = time.time()
+    body = UNITS[kind](CIVS[civ])
+    arm = C.make_armature(asset_id)
+    lod0 = body.build('LOD0', include_detail=True)
+    lod1 = body.build('LOD1', include_detail=False)
+    lod2 = body.build('LOD2', include_detail=False)
+    X._decimate(lod1, 0.45)
+    X._decimate(lod2, 0.2)
+    for o in (lod0, lod1, lod2):
+        X._vertex_tint(o, zlib.crc32(asset_id.encode()) & 0xFFFF, ground_dark=0.85, ground_h=0.4)
+        C.bind(o, arm)
+    for name, keys in clips().items():
+        C.add_clip(arm, name, keys)
+    problems = X._check_geometry(lod0)
+    glb = os.path.join(BUILD_DIR, f'{asset_id}.glb')
+    os.makedirs(BUILD_DIR, exist_ok=True)
+    bpy.ops.export_scene.gltf(
+        filepath=glb, export_format='GLB', export_yup=True, export_apply=False, export_image_format='NONE',
+        export_materials='EXPORT', export_vertex_color='ACTIVE', export_all_vertex_colors=False,
+        export_animations=True, export_animation_mode='NLA_TRACKS', export_skins=True, export_def_bones=False,
+        export_force_sampling=True, export_extras=True,
+    )
+    dims = lod0.dimensions
+    report = {
+        'assetId': asset_id, 'kind': 'unit', 'type': kind, 'civilization': civ,
+        'triangles': [X.tris(o) for o in (lod0, lod1, lod2)],
+        'materials': sorted({s.material.name for s in lod0.material_slots if s.material}),
+        'dimensionsMeters': [round(dims.x, 2), round(dims.z, 2), round(dims.y, 2)],
+        'bones': len(arm.data.bones), 'animations': list(clips().keys()),
+        'bytes': os.path.getsize(glb), 'problems': problems,
+        'generator': f'tools/asset-gen/assets/units.py::{kind}', 'seconds': round(time.time() - t0, 2),
+    }
+    if preview:
+        report['previews'] = [os.path.relpath(p, ROOT) for p in X.preview_poses(os.path.join(PREVIEW_DIR, asset_id), TEX_DIR, lod0, arm)]
+    X.write_report(os.path.join(REPORT_DIR, f'{asset_id}.json'), report)
+    print(f'[{"OK " if not problems else "WARN"}] {asset_id}: tris {report["triangles"]}, {report["dimensionsMeters"]} m, huesos {report["bones"]}, clips {report["animations"]}, {report["bytes"]} B')
+    for p in problems:
+        print(f'      - {p}')
+    return report
+
+
+def cmd_unit(args) -> None:
+    from assets.units import UNITS
+
+    kinds = list(UNITS) if args.kind == 'all' else [args.kind]
+    civs = list(CIVS) if args.civ == 'all' else [args.civ]
+    for kind in kinds:
+        for civ in civs:
+            build_unit(kind, civ, args.preview)
+
+
 def cmd_nature(args) -> None:
     from assets.nature import NATURE
 
@@ -148,8 +208,12 @@ def main() -> None:
     nat = sub.add_parser('nature')
     nat.add_argument('kind', nargs='?', default='all')
     nat.add_argument('--preview', action='store_true')
+    un = sub.add_parser('unit')
+    un.add_argument('kind', nargs='?', default='all')
+    un.add_argument('--civ', default='all')
+    un.add_argument('--preview', action='store_true')
     a = p.parse_args()
-    {'textures': cmd_textures, 'building': cmd_building, 'nature': cmd_nature}[a.cmd](a)
+    {'textures': cmd_textures, 'building': cmd_building, 'nature': cmd_nature, 'unit': cmd_unit}[a.cmd](a)
 
 
 if __name__ == '__main__':

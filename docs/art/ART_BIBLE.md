@@ -145,7 +145,7 @@ Regla de color de equipo: el color de bando aparece en **estandartes, gualdrapas
 | Árbol | ≤ 2,5 k | 2 (corteza, hojas alfa) | 512² |
 | Soldado a pie | ≤ 3 k → 1,2 k → 400 | 1 | atlas de unidades (1024²) |
 | Caballo | ≤ 3,5 k → 1,5 k → 500 | 1 | atlas de unidades |
-| Barco | ≤ 12 k | ≤ 3 | 1024² |
+| Barco | ≤ 12 k → 40 % → 20 % | ≤ 6 compartidos | biblioteca (vela: 512² con UV 0..1) |
 
 Escena (perfil **Medio**): ciudad ≤ 250 llamadas de dibujo y ≤ 1,5 M triángulos; batalla de 500 soldados ≤ 150 llamadas (instancing/agrupación). Se validan con `apps/web/e2e/visual-benchmark.e2e.mjs`.
 

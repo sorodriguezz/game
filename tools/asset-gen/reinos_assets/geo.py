@@ -17,6 +17,12 @@ from mathutils import Matrix, Vector
 
 # metros que cubre una repetición de textura, por material lógico
 TILE = {
+    'skin': 0.5,
+    'leather': 0.8,
+    'sail': 1.0,
+    'canvas': 2.0,
+    'rope': 0.6,
+    'hull_tar': 2.0,
     'foliage_pine': 2.0,
     'foliage': 2.5,
     'bark': 1.5,
@@ -100,6 +106,20 @@ class Builder:
         _uv_box(tmp, uv_l, tile_of(mat), grain=True, long_axis=0)
         rot = Vector((1, 0, 0)).rotation_difference(d.normalized()).to_matrix().to_4x4()
         bmesh.ops.transform(tmp, matrix=Matrix.Translation((a + c) / 2) @ rot, verts=tmp.verts)
+        _merge_into(b, tmp)
+
+    def tube(self, mat: str, p0: tuple[float, float, float], p1: tuple[float, float, float], r0: float, r1: float, *, segments: int = 8, detail: bool = False) -> None:
+        """Tronco de cono orientado entre dos puntos (miembros, astiles), con tapas."""
+        a, c = Vector(p0), Vector(p1)
+        d = c - a
+        b = self.bm(mat, detail)
+        tmp = bmesh.new()
+        uv_l = tmp.loops.layers.uv.new('UVMap')
+        bmesh.ops.create_cone(tmp, cap_ends=True, cap_tris=False, segments=segments, radius1=r0, radius2=r1, depth=d.length)
+        bmesh.ops.translate(tmp, vec=Vector((0, 0, d.length / 2)), verts=tmp.verts)
+        _uv_cylindrical(tmp, uv_l, tile_of(mat), max(r0, r1))
+        rot = Vector((0, 0, 1)).rotation_difference(d.normalized()).to_matrix().to_4x4()
+        bmesh.ops.transform(tmp, matrix=Matrix.Translation(a) @ rot, verts=tmp.verts)
         _merge_into(b, tmp)
 
     def cylinder(
@@ -295,6 +315,74 @@ class Builder:
         bmesh.ops.scale(tmp, vec=Vector(size), verts=tmp.verts)
         _uv_world(tmp, uv_l, tile_of(mat))
         bmesh.ops.translate(tmp, vec=Vector(base), verts=tmp.verts)
+        _merge_into(b, tmp)
+
+    def loft(self, mat: str, rings: list[list[tuple[float, float, float]]], *, close_ends: bool = True, grain_along: bool = True) -> None:
+        """Superficie por secciones (cascos): une anillos consecutivos con caras; UV U = distancia a lo largo, V = perímetro."""
+        b = self.bm(mat)
+        tmp = bmesh.new()
+        uv_l = tmp.loops.layers.uv.new('UVMap')
+        tile = tile_of(mat)
+        vrows = [[tmp.verts.new(p) for p in ring] for ring in rings]
+        # coordenadas UV: u acumulada a lo largo (eje Y), v acumulada por el perímetro de cada anillo
+        ucoord = [0.0]
+        for i in range(1, len(rings)):
+            ucoord.append(ucoord[-1] + (Vector(rings[i][len(rings[i]) // 2]) - Vector(rings[i - 1][len(rings[i - 1]) // 2])).length)
+        vcoord = []
+        for ring in rings:
+            acc = [0.0]
+            for j in range(1, len(ring)):
+                acc.append(acc[-1] + (Vector(ring[j]) - Vector(ring[j - 1])).length)
+            vcoord.append(acc)
+        n = len(rings[0])
+        for i in range(len(rings) - 1):
+            for j in range(n - 1):
+                quad = [vrows[i][j], vrows[i + 1][j], vrows[i + 1][j + 1], vrows[i][j + 1]]
+                try:
+                    f = tmp.faces.new(quad)
+                except ValueError:
+                    continue
+                uvs = [(ucoord[i], vcoord[i][j]), (ucoord[i + 1], vcoord[i + 1][j]), (ucoord[i + 1], vcoord[i + 1][j + 1]), (ucoord[i], vcoord[i][j + 1])]
+                for loop, (u, v) in zip(f.loops, uvs):
+                    loop[uv_l].uv = ((v if not grain_along else u) / tile, (u if not grain_along else v) / tile)
+        if close_ends:
+            for row in (vrows[0], vrows[-1]):
+                try:
+                    f = tmp.faces.new(row)
+                    for loop in f.loops:
+                        co = loop.vert.co
+                        loop[uv_l].uv = (co.x / tile, co.z / tile)
+                except ValueError:
+                    pass
+        bmesh.ops.remove_doubles(tmp, verts=tmp.verts, dist=0.001)
+        bmesh.ops.recalc_face_normals(tmp, faces=tmp.faces)
+        _merge_into(b, tmp)
+
+    def sail(self, mat: str, top_center: tuple[float, float, float], width: float, height: float, *, billow: float = 0.6, taper: float = 0.0, cols: int = 10, rows: int = 8, rot_z: float = 0.0) -> None:
+        """Vela de lona hinchada hacia −Y (proa), con dos caras separadas 1,5 cm (visible por ambos lados)."""
+        b = self.bm(mat)
+        tmp = bmesh.new()
+        uv_l = tmp.loops.layers.uv.new('UVMap')
+        for side, off in ((1, 0.0), (-1, 0.015)):
+            grid = []
+            for r in range(rows + 1):
+                v = r / rows
+                w = width * (1 - taper * v)
+                row = []
+                for c in range(cols + 1):
+                    u = c / cols
+                    x = (u - 0.5) * w
+                    bel = math.sin(math.pi * u) * math.sin(math.pi * (0.15 + 0.85 * v)) * billow
+                    row.append(tmp.verts.new((x, -bel + off, -v * height)))
+                grid.append(row)
+            for r in range(rows):
+                for c in range(cols):
+                    quad = [grid[r][c], grid[r + 1][c], grid[r + 1][c + 1], grid[r][c + 1]]
+                    f = tmp.faces.new(quad if side > 0 else quad[::-1])
+                    for loop in f.loops:
+                        co = loop.vert.co
+                        loop[uv_l].uv = (co.x / width + 0.5, 1 + co.z / height)
+        bmesh.ops.transform(tmp, matrix=Matrix.Translation(Vector(top_center)) @ Matrix.Rotation(math.radians(rot_z), 4, 'Z'), verts=tmp.verts)
         _merge_into(b, tmp)
 
     # ------------------------------------------------------------- salida

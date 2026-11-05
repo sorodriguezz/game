@@ -1,0 +1,23 @@
+{
+  "animations": ["idle", "walk", "run", "attack_melee", "hit", "death"],
+  "assetId": "unit_spearman.corona",
+  "bones": 17,
+  "bytes": 602952,
+  "civilization": "imperial_crown",
+  "dimensionsMeters": [0.95, 2.78, 1.23],
+  "generator": "tools/asset-gen/assets/units.py::unit_spearman",
+  "kind": "unit",
+  "materials": [
+    "common.bark",
+    "common.gambeson",
+    "common.iron",
+    "common.leather",
+    "common.skin",
+    "corona.cloth"
+  ],
+  "previews": ["assets/previews/unit_spearman.corona_poses.png"],
+  "problems": [],
+  "seconds": 0.41,
+  "triangles": [1920, 864, 381],
+  "type": "unit_spearman"
+}

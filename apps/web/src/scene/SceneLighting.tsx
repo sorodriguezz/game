@@ -8,6 +8,7 @@ import {
   Color,
   EnvLighting,
   FOG_LINEAR,
+  LAYERID_SKYBOX,
   SSAOTYPE_LIGHTING,
   TEXTUREPROJECTION_EQUIRECT,
   TONEMAP_ACES,
@@ -98,6 +99,9 @@ export function SceneLighting({
     );
     const cam = camera.current?.camera;
     if (!cam) return;
+    // El HDRI solo ilumina (IBL): no se dibuja como cielo (es una foto con elementos modernos).
+    if (cam.layers.includes(LAYERID_SKYBOX))
+      cam.layers = cam.layers.filter((id) => id !== LAYERID_SKYBOX);
     let frame: CameraFrame | null = null;
     if (profile.post) {
       frame = new CameraFrame(app, cam);

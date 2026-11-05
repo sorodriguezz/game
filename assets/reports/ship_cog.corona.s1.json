@@ -1,0 +1,14 @@
+{
+  "assetId": "ship_cog.corona.s1",
+  "bytes": 824204,
+  "civilization": "imperial_crown",
+  "dimensionsMeters": [8.4, 17.6, 18.22],
+  "generator": "tools/asset-gen/assets/buildings.py::ship_cog",
+  "kind": "ship",
+  "materials": ["common.hull_tar", "corona.wood", "corona.sail", "common.rope", "corona.cloth"],
+  "problems": [],
+  "seconds": 0.28,
+  "triangles": [5104, 2000, 1000],
+  "type": "ship_cog",
+  "visualStage": 1
+}

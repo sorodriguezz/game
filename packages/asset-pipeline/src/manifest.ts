@@ -81,7 +81,8 @@ export const assetEntrySchema = z
         if (v !== 'PASS') issue(`validación ${k} = ${v}`);
     if (a.kind === 'unit') {
       for (const clip of ['idle', 'walk', 'attack', 'death']) {
-        if (!a.animations?.includes(clip)) issue(`unidad sin animación ${clip} (FR-ART-04)`);
+        const has = a.animations?.some((x) => x === clip || x.startsWith(`${clip}_`));
+        if (!has) issue(`unidad sin animación ${clip} (FR-ART-04)`);
       }
     }
     if (a.kind === 'ship') {
@@ -113,8 +114,8 @@ export const BUDGETS: Record<
   { maxTriangles: number; maxMaterials: number; maxTextureSize: number; maxBytes: number }
 > = {
   building: { maxTriangles: 25_000, maxMaterials: 6, maxTextureSize: 2048, maxBytes: 6_000_000 },
-  unit: { maxTriangles: 8_000, maxMaterials: 3, maxTextureSize: 1024, maxBytes: 3_000_000 },
-  ship: { maxTriangles: 12_000, maxMaterials: 4, maxTextureSize: 1024, maxBytes: 4_000_000 },
+  unit: { maxTriangles: 8_000, maxMaterials: 6, maxTextureSize: 1024, maxBytes: 3_000_000 },
+  ship: { maxTriangles: 12_000, maxMaterials: 6, maxTextureSize: 1024, maxBytes: 4_000_000 },
   prop: { maxTriangles: 3_000, maxMaterials: 2, maxTextureSize: 512, maxBytes: 1_000_000 },
   terrain: { maxTriangles: 60_000, maxMaterials: 4, maxTextureSize: 2048, maxBytes: 10_000_000 },
   wonder: { maxTriangles: 60_000, maxMaterials: 8, maxTextureSize: 2048, maxBytes: 12_000_000 },

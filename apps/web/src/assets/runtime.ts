@@ -2,6 +2,7 @@ import {
   Asset,
   BLEND_NONE,
   BLEND_NORMAL,
+  CULLFACE_NONE,
   Color,
   StandardMaterial,
   Vec2,
@@ -176,6 +177,11 @@ export class AssetRuntime {
     m.diffuseVertexColor = true;
     m.diffuseVertexColorChannel = 'rgb';
     m.blendType = BLEND_NONE;
+    if (/sail|cloth|foliage/.test(name)) {
+      // tela y follaje: visibles por ambas caras
+      m.cull = CULLFACE_NONE;
+      m.twoSidedLighting = true;
+    }
     if (opts.blend) {
       m.blendType = BLEND_NORMAL;
       m.opacityVertexColor = true;

@@ -315,11 +315,12 @@ def iron(size: int, seed: int) -> PbrSet:
     macro = fractal_noise(size, seed, beta=2.6)
     fine = fractal_noise(size, seed + 1, beta=1.2)
     rust = np.clip((fractal_noise(size, seed + 2, beta=2.2) - 0.6) * 4, 0, 1)
-    base = tint('#5E6166', np.clip(0.6 * macro + 0.4 * fine, 0, 1), 0.15)
-    base = base * (1 - rust[..., None]) + tint('#7A4A2A', fine, 0.2) * rust[..., None]
+    base = tint('#4A4C50', np.clip(0.6 * macro + 0.4 * fine, 0, 1), 0.15)
+    base = base * (1 - rust[..., None]) + tint('#6B4127', fine, 0.2) * rust[..., None]
     height = 0.5 + 0.1 * fine + 0.2 * rust
     ao = cavity_ao(height)
-    orm = np.stack([ao, 0.42 + 0.4 * rust + 0.1 * fine, 1.0 - rust], axis=-1)
+    # hierro forjado mate (no espejo): rugosidad alta para no reflejar el cielo en azul
+    orm = np.stack([ao, 0.62 + 0.3 * rust + 0.08 * fine, 0.5 - 0.4 * rust], axis=-1)
     return PbrSet(base, normal_from_height(height, size / 512 * 2.0), orm)
 
 
@@ -374,3 +375,25 @@ def bark(size: int, seed: int, color: str) -> PbrSet:
     base = tint(color, np.clip(0.7 * ridges + 0.3 * white, 0, 1), 0.3)
     ao = cavity_ao(height, radius=size / 256 * 2, strength=2.0)
     return PbrSet(base * ao[..., None] ** 0.5, normal_from_height(height, size / 512 * 8.0), _orm(ao, 0.9))
+
+
+def sailcloth(size: int, seed: int, cloth: str, stripe: str, stripes: int = 2) -> PbrSet:
+    """Vela de lona con paños cosidos y franjas verticales del color de la civilización (UV 0..1 = vela entera)."""
+    yy, xx = np.mgrid[0:size, 0:size] / size
+    panels = 9
+    seam = np.clip(1 - np.minimum((xx * panels) % 1, 1 - (xx * panels) % 1) * size / panels / 1.5, 0, 1)
+    folds = fractal_noise(size, seed, beta=3.0)
+    weave = fractal_noise(size, seed + 1, beta=0.6)
+    canvas = tint(cloth, np.clip(0.6 * folds + 0.4 * weave, 0, 1), 0.1)
+    band = np.zeros((size, size))
+    for k in range(stripes):
+        c = (k + 1) / (stripes + 1)
+        band = np.maximum(band, (np.abs(xx - c) < 0.07).astype(float))
+    col = tint(stripe, folds, 0.12)
+    base = canvas * (1 - band[..., None]) + col * band[..., None]
+    base = base * (1 - 0.18 * seam[..., None])
+    stains = np.clip((fractal_noise(size, seed + 2, beta=2.8) - 0.55) * 1.6, 0, 1) * (yy > 0.55)
+    base = base * (1 - 0.12 * stains[..., None])
+    height = 0.6 * folds + 0.15 * weave - 0.2 * seam
+    ao = cavity_ao(height, radius=size / 64)
+    return PbrSet(base, normal_from_height(height, size / 512 * 3.0), _orm(ao, 0.9))

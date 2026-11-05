@@ -143,6 +143,57 @@ function SelectionMarker({ k, p, size }: { k: Kit; p: V3; size: number }) {
   );
 }
 
+/**
+ * Barcos de la costa (aldeas costeras): uno amarrado junto al puerto y dos fondeados.
+ * Decorado: el balanceo es visual y no representa unidades del servidor.
+ */
+function CoastalShips({
+  civilization,
+  hasPort,
+}: {
+  civilization: CivilizationId;
+  hasPort: boolean;
+}) {
+  const civ = civilization === 'imperial_crown' ? 'corona' : 'liga';
+  const ships = useMemo(
+    () => [
+      ...(hasPort ? [{ id: `ship_cog.${civ}.s1`, x: 9, z: -49, rot: 8, phase: 0 }] : []),
+      {
+        id: `ship_cog.${civ === 'corona' ? 'liga' : 'corona'}.s1`,
+        x: -48,
+        z: -95,
+        rot: 120,
+        phase: 1.7,
+      },
+      { id: `ship_galley.${civ}.s1`, x: 62, z: -128, rot: -70, phase: 3.1 },
+    ],
+    [civ, hasPort],
+  );
+  const refs = useRef<Array<PcEntity | null>>([]);
+  useAppEvent('update', () => {
+    const t = performance.now() / 1000;
+    ships.forEach((s, i) => {
+      const e = refs.current[i];
+      if (!e) return;
+      e.setLocalPosition(s.x, -0.35 + Math.sin(t * 0.9 + s.phase) * 0.12, s.z);
+      e.setLocalEulerAngles(
+        Math.sin(t * 0.7 + s.phase) * 1.6,
+        s.rot,
+        Math.sin(t * 0.55 + s.phase * 2) * 2.4,
+      );
+    });
+  });
+  return (
+    <>
+      {ships.map((s, i) => (
+        <Entity key={s.id + i} ref={(e) => void (refs.current[i] = e)} position={[s.x, -0.35, s.z]}>
+          <GlbModel url={`/assets/models/${s.id}.glb`} />
+        </Entity>
+      ))}
+    </>
+  );
+}
+
 /** Aplica las distancias de LOD del perfil gráfico al runtime de assets de esta escena. */
 function LodTuning({ distances }: { distances: [number, number] }) {
   const app = useApp();
@@ -218,6 +269,12 @@ function City(props: CitySceneProps & { dragGuard: React.MutableRefObject<boolea
     <>
       <CityTerrain coastal={props.coastal} paths={pathTargets} />
       <InstancedProps items={scenery} />
+      {props.coastal && (
+        <CoastalShips
+          civilization={props.civilization}
+          hasPort={props.buildings.some((b) => b.type === 'port')}
+        />
+      )}
       <Entity onClick={click(13)}>
         <Wall level={wallLevel} coastal={props.coastal} civilization={props.civilization} />
       </Entity>
@@ -302,7 +359,7 @@ export function CityScene(props: CitySceneProps) {
             <Light
               type="directional"
               color="#ffe8c8"
-              intensity={1.7}
+              intensity={1.25}
               castShadows
               shadowBias={0.2}
               normalOffsetBias={0.04}

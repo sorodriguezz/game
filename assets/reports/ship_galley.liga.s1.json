@@ -1,0 +1,21 @@
+{
+  "assetId": "ship_galley.liga.s1",
+  "bytes": 1156264,
+  "civilization": "sea_league",
+  "dimensionsMeters": [11.22, 14.09, 27.45],
+  "generator": "tools/asset-gen/assets/buildings.py::ship_galley",
+  "kind": "ship",
+  "materials": [
+    "common.hull_tar",
+    "liga.wood",
+    "common.iron",
+    "liga.sail",
+    "liga.cloth",
+    "common.rope"
+  ],
+  "problems": [],
+  "seconds": 0.27,
+  "triangles": [6824, 2997, 1498],
+  "type": "ship_galley",
+  "visualStage": 1
+}

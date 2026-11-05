@@ -31,16 +31,20 @@ interface BuildReport {
   problems: string[];
   generator: string;
   previews?: string[];
+  animations?: string[];
   belowGroundOk?: boolean;
   facing?: 'plaza' | 'outward';
 }
 
 const OUTWARD = new Set(['port']);
-const BELOW_GROUND = new Set(['port', 'quarry', 'mine', 'palisade']);
+const BELOW_GROUND = new Set(['port', 'quarry', 'mine', 'palisade', 'ship_cog', 'ship_galley']);
 
 export async function optimizeGlb(input: Uint8Array): Promise<Uint8Array> {
   const io = new NodeIO().registerExtensions([KHRMeshQuantization]);
   const doc = await io.readBinary(input);
+  // En mallas con esqueleto la cuantización de posición se traslada a las matrices de
+  // enlace inverso: válido, pero impide verificar límites y pivote. Se deja en float.
+  const skinned = doc.getRoot().listSkins().length > 0;
   await doc.transform(
     // Los materiales exportados son idénticos (sin texturas) y solo se distinguen por el
     // nombre, que el cliente usa para asignar el material compartido: no se deduplican.
@@ -49,7 +53,7 @@ export async function optimizeGlb(input: Uint8Array): Promise<Uint8Array> {
     // Las UV están en metros (fuera de [0,1]) y el cliente sustituye los materiales:
     // se cuantizan posición, normal y color, no TEXCOORD (evita KHR_texture_transform).
     quantize({
-      pattern: /^(POSITION|NORMAL|COLOR_0)$/,
+      pattern: skinned ? /^(NORMAL|COLOR_0)$/ : /^(POSITION|NORMAL|COLOR_0)$/,
       quantizePosition: 14,
       quantizeNormal: 10,
       quantizeColor: 8,
@@ -101,6 +105,9 @@ async function main(): Promise<void> {
       { materialLibrary: libraryNames, requireAttributes: true },
     );
     const problems = [...report.problems, ...inspection.problems];
+    for (const clip of report.animations ?? [])
+      if (!inspection.animations.includes(clip))
+        problems.push(`clip ${clip} ausente en el GLB publicado`);
     const expected = new Set(report.materials);
     const got = new Set(inspection.materialNames);
     if (expected.size !== got.size || [...expected].some((m) => !got.has(m)))
@@ -120,6 +127,7 @@ async function main(): Promise<void> {
       visualStage: report.visualStage,
       units: 'meters',
       lodCount: inspection.trianglesPerLod.length,
+      ...(inspection.animations.length ? { animations: inspection.animations } : {}),
       ...(report.kind === 'building'
         ? { facing: OUTWARD.has(report.type) ? ('outward' as const) : ('plaza' as const) }
         : {}),

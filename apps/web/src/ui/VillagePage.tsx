@@ -176,9 +176,9 @@ export function VillagePage({
           </Suspense>
           <div
             className="scene-badge"
-            title="Modelos procedurales de validación; el arte final requiere GLB aprobados (ADR-0008)"
+            title="Modelos del pipeline de assets en estado PENDING_REVIEW: la aprobación final requiere revisión humana (ADR-0008)"
           >
-            Arte 3D: blockout (no final)
+            Arte 3D: pendiente de aprobación
           </div>
           {view.construction && (
             <div className="scene-queue">

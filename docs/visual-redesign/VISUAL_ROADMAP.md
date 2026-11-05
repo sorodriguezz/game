@@ -41,10 +41,12 @@ Referencias representativas, validadas en el motor:
 
 | Asset | Estado | Evidencia |
 |---|---|---|
-| Castillo (`city_hall.*.s3`) | 🟡 generado, en ciudad | render Cycles + captura PlayCanvas |
-| Muralla (tramo, torre, puerta, empalizada) | 🟡 generado, en ciudad | captura PlayCanvas |
-| Soldado humanoide con rig | ⏳ | — |
-| Barco (casco, cubierta, mástiles, velas, timón, aparejos, banderas) | ⏳ | — |
+| Castillo (`city_hall.*.s3`, 19,9 k tris, 17,7 × 19,8 × 17,7 m) | 🟡 candidato | [Cycles](../art/references/cycles-city_hall.corona.s3_iso.jpg) · [motor, alineación de escala](../art/references/engine-ref-lineup.jpg) · [ciudad](../art/references/engine-city-corona-coastal-overview.jpg) |
+| Muralla (tramo, torre, puerta, empalizada) | 🟡 candidato | [motor](../art/references/engine-ref-lineup.jpg) · [ciudad](../art/references/engine-city-corona-coastal-overview.jpg) |
+| Soldado: lancero con esqueleto de 17 huesos y 6 clips (`idle, walk, run, attack_melee, hit, death`), 1,9 k tris | 🟡 candidato | [poses Cycles](../art/references/cycles-unit_spearman.corona_poses.jpg) · [marcha animada en motor](../art/references/engine-ref-spearmen.jpg) |
+| Barcos: coca mercante (5,1 k tris) y galera de guerra (6,8 k tris), velas por civilización | 🟡 candidato | [motor sobre el mar](../art/references/engine-ref-ships.jpg) · [Cycles](../art/references/cycles-ship_galley.liga.s1_iso.jpg) |
+
+Defectos conocidos de los candidatos (a corregir antes de pedir aprobación definitiva): el metal oscuro toma un tono azul-violeta del HDRI (pasar la IBL al cielo procedural de PlayCanvas, F1.3); caras en sombra de la caliza con tinte lavanda (misma causa); pinos demasiado oscuros; la roca de la cantera sin variación; soldado con miembros rígidos (pesos rígidos por pieza).
 
 **Aceptación:**
 1. Los cuatro assets existen como GLB del pipeline, pasan la validación automática y tienen capturas reales en el motor (vista de juego y cercana) en `docs/art/references/`.
@@ -107,8 +109,8 @@ Hecho: telemetría instrumentada y benchmark reproducible. Pendiente: regresión
 
 ### F2 — *Vertical slice* de ciudad · 🟡
 
-Hecho: 12 tipos × 2 civilizaciones × 3 etapas en GLB (72), muralla modular, terreno, mar, vegetación, iluminación; llamadas de dibujo de la ciudad desarrollada 1.354 → ~310.
-Pendiente: habitantes humanoides (de F3/F3.1), barcos en el puerto (de F1.1), andamio y parcela vacía con assets del pipeline, aprobación humana.
+Hecho: 12 tipos × 2 civilizaciones × 3 etapas en GLB (72), muralla modular, terreno, mar, vegetación, barcos fondeados y amarrado junto al puerto, iluminación; llamadas de dibujo de la ciudad desarrollada 1.354 → ~320 (SwiftShader, 1600×900); VRAM de texturas 87,5 MB (a vigilar en F1.6).
+Pendiente: habitantes humanoides (reutilizando el esqueleto del lancero), andamio y parcela vacía con assets del pipeline, aprobación humana.
 
 **Aceptación:** ciudad pequeña y desarrollada de ambas civilizaciones sin primitivas visibles; capturas antes/después a 1366/1920/2560; benchmark con llamadas ≤ 250 (perfil Medio) y VRAM registrada; e2e M1 en verde.
 
@@ -157,4 +159,5 @@ F4–F7 se detallan al cerrar F3. F5 depende de sistemas navales que hoy no exis
 | Fecha | Commit | Fases |
 |---|---|---|
 | 2026-11-05 | `3956692` | F0 ✅ |
-| 2026-11-05 | (este commit) | F1 núcleo, F1.2 núcleo, F1.3 parcial, F2 parcial |
+| 2026-11-05 | `22233d9` | F1 núcleo, F1.2 núcleo, F1.3 parcial, F2 parcial |
+| 2026-11-05 | (este commit) | F1.1: barcos y lancero con esqueleto y clips, visor de assets de desarrollo, capturas en motor; F1.3: cielo sin foto, luz recalibrada |

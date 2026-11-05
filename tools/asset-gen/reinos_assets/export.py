@@ -259,3 +259,60 @@ def write_report(path: str, data: dict) -> None:
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     with open(path, 'w') as fh:
         json.dump(data, fh, indent=2, sort_keys=True)
+
+
+def preview_poses(path: str, tex_dir: str, mesh: bpy.types.Object, arm: bpy.types.Object, *, size: tuple[int, int] = (900, 520)) -> list[str]:
+    """Render de comprobación de un personaje: reposo + fotogramas clave de varios clips en una fila."""
+    scene = bpy.context.scene
+    for slot in mesh.material_slots:
+        if slot.material:
+            slot.material = M.blender_material(slot.material.name, tex_dir)
+    for o in scene.objects:
+        if o.type == 'MESH' and o is not mesh:
+            o.hide_render = True
+    poses = [('idle', 1), ('walk', 8), ('walk', 23), ('attack_melee', 13), ('hit', 5), ('death', 30)]
+    tracks = {t.name: t for t in arm.animation_data.nla_tracks}
+    copies = []
+    for i, (clip, frame) in enumerate(poses):
+        for t in tracks.values():
+            t.mute = t.name != clip
+        scene.frame_set(frame)
+        dg = bpy.context.evaluated_depsgraph_get()
+        ev = mesh.evaluated_get(dg)
+        data = bpy.data.meshes.new_from_object(ev, depsgraph=dg)
+        o = bpy.data.objects.new(f'pose_{i}', data)
+        o.location = (i * 1.3 - 3.2, 0, 0)
+        scene.collection.objects.link(o)
+        copies.append(o)
+    mesh.hide_render = True
+    bpy.ops.mesh.primitive_plane_add(size=30, location=(0, 0, 0))
+    ground = bpy.context.active_object
+    ground.data.materials.append(M.blender_material('terrain.grass', tex_dir, vertex_color=False))
+    sun_data = bpy.data.lights.new('sun', 'SUN')
+    sun_data.energy = 4.0
+    sun = bpy.data.objects.new('sun', sun_data)
+    sun.rotation_euler = (math.radians(40), 0, math.radians(30))
+    scene.collection.objects.link(sun)
+    world = bpy.data.worlds.new('w')
+    world.use_nodes = True
+    world.node_tree.nodes['Background'].inputs['Color'].default_value = (0.55, 0.62, 0.7, 1)
+    world.node_tree.nodes['Background'].inputs['Strength'].default_value = 0.6
+    scene.world = world
+    scene.render.engine = 'CYCLES'
+    scene.cycles.device = 'CPU'
+    scene.cycles.samples = 24
+    scene.cycles.use_denoising = True
+    scene.render.resolution_x, scene.render.resolution_y = size
+    scene.view_settings.view_transform = 'AgX'
+    cam_data = bpy.data.cameras.new('cam')
+    cam_data.lens = 50
+    cam = bpy.data.objects.new('cam', cam_data)
+    scene.collection.objects.link(cam)
+    scene.camera = cam
+    target = Vector((0, 0, 0.9))
+    cam.location = target + Vector((1.2, -9.0, 3.2))
+    cam.rotation_euler = (target - cam.location).to_track_quat('-Z', 'Y').to_euler()
+    out = f'{path}_poses.png'
+    scene.render.filepath = os.path.abspath(out)
+    bpy.ops.render.render(write_still=True)
+    return [out]

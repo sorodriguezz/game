@@ -2381,6 +2381,148 @@
       }
     },
     {
+      "assetId": "ship_cog.corona.s1",
+      "kind": "ship",
+      "type": "ship_cog",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/ship_cog.corona.s1.glb",
+      "civilization": "imperial_crown",
+      "visualStage": 1,
+      "units": "meters",
+      "lodCount": 3,
+      "belowGroundOk": true,
+      "triangles": [5104, 2000, 1000],
+      "materials": ["common.hull_tar", "corona.wood", "corona.sail", "common.rope", "corona.cloth"],
+      "dimensionsMeters": [8.4, 17.6, 18.22],
+      "bytes": 593312,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
+        "provider": "generación procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "ship_cog.liga.s1",
+      "kind": "ship",
+      "type": "ship_cog",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/ship_cog.liga.s1.glb",
+      "civilization": "sea_league",
+      "visualStage": 1,
+      "units": "meters",
+      "lodCount": 3,
+      "belowGroundOk": true,
+      "triangles": [5104, 2000, 1000],
+      "materials": ["common.hull_tar", "liga.wood", "liga.sail", "common.rope", "liga.cloth"],
+      "dimensionsMeters": [8.4, 17.6, 18.22],
+      "bytes": 593304,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
+        "provider": "generación procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "ship_galley.corona.s1",
+      "kind": "ship",
+      "type": "ship_galley",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/ship_galley.corona.s1.glb",
+      "civilization": "imperial_crown",
+      "visualStage": 1,
+      "units": "meters",
+      "lodCount": 3,
+      "belowGroundOk": true,
+      "triangles": [6824, 2997, 1498],
+      "materials": [
+        "common.hull_tar",
+        "corona.wood",
+        "common.iron",
+        "corona.sail",
+        "corona.cloth",
+        "common.rope"
+      ],
+      "dimensionsMeters": [11.22, 14.09, 27.45],
+      "bytes": 831796,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
+        "provider": "generación procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "ship_galley.liga.s1",
+      "kind": "ship",
+      "type": "ship_galley",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/ship_galley.liga.s1.glb",
+      "civilization": "sea_league",
+      "visualStage": 1,
+      "units": "meters",
+      "lodCount": 3,
+      "belowGroundOk": true,
+      "triangles": [6824, 2997, 1498],
+      "materials": [
+        "common.hull_tar",
+        "liga.wood",
+        "common.iron",
+        "liga.sail",
+        "liga.cloth",
+        "common.rope"
+      ],
+      "dimensionsMeters": [11.22, 14.09, 27.45],
+      "bytes": 831788,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
+        "provider": "generación procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
       "assetId": "temple.corona.s1",
       "kind": "building",
       "type": "temple",
@@ -2773,6 +2915,45 @@
       "bytes": 55584,
       "thumbnail": null,
       "version": 3,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
+        "provider": "generación procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "unit_spearman.corona",
+      "kind": "unit",
+      "type": "unit_spearman",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/unit_spearman.corona.glb",
+      "civilization": "imperial_crown",
+      "units": "meters",
+      "lodCount": 3,
+      "animations": ["idle", "walk", "run", "attack_melee", "hit", "death"],
+      "belowGroundOk": false,
+      "triangles": [1920, 864, 381],
+      "materials": [
+        "common.skin",
+        "common.gambeson",
+        "corona.cloth",
+        "common.leather",
+        "common.iron",
+        "common.bark"
+      ],
+      "dimensionsMeters": [0.95, 2.78, 1.23],
+      "bytes": 528100,
+      "thumbnail": "../../assets/previews/unit_spearman.corona_poses.png",
+      "version": 2,
       "source": {
         "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
         "provider": "generación procedural propia",

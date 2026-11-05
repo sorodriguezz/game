@@ -1,0 +1,14 @@
+{
+  "assetId": "ship_cog.liga.s1",
+  "bytes": 824196,
+  "civilization": "sea_league",
+  "dimensionsMeters": [8.4, 17.6, 18.22],
+  "generator": "tools/asset-gen/assets/buildings.py::ship_cog",
+  "kind": "ship",
+  "materials": ["common.hull_tar", "liga.wood", "liga.sail", "common.rope", "liga.cloth"],
+  "problems": [],
+  "seconds": 0.18,
+  "triangles": [5104, 2000, 1000],
+  "type": "ship_cog",
+  "visualStage": 1
+}

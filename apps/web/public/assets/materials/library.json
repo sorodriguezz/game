@@ -7,6 +7,13 @@
       "size": 512,
       "tileMeters": 1.5
     },
+    "common.canvas": {
+      "base": "common/canvas_base.webp",
+      "normal": "common/canvas_normal.webp",
+      "orm": "common/canvas_orm.webp",
+      "size": 512,
+      "tileMeters": 2.0
+    },
     "common.crop": {
       "base": "common/crop_base.webp",
       "normal": "common/crop_normal.webp",
@@ -35,6 +42,20 @@
       "size": 512,
       "tileMeters": 2.0
     },
+    "common.gambeson": {
+      "base": "common/gambeson_base.webp",
+      "normal": "common/gambeson_normal.webp",
+      "orm": "common/gambeson_orm.webp",
+      "size": 512,
+      "tileMeters": 0.8
+    },
+    "common.hull_tar": {
+      "base": "common/hull_tar_base.webp",
+      "normal": "common/hull_tar_normal.webp",
+      "orm": "common/hull_tar_orm.webp",
+      "size": 512,
+      "tileMeters": 2.0
+    },
     "common.iron": {
       "base": "common/iron_base.webp",
       "normal": "common/iron_normal.webp",
@@ -42,12 +63,33 @@
       "size": 512,
       "tileMeters": 1.0
     },
+    "common.leather": {
+      "base": "common/leather_base.webp",
+      "normal": "common/leather_normal.webp",
+      "orm": "common/leather_orm.webp",
+      "size": 512,
+      "tileMeters": 0.8
+    },
+    "common.rope": {
+      "base": "common/rope_base.webp",
+      "normal": "common/rope_normal.webp",
+      "orm": "common/rope_orm.webp",
+      "size": 512,
+      "tileMeters": 0.6
+    },
     "common.rough_stone": {
       "base": "common/rough_stone_base.webp",
       "normal": "common/rough_stone_normal.webp",
       "orm": "common/rough_stone_orm.webp",
       "size": 512,
       "tileMeters": 3.0
+    },
+    "common.skin": {
+      "base": "common/skin_base.webp",
+      "normal": "common/skin_normal.webp",
+      "orm": "common/skin_orm.webp",
+      "size": 512,
+      "tileMeters": 0.5
     },
     "common.thatch": {
       "base": "common/thatch_base.webp",
@@ -84,6 +126,13 @@
       "size": 512,
       "tileMeters": 2.0
     },
+    "corona.sail": {
+      "base": "corona/sail_base.webp",
+      "normal": "corona/sail_normal.webp",
+      "orm": "corona/sail_orm.webp",
+      "size": 512,
+      "tileMeters": 1.0
+    },
     "corona.stone": {
       "base": "corona/stone_base.webp",
       "normal": "corona/stone_normal.webp",
@@ -118,6 +167,13 @@
       "orm": "liga/roof_orm.webp",
       "size": 512,
       "tileMeters": 2.0
+    },
+    "liga.sail": {
+      "base": "liga/sail_base.webp",
+      "normal": "liga/sail_normal.webp",
+      "orm": "liga/sail_orm.webp",
+      "size": 512,
+      "tileMeters": 1.0
     },
     "liga.stone": {
       "base": "liga/stone_base.webp",

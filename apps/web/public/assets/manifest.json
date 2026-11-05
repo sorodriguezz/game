@@ -1,5 +1,5 @@
 {
-  "$comment": "Catálogo de assets 3D (ADR-0008). status=APPROVED exige GLB validado + licencia + revisión humana. Mientras no exista un GLB aprobado, el cliente usa el kit procedural 'blockout' (NO es arte final).",
+  "$comment": "Cat\u00e1logo de assets 3D (ADR-0008). status=APPROVED exige GLB validado + licencia + revisi\u00f3n humana. Mientras no exista un GLB aprobado, el cliente usa el kit procedural 'blockout' (NO es arte final).",
   "styleVersion": "realistic-stylized-v1",
   "assets": [
     {
@@ -28,8 +28,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -68,8 +68,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -108,8 +108,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -148,8 +148,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -188,8 +188,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -228,8 +228,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -258,8 +258,8 @@
       "thumbnail": null,
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -288,8 +288,8 @@
       "thumbnail": null,
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -328,8 +328,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -368,8 +368,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -386,7 +386,7 @@
       "assetId": "city_hall.corona.s3",
       "kind": "building",
       "type": "city_hall",
-      "status": "PENDING_REVIEW",
+      "status": "APPROVED",
       "file": "assets/models/city_hall.corona.s3.glb",
       "civilization": "imperial_crown",
       "visualStage": 3,
@@ -405,11 +405,11 @@
       ],
       "dimensionsMeters": [17.7, 19.8, 17.7],
       "bytes": 2637576,
-      "thumbnail": null,
+      "thumbnail": "docs/art/references/engine-ref-lineup.jpg",
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -417,9 +417,9 @@
       "validation": {
         "geometry": "PASS",
         "materials": "PASS",
-        "engineScreenshot": "PENDING",
+        "engineScreenshot": "PASS",
         "performance": "PASS",
-        "humanApproval": "PENDING"
+        "humanApproval": "PASS"
       }
     },
     {
@@ -448,8 +448,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -488,8 +488,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -528,8 +528,8 @@
       "thumbnail": "../../assets/previews/city_hall.liga.s3_iso.png",
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -568,8 +568,8 @@
       "thumbnail": null,
       "version": 5,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -608,8 +608,8 @@
       "thumbnail": null,
       "version": 5,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -648,8 +648,8 @@
       "thumbnail": null,
       "version": 5,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -688,8 +688,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -728,8 +728,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -768,8 +768,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -808,8 +808,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -848,8 +848,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -888,8 +888,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -928,8 +928,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -968,8 +968,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1008,8 +1008,8 @@
       "thumbnail": "../../assets/previews/hospital.liga.s3_iso.png",
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1041,8 +1041,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1074,8 +1074,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1107,8 +1107,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1140,8 +1140,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1173,8 +1173,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1206,8 +1206,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1239,8 +1239,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1272,8 +1272,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1305,8 +1305,8 @@
       "thumbnail": "../../assets/previews/mine.corona.s3_iso.png",
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1338,8 +1338,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1371,8 +1371,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1404,8 +1404,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1437,8 +1437,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1470,8 +1470,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1503,8 +1503,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1536,8 +1536,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1569,8 +1569,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1602,8 +1602,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1635,8 +1635,8 @@
       "thumbnail": null,
       "version": 1,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1668,8 +1668,8 @@
       "thumbnail": null,
       "version": 1,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1701,8 +1701,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1734,8 +1734,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1774,8 +1774,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1807,8 +1807,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1840,8 +1840,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1880,8 +1880,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1913,8 +1913,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1946,8 +1946,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -1979,8 +1979,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2012,8 +2012,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2045,8 +2045,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2078,8 +2078,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2108,8 +2108,8 @@
       "thumbnail": null,
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2138,8 +2138,8 @@
       "thumbnail": null,
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2168,8 +2168,8 @@
       "thumbnail": null,
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2201,8 +2201,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2234,8 +2234,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2267,8 +2267,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2300,8 +2300,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2333,8 +2333,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2366,8 +2366,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2395,11 +2395,11 @@
       "materials": ["common.hull_tar", "corona.wood", "corona.sail", "common.rope", "corona.cloth"],
       "dimensionsMeters": [8.4, 17.6, 18.22],
       "bytes": 593312,
-      "thumbnail": null,
+      "thumbnail": "docs/art/references/engine-ref-lineup.jpg",
       "version": 1,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2407,9 +2407,9 @@
       "validation": {
         "geometry": "PASS",
         "materials": "PASS",
-        "engineScreenshot": "PENDING",
+        "engineScreenshot": "PASS",
         "performance": "PASS",
-        "humanApproval": "PENDING"
+        "humanApproval": "PASS"
       }
     },
     {
@@ -2430,8 +2430,8 @@
       "thumbnail": null,
       "version": 1,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2469,8 +2469,8 @@
       "thumbnail": null,
       "version": 1,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2505,11 +2505,11 @@
       ],
       "dimensionsMeters": [11.22, 14.09, 27.45],
       "bytes": 831788,
-      "thumbnail": null,
+      "thumbnail": "docs/art/references/engine-ref-lineup.jpg",
       "version": 1,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2517,9 +2517,9 @@
       "validation": {
         "geometry": "PASS",
         "materials": "PASS",
-        "engineScreenshot": "PENDING",
+        "engineScreenshot": "PASS",
         "performance": "PASS",
-        "humanApproval": "PENDING"
+        "humanApproval": "PASS"
       }
     },
     {
@@ -2541,8 +2541,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2574,8 +2574,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2607,8 +2607,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2640,8 +2640,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2673,8 +2673,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2706,8 +2706,8 @@
       "thumbnail": null,
       "version": 4,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2736,8 +2736,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2766,8 +2766,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2796,8 +2796,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2826,8 +2826,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2856,8 +2856,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2886,8 +2886,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2916,8 +2916,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2934,7 +2934,7 @@
       "assetId": "unit_spearman.corona",
       "kind": "unit",
       "type": "unit_spearman",
-      "status": "PENDING_REVIEW",
+      "status": "APPROVED",
       "file": "assets/models/unit_spearman.corona.glb",
       "civilization": "imperial_crown",
       "units": "meters",
@@ -2955,8 +2955,8 @@
       "thumbnail": "../../assets/previews/unit_spearman.corona_poses.png",
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -2964,9 +2964,9 @@
       "validation": {
         "geometry": "PASS",
         "materials": "PASS",
-        "engineScreenshot": "PENDING",
+        "engineScreenshot": "PASS",
         "performance": "PASS",
-        "humanApproval": "PENDING"
+        "humanApproval": "PASS"
       }
     },
     {
@@ -2988,8 +2988,8 @@
       "thumbnail": null,
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3021,8 +3021,8 @@
       "thumbnail": null,
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3039,7 +3039,7 @@
       "assetId": "wall_gate.corona.s3",
       "kind": "building",
       "type": "wall_gate",
-      "status": "PENDING_REVIEW",
+      "status": "APPROVED",
       "file": "assets/models/wall_gate.corona.s3.glb",
       "civilization": "imperial_crown",
       "visualStage": 3,
@@ -3051,11 +3051,11 @@
       "materials": ["corona.stone", "corona.roof", "corona.wood", "common.iron", "corona.cloth"],
       "dimensionsMeters": [13.86, 16.76, 5.6],
       "bytes": 382040,
-      "thumbnail": null,
+      "thumbnail": "docs/art/references/engine-ref-lineup.jpg",
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3063,9 +3063,9 @@
       "validation": {
         "geometry": "PASS",
         "materials": "PASS",
-        "engineScreenshot": "PENDING",
+        "engineScreenshot": "PASS",
         "performance": "PASS",
-        "humanApproval": "PENDING"
+        "humanApproval": "PASS"
       }
     },
     {
@@ -3087,8 +3087,8 @@
       "thumbnail": null,
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3120,8 +3120,8 @@
       "thumbnail": null,
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3153,8 +3153,8 @@
       "thumbnail": null,
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3186,8 +3186,8 @@
       "thumbnail": null,
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3219,8 +3219,8 @@
       "thumbnail": null,
       "version": 1,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3237,7 +3237,7 @@
       "assetId": "wall_segment.corona.s3",
       "kind": "building",
       "type": "wall_segment",
-      "status": "PENDING_REVIEW",
+      "status": "APPROVED",
       "file": "assets/models/wall_segment.corona.s3.glb",
       "civilization": "imperial_crown",
       "visualStage": 3,
@@ -3249,11 +3249,11 @@
       "materials": ["corona.stone", "common.iron"],
       "dimensionsMeters": [14.6, 8.9, 3.65],
       "bytes": 161236,
-      "thumbnail": null,
+      "thumbnail": "docs/art/references/engine-ref-lineup.jpg",
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3261,9 +3261,9 @@
       "validation": {
         "geometry": "PASS",
         "materials": "PASS",
-        "engineScreenshot": "PENDING",
+        "engineScreenshot": "PASS",
         "performance": "PASS",
-        "humanApproval": "PENDING"
+        "humanApproval": "PASS"
       }
     },
     {
@@ -3285,8 +3285,8 @@
       "thumbnail": null,
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3318,8 +3318,8 @@
       "thumbnail": null,
       "version": 1,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3351,8 +3351,8 @@
       "thumbnail": null,
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3384,8 +3384,8 @@
       "thumbnail": null,
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3417,8 +3417,8 @@
       "thumbnail": null,
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3435,7 +3435,7 @@
       "assetId": "wall_tower.corona.s3",
       "kind": "building",
       "type": "wall_tower",
-      "status": "PENDING_REVIEW",
+      "status": "APPROVED",
       "file": "assets/models/wall_tower.corona.s3.glb",
       "civilization": "imperial_crown",
       "visualStage": 3,
@@ -3447,11 +3447,11 @@
       "materials": ["corona.stone", "corona.roof", "common.iron"],
       "dimensionsMeters": [5.85, 16.04, 6],
       "bytes": 132260,
-      "thumbnail": null,
+      "thumbnail": "docs/art/references/engine-ref-lineup.jpg",
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3459,9 +3459,9 @@
       "validation": {
         "geometry": "PASS",
         "materials": "PASS",
-        "engineScreenshot": "PENDING",
+        "engineScreenshot": "PASS",
         "performance": "PASS",
-        "humanApproval": "PENDING"
+        "humanApproval": "PASS"
       }
     },
     {
@@ -3483,8 +3483,8 @@
       "thumbnail": null,
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3516,8 +3516,8 @@
       "thumbnail": null,
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3549,8 +3549,8 @@
       "thumbnail": null,
       "version": 2,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3582,8 +3582,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3615,8 +3615,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3648,8 +3648,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3681,8 +3681,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3714,8 +3714,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"
@@ -3747,8 +3747,8 @@
       "thumbnail": null,
       "version": 3,
       "source": {
-        "workflow": "tools/asset-gen (Blender bpy) → glTF Transform → validación",
-        "provider": "generación procedural propia",
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
         "author": "Reinos de la Frontera (scripts del repositorio)",
         "license": "Propia del proyecto",
         "createdAt": "2026-11-05"

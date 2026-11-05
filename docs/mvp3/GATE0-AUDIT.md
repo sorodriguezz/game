@@ -50,3 +50,5 @@ Trabajo desacoplado, sin persistencia de mundo y sin depender de los sistemas au
 | B | Empezar ya los núcleos puros del MVP 3 (grafo, convoyes, combate naval automático, `NavalBattleRoom` en `TRAINING`) aislados, aceptando que su integración con diplomacia, rankings y Maravillas queda bloqueada hasta que existan. |
 
 Hasta recibir esa decisión, el trabajo continúa en el rediseño visual (que el MVP 3 exige reutilizar) y en los assets navales compartidos.
+
+**Decisión del propietario (2026-11-05): opción A.** Plan de ejecución en [`docs/CONTINUATION_PLAN.md`](../CONTINUATION_PLAN.md).

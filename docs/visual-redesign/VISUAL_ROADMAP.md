@@ -35,7 +35,7 @@ F5 (agua/puertos/naval) comparte assets con el Gate 0 del MVP 3 (barco + mar abi
 
 **Aceptación:** biblia de arte vigente; pipeline reproducible con un comando; tokens de diseño aplicados en al menos una pantalla.
 
-### F1.1 — Validación artística · 🟡
+### F1.1 — Validación artística · ✅ (aprobada por el propietario el 2026-11-05)
 
 Referencias representativas, validadas en el motor:
 
@@ -161,3 +161,5 @@ F4–F7 se detallan al cerrar F3. F5 depende de sistemas navales que hoy no exis
 | 2026-11-05 | `3956692` | F0 ✅ |
 | 2026-11-05 | `22233d9` | F1 núcleo, F1.2 núcleo, F1.3 parcial, F2 parcial |
 | 2026-11-05 | (este commit) | F1.1: barcos y lancero con esqueleto y clips, visor de assets de desarrollo, capturas en motor; F1.3: cielo sin foto, luz recalibrada |
+
+| 2026-11-05 | (este commit) | F1.1 ✅: aprobación humana registrada en el manifiesto (castillo, muralla, lancero → `APPROVED`; barcos con aprobación visual, `PENDING_REVIEW` hasta tener clips `idle`/`sail`) |

@@ -27,7 +27,7 @@ export class InstancedPart {
   private readonly s = new Vec3();
 
   constructor(
-    app: AppBase,
+    private readonly app: AppBase,
     type: 'box' | 'capsule' | 'sphere' | 'cylinder' | 'cone',
     material: StandardMaterial,
     private readonly capacity: number,
@@ -85,7 +85,13 @@ export class InstancedPart {
     return this.count;
   }
 
+  /**
+   * Libera la entidad y el búfer de instancias. Si `<Application>` ya destruyó
+   * la app (React desmonta primero el padre), el dispositivo liberó todo y no
+   * hay nada que tocar: llamar a `vb.destroy()` entonces lanzaba y dejaba la UI en blanco.
+   */
   destroy(): void {
+    if (!this.app.graphicsDevice) return;
     this.entity.destroy();
     this.vb.destroy();
   }

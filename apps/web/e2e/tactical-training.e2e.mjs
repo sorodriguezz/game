@@ -116,6 +116,13 @@ await (async () => {
     throw new Error('el anfitrión no ve al invitado como rival');
   await h.page.screenshot({ path: `${OUT}/t05-pvp-host.png` });
   await g.page.screenshot({ path: `${OUT}/t06-pvp-guest.png` });
+  // Salir del campo debe volver al lobby sin errores (regresión: la UI quedaba en blanco).
+  const errors = [];
+  g.page.on('pageerror', (e) => errors.push(e.message));
+  await g.page.getByRole('button', { name: /Salir del campo/ }).dispatchEvent('click');
+  await g.page.getByText('Campo de entrenamiento táctico').waitFor({ timeout: 30000 });
+  if (errors.length) throw new Error(`errores al salir del campo: ${errors.join(' | ')}`);
+  log('salida del campo: lobby visible y sin errores');
   await h.ctx.close();
   await g.ctx.close();
   await browser.close();

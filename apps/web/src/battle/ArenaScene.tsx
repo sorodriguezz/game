@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Application, Entity } from '@playcanvas/react';
 import { Camera, Light, Render } from '@playcanvas/react/components';
+import { RenderTelemetry } from '../perf/RenderTelemetry.js';
 import { useApp, useAppEvent } from '@playcanvas/react/hooks';
 import {
   Color,
@@ -524,6 +525,7 @@ export function ArenaScene(props: ArenaSceneProps) {
         graphicsDeviceOptions={{ antialias: true }}
       >
         <SceneSettings />
+        <RenderTelemetry scene="arena" />
         <KitProvider civ={props.attackerCiv}>
           <Entity name="sun" rotation={[52, 30, 0]}>
             <Light

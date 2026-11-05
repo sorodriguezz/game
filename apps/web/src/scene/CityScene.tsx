@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { Application, Entity } from '@playcanvas/react';
 import { Camera, Light, Render, Script } from '@playcanvas/react/components';
+import { RenderTelemetry } from '../perf/RenderTelemetry.js';
 import { useApp, useAppEvent } from '@playcanvas/react/hooks';
 import { CameraControls } from 'playcanvas/scripts/esm/camera-controls.mjs';
 import {
@@ -387,6 +388,7 @@ export function CityScene(props: CitySceneProps) {
         graphicsDeviceOptions={{ antialias: true }}
       >
         <SceneSettings />
+        <RenderTelemetry scene="city" />
         <KitProvider civ={props.civilization}>
           <Entity name="sun" rotation={[50, 35, 0]}>
             <Light

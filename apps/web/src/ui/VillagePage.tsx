@@ -1,4 +1,10 @@
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  PROFILES,
+  setGraphicsProfile,
+  useGraphicsProfile,
+  type GraphicsProfileId,
+} from '../scene/graphics.js';
 import type { AccountView, VillageView } from '@reinos/contracts';
 import { RESOURCE_KEYS, type ResourceKey } from '@reinos/game-config';
 import { api, describeError } from '../api.js';
@@ -153,6 +159,7 @@ export function VillagePage({
             {duration((new Date(incoming[0]!.arrivesAt).getTime() - now) / 1000)}
           </span>
         )}
+        <GraphicsSelect />
         <span className="who">{account.displayName}</span>
         <button className="ghost" onClick={onLogout}>
           Salir
@@ -225,5 +232,27 @@ export function VillagePage({
         </aside>
       </main>
     </div>
+  );
+}
+
+/** Calidad gráfica (Baja/Media/Alta): cambia resolución, sombras, LOD y postproceso de la escena. */
+function GraphicsSelect() {
+  const profile = useGraphicsProfile();
+  return (
+    <label className="graphics-select">
+      <span className="sr-only">Calidad gráfica</span>
+      <select
+        aria-label="Calidad gráfica"
+        value={profile.id}
+        onChange={(e) => setGraphicsProfile(e.target.value as GraphicsProfileId)}
+        title="Calidad gráfica: resolución, sombras, nivel de detalle y efectos"
+      >
+        {Object.values(PROFILES).map((p) => (
+          <option key={p.id} value={p.id}>
+            Gráficos: {p.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

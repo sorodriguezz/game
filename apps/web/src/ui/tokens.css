@@ -1,0 +1,111 @@
+/*
+ * Tokens del sistema de diseño (docs/visual-redesign/UI_DESIGN_SYSTEM.md).
+ * Fuente de verdad de color, tipografía, espaciado, radios, sombras, elevación,
+ * estados y movimiento. Los componentes usan SOLO estos tokens.
+ */
+:root {
+  /* — Color: superficies (nogal/antracita) — */
+  --color-bg: #15110d;
+  --color-surface-1: #201a14;
+  --color-surface-2: #2a2219;
+  --color-surface-3: #352b20;
+  --color-overlay: rgb(16 12 9 / 0.78);
+  --color-border: #4a3c2d;
+  --color-border-strong: #6b563d;
+
+  /* — Color: texto (pergamino) — */
+  --color-text: #f1e7d3;
+  --color-text-muted: #b6a68b;
+  --color-text-faint: #8c7d66;
+  --color-text-on-accent: #1b140c;
+
+  /* — Color: acentos y estados — */
+  --color-accent: #d6ad4f;
+  --color-accent-strong: #f2c94c;
+  --color-accent-deep: #9c7426;
+  --color-success: #5fa36b;
+  --color-warning: #e0a63a;
+  --color-danger: #d0503f;
+  --color-info: #5d9bd1;
+  --color-focus: #f2c94c;
+
+  /* — Color: civilizaciones (Art Bible §5) — */
+  --color-civ-crown: #8e1e22;
+  --color-civ-crown-trim: #c9a24b;
+  --color-civ-league: #1f6f8b;
+  --color-civ-league-trim: #e8e2cf;
+
+  /* — Tipografía — */
+  --font-display: 'Cinzel', Georgia, 'Times New Roman', serif;
+  --font-body: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-md: 0.9375rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --leading-tight: 1.2;
+  --leading-normal: 1.45;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* — Espaciado (escala de 4 px) — */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  /* — Radios y bordes — */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+  --border-width: 1px;
+
+  /* — Sombras y elevación — */
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.35);
+  --shadow-2: 0 4px 12px rgb(0 0 0 / 0.4);
+  --shadow-3: 0 12px 32px rgb(0 0 0 / 0.5);
+  --shadow-inset: inset 0 1px 0 rgb(255 255 255 / 0.04);
+  --z-scene: 0;
+  --z-hud: 10;
+  --z-panel: 20;
+  --z-overlay: 40;
+  --z-toast: 60;
+
+  /* — Movimiento — */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+}
+
+/* Movimiento reducido: sin animaciones decorativas ni desplazamientos. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Foco visible en todo control interactivo (WCAG 2.4.7). */
+:where(button, a, input, select, textarea, [role='tab'], [tabindex]):focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}

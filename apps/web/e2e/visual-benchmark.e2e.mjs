@@ -41,6 +41,7 @@ async function measure(page, scene, name) {
   await sleep(MEASURE_MS);
   const snap = await page.evaluate((s) => window.__reinosPerf.snapshot(s), scene);
   results.scenarios[name] = snap;
+  persist();
   log(
     `${name}: ${snap.fps} FPS · frame p50 ${snap.frameMs.p50} / p95 ${snap.frameMs.p95} ms · CPU ${snap.cpuMs.avg} ms · ` +
       `${snap.drawCalls.avg} draw calls · ${snap.sceneTriangles} tris · ${snap.meshInstances} mesh inst. · VRAM ${snap.vramMB?.total ?? '—'} MB`,
@@ -67,7 +68,12 @@ async function loadMetrics(page, name) {
 }
 
 async function shot(page, file) {
-  await page.screenshot({ path: `${OUT}/${file}.png` });
+  // Con render por software una captura de la ciudad texturizada puede tardar > 30 s.
+  await page.screenshot({ path: `${OUT}/${file}.png`, timeout: 240000 });
+}
+
+function persist() {
+  writeFileSync(`${OUT}/perf-${LABEL}.json`, JSON.stringify(results, null, 2));
 }
 
 async function register(page, name) {
@@ -208,7 +214,7 @@ await (async () => {
   await page.getByRole('tab', { name: 'Informes' }).dispatchEvent('click');
   await measure(page, 'city', 'city-panels-open');
   await page.getByRole('tab', { name: 'Campaña' }).dispatchEvent('click');
-  await page.locator('canvas.map').waitFor();
+  await page.locator('canvas.map').waitFor({ timeout: 180000 });
   await sleep(1500);
   await shot(page, '08-map-1920');
   await page.setViewportSize({ width: 1366, height: 768 });
@@ -226,7 +232,7 @@ await (async () => {
     ['arena-large', 'large'],
   ]) {
     await page.goto(`${BASE}/#/training`);
-    await page.getByText('Campo de entrenamiento táctico').waitFor();
+    await page.getByText('Campo de entrenamiento táctico').waitFor({ timeout: 180000 });
     if (name === 'arena-balanced') await shot(page, '11-training-lobby-1920');
     const card = page.locator('article', { hasText: 'Contra la doctrina' });
     await card.getByLabel('Tu ejército').selectOption(army);

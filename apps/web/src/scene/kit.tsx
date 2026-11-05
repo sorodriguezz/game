@@ -72,6 +72,8 @@ export function createKit(civ: CivilizationId) {
     herb: mat('#3f8a4f', { gloss: 0.1 }),
     fire: mat('#ffb347', { emissive: '#ff8c2a', gloss: 0.1 }),
     selection: mat('#ffd36e', { emissive: '#f0b030', gloss: 0.4, opacity: 0.85 }),
+    /** Marca de suelo translúcida del bando (anillo de formación en la batalla táctica). */
+    teamMark: mat(c.banner, { emissive: c.banner, gloss: 0.1, opacity: 0.26 }),
     ghost: mat('#ffffff', { opacity: 0.25 }),
     skin: mat('#c99b76', { gloss: 0.2 }),
     tunic: mat(c.banner, { gloss: 0.15 }),

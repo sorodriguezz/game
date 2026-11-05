@@ -1,8 +1,9 @@
-# Reinos de la Frontera — MVP 1.0
+# Reinos de la Frontera — MVP 1 + MVP 2 (táctico)
 
 MMORTS web 3D por temporadas. Este directorio contiene la **documentación de producto/arquitectura** y, desde la iteración 1, el **código del monorepo** que la implementa.
 
 - Estado real de la implementación, pruebas y pendientes: [`docs/IMPLEMENTATION-STATUS.md`](docs/IMPLEMENTATION-STATUS.md)
+- Desglose del MVP 2 (ADR-0021…0037, PRD, backlog y QA contra el código): [`docs/mvp2/DESGLOSE-MVP2.md`](docs/mvp2/DESGLOSE-MVP2.md)
 - Arte 3D: la ciudad usa un **kit procedural de validación ("blockout")**, no arte final. Gate 0 sigue abierto.
 
 ## Documentación
@@ -13,6 +14,7 @@ MMORTS web 3D por temporadas. Este directorio contiene la **documentación de pr
 4. [`AGENTS.md`](AGENTS.md) — Contrato de comportamiento para agentes de IA.
 5. [`BACKLOG_MVP1.md`](BACKLOG_MVP1.md) — Implementación en cinco gates.
 6. `specs/`, `examples/`, `infra/` — Balance propuesto, manifest de assets y Compose local.
+7. [`Reinos_de_la_Frontera_MVP2/`](Reinos_de_la_Frontera_MVP2/PRD_MVP2.md) — PRD, GDD táctico, ADR-0021…0037, backlog y plan de QA del MVP 2 (batallas RTS por formaciones).
 
 ## Arquitectura del código
 
@@ -27,6 +29,8 @@ MMORTS web 3D por temporadas. Este directorio contiene la **documentación de pr
 | `packages/db` | Esquema Drizzle con `world_id` en FKs compuestas, migraciones SQL, seed |
 | `packages/core` | Casos de uso transaccionales usados por API y worker |
 | `packages/asset-pipeline` | Contrato de manifest de assets e inspección automática de GLB |
+| `apps/battle-server` | **MVP 2.** Salas tácticas Colyseus 0.18 (ADR-0022): tick fijo 10 Hz, tickets de un uso, niebla de guerra, reconexión; sin acceso a la BD del mundo |
+| `packages/tactical-sim` | **MVP 2.** Simulación táctica pura y entera por formaciones, navegación 2.5D, doctrina, replay y tickets HMAC |
 
 ## Arranque local
 
@@ -58,7 +62,7 @@ pnpm db:migrate
 pnpm db:seed
 ```
 
-Tres terminales (API en :3000, worker y web en :5173 con proxy a la API):
+Tres terminales (API en :3000, worker y web en :5173 con proxy a la API) y una cuarta opcional para el MVP 2:
 
 ```bash
 pnpm dev:api
@@ -72,7 +76,15 @@ pnpm dev:worker
 pnpm dev:web
 ```
 
+```bash
+pnpm dev:battle
+```
+
 Abre http://localhost:5173, crea una cuenta y únete a **Prueba Rápida ×50** (mundo acelerado para probar) o a **Frontera I** (velocidad 1, protección de principiante de 72 h).
+
+**Entrenamiento táctico (MVP 2, Gate 1):** con el battle-server levantado (:2567; Vite lo expone bajo `/battle` con WebSocket), pulsa **⚔ Entrenamiento táctico** en la pantalla de mundos. Puedes luchar contra la doctrina (IA de reglas) o crear un duelo con código para otro jugador. El entrenamiento **nunca** modifica un mundo (ADR-0037). Variables en `.env.example` (`TACTICAL_*`, `BATTLE_*`); las claves de ejemplo son solo de desarrollo.
+
+Controles de la arena: clic izquierdo selecciona (Mayús añade), clic derecho mueve o ataca, `H` mantener, `R` retirada, `F` apoyo, `1`/`2`/`3` línea/cuña/escaramuza, `WASD`/flechas desplazan la cámara, `Q`/`E` giran y la rueda acerca.
 
 ## Calidad
 
@@ -102,8 +114,8 @@ pnpm --filter @reinos/web e2e
 
 ## Reglas esenciales (no negociables)
 
-- Servidor autoritativo; PostgreSQL es la fuente de verdad y la cola durable. Sin Redis/BullMQ/Kafka/Colyseus/K8s en MVP 1.
+- Servidor autoritativo; PostgreSQL es la fuente de verdad y la cola durable. Sin Redis/BullMQ/Kafka/K8s. Colyseus solo en `apps/battle-server` (ADR-0022, MVP 2).
 - `world_id` en todo agregado, con FKs compuestas; idempotencia en órdenes, eventos y combate.
-- Combate automático determinista (MVP 1); RTS táctico en MVP 2. Sin héroes. Sin pay-to-win.
+- Combate automático determinista obligatorio (MVP 1); el RTS táctico (MVP 2) es opt-in y hoy solo existe como `TRAINING`. `WORLD_PVP` sigue bloqueado hasta que M1 tenga diplomacia. Sin héroes. Sin pay-to-win.
 - IA generativa solo en desarrollo (código/assets), nunca en runtime de NPC o combate.
 - Ningún placeholder es arte final: los assets se aprueban vía manifest, licencia y revisión humana.

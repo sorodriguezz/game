@@ -1,22 +1,35 @@
-# Estado de implementación — MVP 1 (iteración 1)
+# Estado de implementación — MVP 1 (iteración 1) + MVP 2 (Gate 0 técnico y Gate 1 `TRAINING`)
 
-**Fecha:** 2026-11-04 · **Alcance de esta iteración:** G0-01 + vertical slice persistente de Gate 1 + base del pipeline de assets.
-**Regla:** nada se marca como terminado sin prueba ejecutada. Los resultados de abajo son de ejecuciones reales en este repositorio.
+**Fecha:** 2026-11-05 · **Regla:** nada se marca como terminado sin prueba ejecutada. Los resultados de abajo son de ejecuciones reales en este repositorio.
+
+## 0. MVP 2 — resumen
+
+El desglose completo (ADR-0021…0037, PRD, backlog, plan de QA y decisiones D-01…D-17) está en
+[`docs/mvp2/DESGLOSE-MVP2.md`](mvp2/DESGLOSE-MVP2.md). En corto:
+
+- **Hecho y probado:** contratos tácticos zod, ruleset táctico `tactical-mvp2-alpha.0` (PROPOSAL), simulación entera determinista por formaciones a 10 Hz (`packages/tactical-sim`), navegación 2.5D, doctrina, replay verificable, tickets HMAC de un uso, `apps/battle-server` (Colyseus 0.18, niebla de guerra, reconexión, límites), API de entrenamiento (`/api/v1/training…`) que verifica cada resultado re-ejecutando el replay, y arena 3D en la web con soldados por *instancing*.
+- **`TRAINING` no escribe en el mundo:** test e2e con huella de 13 tablas de mundo idéntica antes y después de entrenar.
+- **No iniciado / bloqueado:** `WORLD_PVP` (Gate 2) espera a que el MVP 1 tenga diplomacia/PNA; arte final (Gate 0 de M1); playtest humano; GPU real; carga.
+
+Capturas reales de la arena (Chromium headless con SwiftShader, render por software):
+[despliegue](screenshots/tactico-despliegue.png) · [combate](screenshots/tactico-combate.png) · [resultado](screenshots/tactico-resultado.png) · [duelo PvP](screenshots/tactico-pvp.png).
 
 ## 1. Qué existe
 
 ```text
-reinos_mvp1/
+./
 ├── apps/
-│   ├── api/        NestJS 12 (monolito modular, ADR-0001): auth, mundos, aldeas, mapa, informes
-│   ├── worker/     Worker de eventos sobre PostgreSQL (ADR-0003)
-│   └── web/        React 19 + PlayCanvas 2 (@playcanvas/react): ciudad 3D, HUD, paneles, mapa 2D
+│   ├── api/           NestJS 12 (monolito modular, ADR-0001): auth, mundos, aldeas, mapa, informes, entrenamiento táctico
+│   ├── worker/        Worker de eventos sobre PostgreSQL (ADR-0003)
+│   ├── battle-server/ MVP 2: salas tácticas Colyseus 0.18 (ADR-0022), sin acceso a la BD del mundo
+│   └── web/           React 19 + PlayCanvas 2 (@playcanvas/react): ciudad 3D, HUD, paneles, mapa 2D, arena táctica
 ├── packages/
 │   ├── game-config/    Ruleset versionado `mvp1-alpha.0` (zod) — catálogo y balance
 │   ├── game-rules/     Reglas puras deterministas: economía, combate, viaje, mapa, ciudad
 │   ├── contracts/      DTO zod + códigos de error compartidos web/API
 │   ├── db/             Esquema Drizzle, migraciones SQL, seed
-│   ├── core/           Casos de uso transaccionales compartidos por API y worker
+│   ├── core/           Casos de uso transaccionales compartidos por API y worker (+ TrainingService)
+│   ├── tactical-sim/   MVP 2: simulación táctica pura, nav 2.5D, doctrina, replay, tickets
 │   └── asset-pipeline/ Contrato de manifest + inspección automática de GLB
 └── scripts/bundle.mjs  Empaquetado de API/worker para producción
 ```
@@ -49,11 +62,12 @@ Capturas reales del cliente (Chromium headless, render por software):
 ## 3. Pruebas ejecutadas (resultado real)
 
 ```bash
-pnpm test            # 8 archivos, 74 tests: unitarios + integración con PostgreSQL 16 real
+pnpm test            # 11 archivos, 100 tests (74 M1 + 26 MVP 2): unitarios + integración con PostgreSQL 16 real
 pnpm lint            # ESLint sin errores (prohíbe Math.random fuera del cliente)
-pnpm typecheck       # 9 paquetes sin errores
+pnpm typecheck       # 11 paquetes sin errores
 pnpm assets:validate # manifest válido; 13 assets en BLOCKOUT (aviso explícito)
-pnpm --filter @reinos/web e2e   # escenario completo en Chromium contra la pila levantada
+pnpm --filter @reinos/web e2e           # escenario M1 completo en Chromium contra la pila levantada
+pnpm --filter @reinos/web e2e:tactical  # MVP 2: batalla contra la doctrina hasta el resultado + duelo PvP en dos navegadores
 ```
 
 Casos obligatorios del PRD cubiertos por tests automatizados:

@@ -556,3 +556,81 @@ table.units td:first-child {
 .map-nav {
   flex-wrap: wrap;
 }
+
+/* ---- MVP 2: entrenamiento táctico ---- */
+select {
+  font: inherit;
+  width: 100%;
+  padding: 0.45em 0.5em;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: #120f0c;
+  color: var(--text);
+}
+.invite-code {
+  font-family: ui-monospace, monospace;
+  font-size: 2.2em;
+  letter-spacing: 0.25em;
+  color: var(--gold-2);
+  margin: 0.2em 0;
+}
+.row.wrap {
+  flex-wrap: wrap;
+}
+.minimap {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  border: 2px solid var(--line);
+  border-radius: 6px;
+  background: #3c6629;
+}
+.scene-hint {
+  position: absolute;
+  left: 12px;
+  bottom: 48px;
+  background: rgba(23, 19, 15, 0.8);
+  padding: 0.3em 0.7em;
+  border-radius: 6px;
+  font-size: 0.85em;
+}
+.scene-queue.reject {
+  border-color: var(--danger);
+  color: #ffd2cb;
+}
+.result-overlay {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  max-width: min(560px, 92%);
+  max-height: 85%;
+  overflow: auto;
+  background: rgba(23, 19, 15, 0.95);
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  padding: 1.2em 1.5em;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+.formations li {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.15em;
+}
+.formations li.selected {
+  background: rgba(214, 173, 79, 0.12);
+  border-radius: 6px;
+  padding-left: 0.3em;
+}
+.morale {
+  display: block;
+  height: 5px;
+  background: #3a2f25;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.morale span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #c0392b, #d6ad4f, #3f8a4f);
+}

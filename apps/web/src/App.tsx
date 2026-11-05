@@ -4,8 +4,14 @@ import { api, setCsrf } from './api.js';
 import { AuthPage } from './ui/AuthPage.js';
 import { WorldsPage } from './ui/WorldsPage.js';
 import { VillagePage } from './ui/VillagePage.js';
+import { TrainingPage } from './ui/TrainingPage.js';
+import { TacticalArenaPage } from './ui/TacticalArenaPage.js';
 
-type Route = { name: 'worlds' } | { name: 'village'; worldId: string; villageId: string };
+type Route =
+  | { name: 'worlds' }
+  | { name: 'village'; worldId: string; villageId: string }
+  | { name: 'training' }
+  | { name: 'arena'; matchId: string };
 
 interface Toast {
   id: number;
@@ -16,8 +22,26 @@ const ToastContext = createContext<(kind: Toast['kind'], text: string) => void>(
 export const useToast = () => useContext(ToastContext);
 
 function parseHash(): Route {
-  const m = /^#\/w\/([0-9a-f-]{36})\/v\/([0-9a-f-]{36})/.exec(window.location.hash);
-  return m ? { name: 'village', worldId: m[1]!, villageId: m[2]! } : { name: 'worlds' };
+  const h = window.location.hash;
+  const m = /^#\/w\/([0-9a-f-]{36})\/v\/([0-9a-f-]{36})/.exec(h);
+  if (m) return { name: 'village', worldId: m[1]!, villageId: m[2]! };
+  const a = /^#\/training\/([0-9a-f-]{36})/.exec(h);
+  if (a) return { name: 'arena', matchId: a[1]! };
+  if (h.startsWith('#/training')) return { name: 'training' };
+  return { name: 'worlds' };
+}
+
+function hashOf(r: Route): string {
+  switch (r.name) {
+    case 'village':
+      return `#/w/${r.worldId}/v/${r.villageId}`;
+    case 'training':
+      return '#/training';
+    case 'arena':
+      return `#/training/${r.matchId}`;
+    default:
+      return '#/';
+  }
 }
 
 export function App() {
@@ -45,7 +69,7 @@ export function App() {
   }, []);
 
   const go = (r: Route) => {
-    window.location.hash = r.name === 'village' ? `#/w/${r.worldId}/v/${r.villageId}` : '#/';
+    window.location.hash = hashOf(r);
     setRoute(r);
   };
 
@@ -67,6 +91,16 @@ export function App() {
         }}
       />
     );
+  else if (route.name === 'training')
+    page = (
+      <TrainingPage
+        account={account}
+        onOpen={(matchId) => go({ name: 'arena', matchId })}
+        onBack={() => go({ name: 'worlds' })}
+      />
+    );
+  else if (route.name === 'arena')
+    page = <TacticalArenaPage matchId={route.matchId} onExit={() => go({ name: 'training' })} />;
   else if (route.name === 'village')
     page = (
       <VillagePage
@@ -82,6 +116,7 @@ export function App() {
       <WorldsPage
         account={account}
         onEnter={(worldId, villageId) => go({ name: 'village', worldId, villageId })}
+        onTraining={() => go({ name: 'training' })}
         onLogout={logout}
       />
     );

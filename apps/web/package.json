@@ -9,7 +9,8 @@
     "build": "tsc -p tsconfig.json && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json",
-    "e2e": "node e2e/vertical-slice.e2e.mjs"
+    "e2e": "node e2e/vertical-slice.e2e.mjs",
+    "e2e:tactical": "node e2e/tactical-training.e2e.mjs"
   },
   "dependencies": {
     "@colyseus/schema": "5.0.43",

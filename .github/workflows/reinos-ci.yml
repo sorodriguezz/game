@@ -44,4 +44,4 @@ jobs:
       - run: pnpm test
       - run: pnpm assets:validate
       - run: pnpm --filter @reinos/web build
-      - run: pnpm --filter @reinos/api build && pnpm --filter @reinos/worker build
+      - run: pnpm --filter @reinos/api build && pnpm --filter @reinos/worker build && pnpm --filter @reinos/battle-server build

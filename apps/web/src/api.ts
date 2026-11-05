@@ -3,7 +3,12 @@ import {
   CSRF_HEADER,
   IDEMPOTENCY_HEADER,
   type ApiErrorBody,
+  type BattleConfigView,
   type BattleReportDetail,
+  type CreateTrainingMatchRequest,
+  type JoinTicketResponse,
+  type JoinTrainingMatchRequest,
+  type TrainingMatchView,
   type BattleReportSummary,
   type BuildRequest,
   type BuildResponse,
@@ -121,6 +126,15 @@ export const api = {
   reports: (worldId: string) => call<BattleReportSummary[]>('GET', `${w(worldId)}/reports`),
   report: (worldId: string, battleId: string) =>
     call<BattleReportDetail>('GET', `${w(worldId)}/reports/${battleId}`),
+  // MVP 2 — entrenamiento táctico
+  battleConfig: () => call<BattleConfigView>('GET', '/battle-config'),
+  trainings: () => call<TrainingMatchView[]>('GET', '/training'),
+  createTraining: (b: CreateTrainingMatchRequest) =>
+    call<TrainingMatchView>('POST', '/training', b),
+  joinTraining: (code: string, b: JoinTrainingMatchRequest) =>
+    call<TrainingMatchView>('POST', `/training/join/${encodeURIComponent(code)}`, b),
+  training: (id: string) => call<TrainingMatchView>('GET', `/training/${id}`),
+  trainingTicket: (id: string) => call<JoinTicketResponse>('POST', `/training/${id}/join-ticket`),
 };
 
 /** Mensajes de error comprensibles por código (la UI nunca depende del texto del servidor). */
@@ -143,6 +157,10 @@ export function describeError(e: unknown): string {
     EVENTS_PENDING: 'Hay un combate resolviéndose en tu aldea; reintenta.',
     NOT_COASTAL: 'El puerto solo puede construirse en aldeas costeras.',
     CIVILIZATION_RESTRICTED: 'Exclusivo de otra civilización.',
+    FEATURE_DISABLED: 'El entrenamiento táctico está desactivado.',
+    BATTLE_SERVER_UNAVAILABLE: 'El servidor táctico no está disponible ahora mismo.',
+    ROOM_AT_CAPACITY: 'Todas las salas tácticas están ocupadas; reintenta en unos minutos.',
+    MATCH_NOT_JOINABLE: 'Código no válido, caducado o partida ya ocupada.',
   };
   return map[e.code] ?? e.message;
 }

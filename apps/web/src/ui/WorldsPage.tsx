@@ -8,10 +8,12 @@ export function WorldsPage({
   account,
   onEnter,
   onLogout,
+  onTraining,
 }: {
   account: AccountView;
   onEnter: (worldId: string, villageId: string) => void;
   onLogout: () => void;
+  onTraining: () => void;
 }) {
   const [worlds, setWorlds] = useState<WorldSummary[] | null>(null);
   const [joining, setJoining] = useState<string | null>(null);
@@ -30,6 +32,13 @@ export function WorldsPage({
         <div className="brand">Reinos de la Frontera</div>
         <div className="spacer" />
         <span className="who">{account.displayName}</span>
+        <button
+          className="ghost"
+          onClick={onTraining}
+          title="Batallas RTS de entrenamiento (MVP 2): sin efectos en los mundos"
+        >
+          ⚔ Entrenamiento táctico
+        </button>
         <button className="ghost" onClick={onLogout}>
           Salir
         </button>

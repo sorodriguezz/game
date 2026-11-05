@@ -1,0 +1,13 @@
+{
+  "assetId": "tree_oak.v0",
+  "bytes": 177704,
+  "dimensionsMeters": [6.71, 7.61, 6.02],
+  "generator": "tools/asset-gen/assets/nature.py::tree_oak",
+  "kind": "prop",
+  "materials": ["common.bark", "common.foliage"],
+  "problems": [],
+  "seconds": 0.08,
+  "triangles": [852, 426, 163],
+  "type": "tree_oak",
+  "variant": 0
+}

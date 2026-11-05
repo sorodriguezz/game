@@ -1,0 +1,14 @@
+{
+  "assetId": "wall_segment.liga.s1",
+  "bytes": 48492,
+  "civilization": "sea_league",
+  "dimensionsMeters": [14.6, 5.2, 2.7],
+  "generator": "tools/asset-gen/assets/buildings.py::wall_segment",
+  "kind": "building",
+  "materials": ["liga.stone", "liga.wood"],
+  "problems": [],
+  "seconds": 0.03,
+  "triangles": [220, 132, 66],
+  "type": "wall_segment",
+  "visualStage": 1
+}

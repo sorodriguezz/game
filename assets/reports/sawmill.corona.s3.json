@@ -1,0 +1,14 @@
+{
+  "assetId": "sawmill.corona.s3",
+  "bytes": 243332,
+  "civilization": "imperial_crown",
+  "dimensionsMeters": [9.6, 5.34, 10.75],
+  "generator": "tools/asset-gen/assets/buildings.py::sawmill",
+  "kind": "building",
+  "materials": ["corona.wood", "corona.roof", "corona.stone", "corona.plaster", "common.iron"],
+  "problems": [],
+  "seconds": 0.09,
+  "triangles": [1276, 722, 358],
+  "type": "sawmill",
+  "visualStage": 3
+}

@@ -1,0 +1,14 @@
+{
+  "assetId": "mine.liga.s3",
+  "bytes": 186728,
+  "civilization": "sea_league",
+  "dimensionsMeters": [11.5, 7.91, 11.47],
+  "generator": "tools/asset-gen/assets/buildings.py::mine",
+  "kind": "building",
+  "materials": ["common.rough_stone", "liga.wood", "common.iron", "liga.roof"],
+  "problems": [],
+  "seconds": 0.06,
+  "triangles": [968, 398, 198],
+  "type": "mine",
+  "visualStage": 3
+}

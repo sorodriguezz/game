@@ -1,0 +1,13 @@
+{
+  "assetId": "tree_pine.v0",
+  "bytes": 69280,
+  "dimensionsMeters": [5.33, 9.77, 5.42],
+  "generator": "tools/asset-gen/assets/nature.py::tree_pine",
+  "kind": "prop",
+  "materials": ["common.bark", "common.foliage_pine"],
+  "problems": [],
+  "seconds": 0.03,
+  "triangles": [340, 170, 65],
+  "type": "tree_pine",
+  "variant": 0
+}

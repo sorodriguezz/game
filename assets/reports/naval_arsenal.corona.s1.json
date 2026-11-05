@@ -1,0 +1,14 @@
+{
+  "assetId": "naval_arsenal.corona.s1",
+  "bytes": 219504,
+  "civilization": "imperial_crown",
+  "dimensionsMeters": [8.3, 7.93, 10.7],
+  "generator": "tools/asset-gen/assets/buildings.py::naval_arsenal",
+  "kind": "building",
+  "materials": ["corona.stone", "corona.wood", "corona.roof"],
+  "problems": [],
+  "seconds": 0.11,
+  "triangles": [1080, 648, 324],
+  "type": "naval_arsenal",
+  "visualStage": 1
+}

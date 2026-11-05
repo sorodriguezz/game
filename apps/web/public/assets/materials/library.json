@@ -1,0 +1,166 @@
+{
+  "materials": {
+    "common.bark": {
+      "base": "common/bark_base.webp",
+      "normal": "common/bark_normal.webp",
+      "orm": "common/bark_orm.webp",
+      "size": 512,
+      "tileMeters": 1.5
+    },
+    "common.crop": {
+      "base": "common/crop_base.webp",
+      "normal": "common/crop_normal.webp",
+      "orm": "common/crop_orm.webp",
+      "size": 512,
+      "tileMeters": 3.0
+    },
+    "common.dirt": {
+      "base": "common/dirt_base.webp",
+      "normal": "common/dirt_normal.webp",
+      "orm": "common/dirt_orm.webp",
+      "size": 512,
+      "tileMeters": 4.0
+    },
+    "common.foliage": {
+      "base": "common/foliage_base.webp",
+      "normal": "common/foliage_normal.webp",
+      "orm": "common/foliage_orm.webp",
+      "size": 512,
+      "tileMeters": 2.5
+    },
+    "common.foliage_pine": {
+      "base": "common/foliage_pine_base.webp",
+      "normal": "common/foliage_pine_normal.webp",
+      "orm": "common/foliage_pine_orm.webp",
+      "size": 512,
+      "tileMeters": 2.0
+    },
+    "common.iron": {
+      "base": "common/iron_base.webp",
+      "normal": "common/iron_normal.webp",
+      "orm": "common/iron_orm.webp",
+      "size": 512,
+      "tileMeters": 1.0
+    },
+    "common.rough_stone": {
+      "base": "common/rough_stone_base.webp",
+      "normal": "common/rough_stone_normal.webp",
+      "orm": "common/rough_stone_orm.webp",
+      "size": 512,
+      "tileMeters": 3.0
+    },
+    "common.thatch": {
+      "base": "common/thatch_base.webp",
+      "normal": "common/thatch_normal.webp",
+      "orm": "common/thatch_orm.webp",
+      "size": 512,
+      "tileMeters": 2.5
+    },
+    "common.water": {
+      "base": "common/water_base.webp",
+      "normal": "common/water_normal.webp",
+      "orm": "common/water_orm.webp",
+      "size": 512,
+      "tileMeters": 9.0
+    },
+    "corona.cloth": {
+      "base": "corona/cloth_base.webp",
+      "normal": "corona/cloth_normal.webp",
+      "orm": "corona/cloth_orm.webp",
+      "size": 512,
+      "tileMeters": 1.5
+    },
+    "corona.plaster": {
+      "base": "corona/plaster_base.webp",
+      "normal": "corona/plaster_normal.webp",
+      "orm": "corona/plaster_orm.webp",
+      "size": 512,
+      "tileMeters": 3.0
+    },
+    "corona.roof": {
+      "base": "corona/roof_base.webp",
+      "normal": "corona/roof_normal.webp",
+      "orm": "corona/roof_orm.webp",
+      "size": 512,
+      "tileMeters": 2.0
+    },
+    "corona.stone": {
+      "base": "corona/stone_base.webp",
+      "normal": "corona/stone_normal.webp",
+      "orm": "corona/stone_orm.webp",
+      "size": 512,
+      "tileMeters": 2.4
+    },
+    "corona.wood": {
+      "base": "corona/wood_base.webp",
+      "normal": "corona/wood_normal.webp",
+      "orm": "corona/wood_orm.webp",
+      "size": 512,
+      "tileMeters": 2.0
+    },
+    "liga.cloth": {
+      "base": "liga/cloth_base.webp",
+      "normal": "liga/cloth_normal.webp",
+      "orm": "liga/cloth_orm.webp",
+      "size": 512,
+      "tileMeters": 1.5
+    },
+    "liga.plaster": {
+      "base": "liga/plaster_base.webp",
+      "normal": "liga/plaster_normal.webp",
+      "orm": "liga/plaster_orm.webp",
+      "size": 512,
+      "tileMeters": 3.0
+    },
+    "liga.roof": {
+      "base": "liga/roof_base.webp",
+      "normal": "liga/roof_normal.webp",
+      "orm": "liga/roof_orm.webp",
+      "size": 512,
+      "tileMeters": 2.0
+    },
+    "liga.stone": {
+      "base": "liga/stone_base.webp",
+      "normal": "liga/stone_normal.webp",
+      "orm": "liga/stone_orm.webp",
+      "size": 512,
+      "tileMeters": 2.4
+    },
+    "liga.wood": {
+      "base": "liga/wood_base.webp",
+      "normal": "liga/wood_normal.webp",
+      "orm": "liga/wood_orm.webp",
+      "size": 512,
+      "tileMeters": 2.0
+    },
+    "terrain.dirt": {
+      "base": "terrain/dirt_base.webp",
+      "normal": "terrain/dirt_normal.webp",
+      "orm": "terrain/dirt_orm.webp",
+      "size": 512,
+      "tileMeters": 5.0
+    },
+    "terrain.grass": {
+      "base": "terrain/grass_base.webp",
+      "normal": "terrain/grass_normal.webp",
+      "orm": "terrain/grass_orm.webp",
+      "size": 512,
+      "tileMeters": 6.0
+    },
+    "terrain.rock": {
+      "base": "terrain/rock_base.webp",
+      "normal": "terrain/rock_normal.webp",
+      "orm": "terrain/rock_orm.webp",
+      "size": 512,
+      "tileMeters": 6.0
+    },
+    "terrain.sand": {
+      "base": "terrain/sand_base.webp",
+      "normal": "terrain/sand_normal.webp",
+      "orm": "terrain/sand_orm.webp",
+      "size": 512,
+      "tileMeters": 5.0
+    }
+  },
+  "version": 1
+}

@@ -1,0 +1,21 @@
+{
+  "assetId": "port.corona.s3",
+  "bytes": 860820,
+  "civilization": "imperial_crown",
+  "dimensionsMeters": [13.58, 11.53, 17.73],
+  "generator": "tools/asset-gen/assets/buildings.py::port",
+  "kind": "building",
+  "materials": [
+    "corona.stone",
+    "corona.wood",
+    "corona.plaster",
+    "corona.roof",
+    "common.iron",
+    "corona.cloth"
+  ],
+  "problems": [],
+  "seconds": 0.22,
+  "triangles": [5452, 2188, 1094],
+  "type": "port",
+  "visualStage": 3
+}

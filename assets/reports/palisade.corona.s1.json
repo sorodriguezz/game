@@ -1,0 +1,14 @@
+{
+  "assetId": "palisade.corona.s1",
+  "bytes": 228392,
+  "civilization": "imperial_crown",
+  "dimensionsMeters": [14.6, 3.67, 0.52],
+  "generator": "tools/asset-gen/assets/buildings.py::palisade",
+  "kind": "building",
+  "materials": ["corona.wood"],
+  "problems": [],
+  "seconds": 0.09,
+  "triangles": [1206, 722, 496],
+  "type": "palisade",
+  "visualStage": 1
+}

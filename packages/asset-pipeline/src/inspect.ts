@@ -1,8 +1,12 @@
 import { Document, NodeIO, getBounds, type Primitive } from '@gltf-transform/core';
+import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
 import { BUDGETS, type AssetEntry } from './manifest.js';
 
 export interface GlbReport {
+  /** Triángulos del LOD0 (o de todo el documento si no hay nodos LOD). */
   triangles: number;
+  trianglesPerLod: number[];
+  materialNames: string[];
   meshes: number;
   materials: number;
   pbrMaterials: number;
@@ -28,18 +32,50 @@ function trianglesOf(p: Primitive): number {
  * pivote, materiales no PBR, presupuesto de triángulos/texturas y clips de animación.
  * NO sustituye la revisión visual humana (FR-ART-09).
  */
+export interface InspectOptions {
+  /** Nombres de material que existen en la biblioteca publicada; si se da, se exige pertenencia. */
+  materialLibrary?: ReadonlySet<string>;
+  /** Exige atributos que usa el cliente (NORMAL, TEXCOORD_0, COLOR_0). */
+  requireAttributes?: boolean;
+}
+
 export async function inspectDocument(
   doc: Document,
-  entry: Pick<AssetEntry, 'kind' | 'animations'>,
+  entry: Pick<AssetEntry, 'kind' | 'animations'> & { belowGroundOk?: boolean },
   bytes = 0,
+  options: InspectOptions = {},
 ): Promise<GlbReport> {
   const root = doc.getRoot();
   const budget = BUDGETS[entry.kind];
   const problems: string[] = [];
 
+  const lodNodes = root
+    .listNodes()
+    .filter((n) => /^LOD\d$/.test(n.getName()) && n.getMesh())
+    .sort((a, b) => a.getName().localeCompare(b.getName()));
+  const meshTris = (m: NonNullable<ReturnType<(typeof lodNodes)[number]['getMesh']>>) =>
+    m.listPrimitives().reduce((s, p) => s + trianglesOf(p), 0);
+  const trianglesPerLod = lodNodes.map((n) => meshTris(n.getMesh()!));
   let triangles = 0;
-  for (const mesh of root.listMeshes())
-    for (const prim of mesh.listPrimitives()) triangles += trianglesOf(prim);
+  if (lodNodes.length > 0) triangles = trianglesPerLod[0]!;
+  else for (const mesh of root.listMeshes()) triangles += meshTris(mesh);
+  if (lodNodes.length > 1)
+    for (let i = 1; i < trianglesPerLod.length; i++)
+      if (trianglesPerLod[i]! >= trianglesPerLod[i - 1]!)
+        problems.push(`LOD${i} no reduce triángulos respecto a LOD${i - 1}`);
+
+  if (options.requireAttributes) {
+    for (const mesh of root.listMeshes())
+      for (const prim of mesh.listPrimitives())
+        for (const sem of ['NORMAL', 'TEXCOORD_0', 'COLOR_0'])
+          if (!prim.getAttribute(sem)) {
+            problems.push(`malla ${mesh.getName() || '?'} sin ${sem}`);
+          }
+  }
+  const materialNames = root.listMaterials().map((m) => m.getName());
+  if (options.materialLibrary)
+    for (const n of materialNames)
+      if (!options.materialLibrary.has(n)) problems.push(`material ${n} no está en la biblioteca`);
 
   const materials = root.listMaterials();
   const pbrMaterials = materials.filter(
@@ -73,7 +109,7 @@ export async function inspectDocument(
   const tallest = Math.max(...size);
   if (tallest < 0.3 || tallest > 120)
     problems.push(`escala sospechosa: dimensión máx. ${tallest.toFixed(2)} m`);
-  if (Math.abs(min[1]) > 0.05 * Math.max(1, size[1]!))
+  if (entry.belowGroundOk ? min[1] > 0.05 : Math.abs(min[1]) > 0.05 * Math.max(1, size[1]!))
     problems.push(`pivote: la base no está en y=0 (min.y=${min[1].toFixed(3)})`);
   const cx = (min[0] + max[0]) / 2;
   const cz = (min[2] + max[2]) / 2;
@@ -85,6 +121,8 @@ export async function inspectDocument(
 
   return {
     triangles,
+    trianglesPerLod,
+    materialNames,
     meshes: root.listMeshes().length,
     materials: materials.length,
     pbrMaterials,
@@ -98,10 +136,11 @@ export async function inspectDocument(
 
 export async function inspectGlbFile(
   path: string,
-  entry: Pick<AssetEntry, 'kind' | 'animations'>,
+  entry: Pick<AssetEntry, 'kind' | 'animations'> & { belowGroundOk?: boolean },
+  options: InspectOptions = {},
 ): Promise<GlbReport> {
   const { readFile } = await import('node:fs/promises');
   const buf = await readFile(path);
-  const doc = await new NodeIO().readBinary(new Uint8Array(buf));
-  return inspectDocument(doc, entry, buf.byteLength);
+  const doc = await new NodeIO().registerExtensions(ALL_EXTENSIONS).readBinary(new Uint8Array(buf));
+  return inspectDocument(doc, entry, buf.byteLength, options);
 }

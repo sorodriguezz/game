@@ -27,7 +27,9 @@ for (const a of parsed.data.assets) {
   counts[a.status] = (counts[a.status] ?? 0) + 1;
   if (!a.file) continue;
   try {
-    const report = await inspectGlbFile(resolve(publicRoot, a.file), a);
+    const report = await inspectGlbFile(resolve(publicRoot, a.file), a, {
+      requireAttributes: true,
+    });
     const tag = report.problems.length === 0 ? 'OK ' : a.status === 'APPROVED' ? 'ERR' : 'WARN';
     console.log(
       `[${tag}] ${a.assetId}: ${report.triangles} tris, ${report.materials} mats, ${report.maxTextureSize}px, ${report.bytes} B`,

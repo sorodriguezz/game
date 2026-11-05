@@ -1,0 +1,14 @@
+{
+  "assetId": "mine.corona.s2",
+  "bytes": 161896,
+  "civilization": "imperial_crown",
+  "dimensionsMeters": [11.5, 5.08, 11.47],
+  "generator": "tools/asset-gen/assets/buildings.py::mine",
+  "kind": "building",
+  "materials": ["common.rough_stone", "corona.wood", "common.iron", "corona.roof"],
+  "problems": [],
+  "seconds": 0.07,
+  "triangles": [788, 344, 172],
+  "type": "mine",
+  "visualStage": 2
+}

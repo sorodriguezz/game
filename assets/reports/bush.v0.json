@@ -1,0 +1,13 @@
+{
+  "assetId": "bush.v0",
+  "bytes": 54728,
+  "dimensionsMeters": [1.88, 0.99, 1.78],
+  "generator": "tools/asset-gen/assets/nature.py::bush",
+  "kind": "prop",
+  "materials": ["common.foliage"],
+  "problems": [],
+  "seconds": 0.02,
+  "triangles": [240, 120, 48],
+  "type": "bush",
+  "variant": 0
+}

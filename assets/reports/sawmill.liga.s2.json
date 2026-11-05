@@ -1,0 +1,14 @@
+{
+  "assetId": "sawmill.liga.s2",
+  "bytes": 145316,
+  "civilization": "sea_league",
+  "dimensionsMeters": [9.6, 5.34, 8.55],
+  "generator": "tools/asset-gen/assets/buildings.py::sawmill",
+  "kind": "building",
+  "materials": ["liga.wood", "liga.roof", "common.iron"],
+  "problems": [],
+  "seconds": 0.05,
+  "triangles": [780, 438, 218],
+  "type": "sawmill",
+  "visualStage": 2
+}

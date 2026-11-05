@@ -10,6 +10,7 @@ export default tseslint.config(
       'packages/db/drizzle/**',
       'apps/web/public/**',
       'Reinos_de_la_Frontera_MVP2/**',
+      '.claude/**',
     ],
   },
   js.configs.recommended,

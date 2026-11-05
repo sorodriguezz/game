@@ -1,0 +1,14 @@
+{
+  "assetId": "wall_gate.corona.s2",
+  "bytes": 530048,
+  "civilization": "imperial_crown",
+  "dimensionsMeters": [13.86, 15.36, 5.6],
+  "generator": "tools/asset-gen/assets/buildings.py::wall_gate",
+  "kind": "building",
+  "materials": ["corona.stone", "corona.roof", "corona.wood", "common.iron", "corona.cloth"],
+  "problems": [],
+  "seconds": 0.13,
+  "triangles": [2888, 1556, 777],
+  "type": "wall_gate",
+  "visualStage": 2
+}

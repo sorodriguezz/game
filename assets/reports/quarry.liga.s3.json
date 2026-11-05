@@ -1,0 +1,14 @@
+{
+  "assetId": "quarry.liga.s3",
+  "bytes": 251864,
+  "civilization": "sea_league",
+  "dimensionsMeters": [10.28, 7.34, 10.86],
+  "generator": "tools/asset-gen/assets/buildings.py::quarry",
+  "kind": "building",
+  "materials": ["common.rough_stone", "liga.stone", "liga.wood"],
+  "problems": [],
+  "seconds": 0.06,
+  "triangles": [1364, 614, 306],
+  "type": "quarry",
+  "visualStage": 3
+}

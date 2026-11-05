@@ -1,0 +1,21 @@
+{
+  "assetId": "barracks.corona.s2",
+  "bytes": 1306044,
+  "civilization": "imperial_crown",
+  "dimensionsMeters": [10.56, 9.7, 10.9],
+  "generator": "tools/asset-gen/assets/buildings.py::barracks",
+  "kind": "building",
+  "materials": [
+    "corona.stone",
+    "corona.wood",
+    "corona.plaster",
+    "corona.roof",
+    "corona.cloth",
+    "common.iron"
+  ],
+  "problems": [],
+  "seconds": 0.38,
+  "triangles": [7360, 3440, 1720],
+  "type": "barracks",
+  "visualStage": 2
+}

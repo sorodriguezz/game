@@ -1,0 +1,14 @@
+{
+  "assetId": "temple.corona.s2",
+  "bytes": 371460,
+  "civilization": "imperial_crown",
+  "dimensionsMeters": [8.52, 15.41, 9.67],
+  "generator": "tools/asset-gen/assets/buildings.py::temple",
+  "kind": "building",
+  "materials": ["corona.stone", "corona.wood", "corona.roof", "common.iron"],
+  "problems": [],
+  "seconds": 0.13,
+  "triangles": [2012, 1072, 536],
+  "type": "temple",
+  "visualStage": 2
+}

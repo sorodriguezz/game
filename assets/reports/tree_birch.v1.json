@@ -1,0 +1,13 @@
+{
+  "assetId": "tree_birch.v1",
+  "bytes": 119896,
+  "dimensionsMeters": [3.58, 8.66, 3.83],
+  "generator": "tools/asset-gen/assets/nature.py::tree_birch",
+  "kind": "prop",
+  "materials": ["common.bark", "common.foliage"],
+  "problems": [],
+  "seconds": 0.05,
+  "triangles": [560, 280, 108],
+  "type": "tree_birch",
+  "variant": 1
+}

@@ -1,0 +1,14 @@
+{
+  "assetId": "warehouse.liga.s3",
+  "bytes": 195248,
+  "civilization": "sea_league",
+  "dimensionsMeters": [11.1, 9.45, 9.43],
+  "generator": "tools/asset-gen/assets/buildings.py::warehouse",
+  "kind": "building",
+  "materials": ["liga.stone", "liga.wood", "common.iron", "liga.roof"],
+  "problems": [],
+  "seconds": 0.07,
+  "triangles": [1600, 288, 144],
+  "type": "warehouse",
+  "visualStage": 3
+}

@@ -1,0 +1,14 @@
+{
+  "assetId": "warehouse.corona.s3",
+  "bytes": 195260,
+  "civilization": "imperial_crown",
+  "dimensionsMeters": [11.1, 7.91, 9.42],
+  "generator": "tools/asset-gen/assets/buildings.py::warehouse",
+  "kind": "building",
+  "materials": ["corona.stone", "corona.wood", "common.iron", "corona.roof"],
+  "problems": [],
+  "seconds": 0.07,
+  "triangles": [1600, 288, 144],
+  "type": "warehouse",
+  "visualStage": 3
+}

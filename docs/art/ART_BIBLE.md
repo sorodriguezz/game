@@ -98,7 +98,7 @@ Regla de color de equipo: el color de bando aparece en **estandartes, gualdrapas
 ## 6. Materiales PBR
 
 - Flujo **metalness/roughness** (glTF). Texturas: `baseColor` (sRGB), `normal`, `ORM` (oclusión, rugosidad, metal).
-- **Hojas de recorte (*trim sheets*) por civilización** de 1024² compartidas por todos los edificios de esa civilización: sillería, revoque, madera, teja/pizarra, metal, tela. Un edificio usa 1–3 materiales.
+- **Biblioteca de materiales compartidos por civilización** (sillería, revoque, madera, teja/pizarra, tela) más comunes (hierro, roca, tierra, mies, follaje, corteza, agua): cada GLB referencia los materiales por nombre y el cliente usa una sola instancia por material, así que cada material cuesta una llamada de dibujo por edificio y su textura se descarga una vez. Un edificio usa ≤ 6.
 - Rugosidad: piedra 0,85–0,95; madera 0,7–0,85; teja 0,6–0,75; metal forjado 0,35–0,5 (metalness 1); agua 0,05.
 - Variación obligatoria: ningún material de superficie grande es un color uniforme; mínimo ruido macro (±8 % de luminancia) y desgaste de aristas.
 - Prohibido `metalness` > 0 en piedra o madera; prohibido emisivo salvo fuego, ventanas nocturnas o efectos.
@@ -138,8 +138,8 @@ Regla de color de equipo: el color de bando aparece en **estandartes, gualdrapas
 
 | Categoría | Triángulos | Materiales | Texturas |
 |---|---|---|---|
-| Edificio mayor (centro, castillo, templo, puerto) | ≤ 20 k → 50 % → 15 % | ≤ 3 | *trim sheet* de civilización (1024²) |
-| Edificio estándar | ≤ 10 k → 50 % → 15 % | ≤ 3 | *trim sheet* compartida |
+| Edificio mayor (centro, castillo, templo, puerto) | ≤ 20 k → 50 % → 15 % | ≤ 6 compartidos | biblioteca de la civilización (512², ORM 256²) |
+| Edificio estándar | ≤ 10 k → 50 % → 15 % | ≤ 6 compartidos | biblioteca compartida |
 | Tramo de muralla / torre | ≤ 4 k / ≤ 8 k | ≤ 2 | *trim sheet* |
 | Prop (barril, carro, valla) | ≤ 1 k | 1 | atlas de props (1024²) |
 | Árbol | ≤ 2,5 k | 2 (corteza, hojas alfa) | 512² |

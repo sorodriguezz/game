@@ -1,0 +1,21 @@
+{
+  "assetId": "farm.liga.s3",
+  "bytes": 536364,
+  "civilization": "sea_league",
+  "dimensionsMeters": [12.87, 7.03, 11.17],
+  "generator": "tools/asset-gen/assets/buildings.py::farm",
+  "kind": "building",
+  "materials": [
+    "liga.stone",
+    "liga.wood",
+    "liga.roof",
+    "common.dirt",
+    "common.crop",
+    "common.iron"
+  ],
+  "problems": [],
+  "seconds": 0.15,
+  "triangles": [2928, 1554, 776],
+  "type": "farm",
+  "visualStage": 3
+}

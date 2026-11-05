@@ -11,3 +11,5 @@ test-results/
 apps/web/tests/__screenshots__/*.actual.png
 assets/raw/
 .DS_Store
+__pycache__/
+*.pyc

@@ -1,0 +1,21 @@
+{
+  "assetId": "farm.corona.s1",
+  "bytes": 274944,
+  "civilization": "imperial_crown",
+  "dimensionsMeters": [10.3, 6.01, 10.75],
+  "generator": "tools/asset-gen/assets/buildings.py::farm",
+  "kind": "building",
+  "materials": [
+    "corona.stone",
+    "corona.wood",
+    "corona.roof",
+    "common.dirt",
+    "common.crop",
+    "common.iron"
+  ],
+  "problems": [],
+  "seconds": 0.15,
+  "triangles": [1400, 796, 397],
+  "type": "farm",
+  "visualStage": 1
+}

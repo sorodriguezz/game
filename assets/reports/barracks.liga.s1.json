@@ -1,0 +1,21 @@
+{
+  "assetId": "barracks.liga.s1",
+  "bytes": 698532,
+  "civilization": "sea_league",
+  "dimensionsMeters": [10.0, 10.66, 8.43],
+  "generator": "tools/asset-gen/assets/buildings.py::barracks",
+  "kind": "building",
+  "materials": [
+    "liga.stone",
+    "liga.wood",
+    "liga.plaster",
+    "liga.roof",
+    "common.iron",
+    "liga.cloth"
+  ],
+  "problems": [],
+  "seconds": 0.19,
+  "triangles": [4184, 1746, 872],
+  "type": "barracks",
+  "visualStage": 1
+}

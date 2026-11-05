@@ -1,0 +1,21 @@
+{
+  "assetId": "city_hall.corona.s2",
+  "bytes": 1940512,
+  "civilization": "imperial_crown",
+  "dimensionsMeters": [11.02, 16.8, 15.0],
+  "generator": "tools/asset-gen/assets/buildings.py::city_hall",
+  "kind": "building",
+  "materials": [
+    "corona.stone",
+    "corona.wood",
+    "corona.roof",
+    "corona.plaster",
+    "common.iron",
+    "corona.cloth"
+  ],
+  "problems": [],
+  "seconds": 0.52,
+  "triangles": [10988, 5560, 2778],
+  "type": "city_hall",
+  "visualStage": 2
+}

@@ -1,0 +1,14 @@
+{
+  "assetId": "wall_tower.liga.s1",
+  "bytes": 166912,
+  "civilization": "sea_league",
+  "dimensionsMeters": [4.97, 7.8, 5.1],
+  "generator": "tools/asset-gen/assets/buildings.py::wall_tower",
+  "kind": "building",
+  "materials": ["liga.stone", "common.iron"],
+  "problems": [],
+  "seconds": 0.05,
+  "triangles": [864, 488, 244],
+  "type": "wall_tower",
+  "visualStage": 1
+}

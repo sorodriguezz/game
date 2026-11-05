@@ -1,0 +1,21 @@
+{
+  "assetId": "hospital.corona.s2",
+  "bytes": 1102092,
+  "civilization": "imperial_crown",
+  "dimensionsMeters": [11.16, 9.61, 10.03],
+  "generator": "tools/asset-gen/assets/buildings.py::hospital",
+  "kind": "building",
+  "materials": [
+    "corona.stone",
+    "corona.wood",
+    "corona.plaster",
+    "corona.roof",
+    "common.crop",
+    "common.iron"
+  ],
+  "problems": [],
+  "seconds": 0.28,
+  "triangles": [6176, 2956, 1478],
+  "type": "hospital",
+  "visualStage": 2
+}

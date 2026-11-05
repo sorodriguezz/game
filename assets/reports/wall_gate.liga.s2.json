@@ -1,0 +1,14 @@
+{
+  "assetId": "wall_gate.liga.s2",
+  "bytes": 529876,
+  "civilization": "sea_league",
+  "dimensionsMeters": [13.86, 16.32, 5.6],
+  "generator": "tools/asset-gen/assets/buildings.py::wall_gate",
+  "kind": "building",
+  "materials": ["liga.stone", "liga.roof", "liga.wood", "common.iron", "liga.cloth"],
+  "problems": [],
+  "seconds": 0.13,
+  "triangles": [2888, 1556, 777],
+  "type": "wall_gate",
+  "visualStage": 2
+}

@@ -1,0 +1,21 @@
+{
+  "assetId": "city_hall.liga.s1",
+  "bytes": 863948,
+  "civilization": "sea_league",
+  "dimensionsMeters": [11.12, 11.81, 9.83],
+  "generator": "tools/asset-gen/assets/buildings.py::city_hall",
+  "kind": "building",
+  "materials": [
+    "liga.stone",
+    "liga.wood",
+    "liga.plaster",
+    "liga.roof",
+    "common.iron",
+    "liga.cloth"
+  ],
+  "problems": [],
+  "seconds": 0.21,
+  "triangles": [4920, 2320, 1160],
+  "type": "city_hall",
+  "visualStage": 1
+}

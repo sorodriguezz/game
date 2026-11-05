@@ -1,0 +1,21 @@
+{
+  "assetId": "hospital.liga.s1",
+  "bytes": 735352,
+  "civilization": "sea_league",
+  "dimensionsMeters": [10.6, 10.53, 9.76],
+  "generator": "tools/asset-gen/assets/buildings.py::hospital",
+  "kind": "building",
+  "materials": [
+    "liga.stone",
+    "liga.wood",
+    "liga.plaster",
+    "liga.roof",
+    "common.crop",
+    "common.iron"
+  ],
+  "problems": [],
+  "seconds": 0.19,
+  "triangles": [4160, 1958, 978],
+  "type": "hospital",
+  "visualStage": 1
+}

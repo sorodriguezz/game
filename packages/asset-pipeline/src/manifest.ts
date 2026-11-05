@@ -11,7 +11,8 @@ const CHECK = z.enum(['PENDING', 'PASS', 'FAIL']);
 
 export const assetEntrySchema = z
   .object({
-    assetId: z.string().regex(/^[a-z0-9_]+$/),
+    /** `tipo` o `tipo.civilización.sN` para variantes por civilización/etapa. */
+    assetId: z.string().regex(/^[a-z0-9_]+(\.[a-z0-9_]+)*$/),
     kind: z.enum(ASSET_KINDS),
     status: z.enum(ASSET_STATUSES),
     /** Ruta relativa a la raíz pública del cliente; null mientras sea blockout. */
@@ -20,6 +21,22 @@ export const assetEntrySchema = z
       .regex(/\.glb$/)
       .nullable(),
     civilization: z.enum(['imperial_crown', 'sea_league']).optional(),
+    /** Tipo de juego al que representa (p. ej. `barracks`); el cliente busca por tipo+civ+etapa. */
+    type: z
+      .string()
+      .regex(/^[a-z0-9_]+$/)
+      .optional(),
+    /** Orientación de autoría: `plaza` = puerta hacia el centro de la ciudad; `outward` = hacia fuera (puerto → mar). */
+    facing: z.enum(['plaza', 'outward']).optional(),
+    /** Triángulos por LOD (LOD0 primero). */
+    triangles: z.array(z.number().int().nonnegative()).optional(),
+    /** Materiales compartidos de la biblioteca (`assets/materials/library.json`). */
+    materials: z.array(z.string()).optional(),
+    dimensionsMeters: z.tuple([z.number(), z.number(), z.number()]).optional(),
+    bytes: z.number().int().nonnegative().optional(),
+    /** Partes bajo el suelo a propósito (pilotes en el agua, rocas enterradas). */
+    belowGroundOk: z.boolean().optional(),
+    version: z.number().int().positive().optional(),
     visualStage: z.number().int().min(1).max(3).optional(),
     units: z.literal('meters').optional(),
     lodCount: z.number().int().min(0).max(4).optional(),

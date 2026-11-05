@@ -1,0 +1,13 @@
+{
+  "assetId": "rock.v0",
+  "bytes": 37588,
+  "dimensionsMeters": [1.94, 0.85, 1.94],
+  "generator": "tools/asset-gen/assets/nature.py::rock",
+  "kind": "prop",
+  "materials": ["common.rough_stone"],
+  "problems": [],
+  "seconds": 0.02,
+  "triangles": [160, 80, 32],
+  "type": "rock",
+  "variant": 0
+}

@@ -1,0 +1,14 @@
+{
+  "assetId": "naval_arsenal.liga.s3",
+  "bytes": 273852,
+  "civilization": "sea_league",
+  "dimensionsMeters": [8.3, 7.93, 10.7],
+  "generator": "tools/asset-gen/assets/buildings.py::naval_arsenal",
+  "kind": "building",
+  "materials": ["liga.stone", "liga.wood", "liga.roof"],
+  "problems": [],
+  "seconds": 0.07,
+  "triangles": [1344, 806, 402],
+  "type": "naval_arsenal",
+  "visualStage": 3
+}

@@ -1,0 +1,14 @@
+{
+  "assetId": "wall_segment.corona.s2",
+  "bytes": 118244,
+  "civilization": "imperial_crown",
+  "dimensionsMeters": [14.6, 7.5, 3.1],
+  "generator": "tools/asset-gen/assets/buildings.py::wall_segment",
+  "kind": "building",
+  "materials": ["corona.stone"],
+  "problems": [],
+  "seconds": 0.04,
+  "triangles": [572, 342, 170],
+  "type": "wall_segment",
+  "visualStage": 2
+}

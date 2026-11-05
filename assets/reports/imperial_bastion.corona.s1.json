@@ -1,0 +1,14 @@
+{
+  "assetId": "imperial_bastion.corona.s1",
+  "bytes": 319864,
+  "civilization": "imperial_crown",
+  "dimensionsMeters": [11.93, 11.13, 11.93],
+  "generator": "tools/asset-gen/assets/buildings.py::imperial_bastion",
+  "kind": "building",
+  "materials": ["corona.stone", "corona.roof", "corona.wood", "common.iron", "corona.cloth"],
+  "problems": [],
+  "seconds": 0.13,
+  "triangles": [1880, 892, 445],
+  "type": "imperial_bastion",
+  "visualStage": 1
+}

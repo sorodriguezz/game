@@ -1,0 +1,14 @@
+{
+  "assetId": "port.liga.s1",
+  "bytes": 309832,
+  "civilization": "sea_league",
+  "dimensionsMeters": [13.3, 9.02, 14.46],
+  "generator": "tools/asset-gen/assets/buildings.py::port",
+  "kind": "building",
+  "materials": ["liga.stone", "liga.wood", "liga.roof", "common.iron"],
+  "problems": [],
+  "seconds": 0.09,
+  "triangles": [1996, 810, 404],
+  "type": "port",
+  "visualStage": 1
+}

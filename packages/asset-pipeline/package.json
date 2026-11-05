@@ -3,19 +3,23 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Contrato de manifest de assets 3D e inspección/validación automática de GLB (ADR-0008).",
+  "description": "Contrato de manifest de assets 3D e inspecci\u00f3n/validaci\u00f3n autom\u00e1tica de GLB (ADR-0008).",
   "exports": {
     ".": "./src/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "validate": "tsx src/cli.ts ../../apps/web/public/assets/manifest.json ../../apps/web/public"
+    "validate": "tsx src/cli.ts ../../apps/web/public/assets/manifest.json ../../apps/web/public",
+    "publish:assets": "tsx src/publish.ts ../.."
   },
   "dependencies": {
     "@gltf-transform/core": "^4.5.1",
-    "zod": "^4.6.7"
+    "zod": "^4.6.7",
+    "@gltf-transform/extensions": "4.5.1"
   },
   "devDependencies": {
+    "@gltf-transform/cli": "4.5.1",
+    "@gltf-transform/functions": "4.5.1",
     "tsx": "^4.23.15"
   }
 }

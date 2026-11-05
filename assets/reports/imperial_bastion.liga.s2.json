@@ -1,0 +1,14 @@
+{
+  "assetId": "imperial_bastion.liga.s2",
+  "bytes": 320088,
+  "civilization": "sea_league",
+  "dimensionsMeters": [11.93, 12.61, 11.93],
+  "generator": "tools/asset-gen/assets/buildings.py::imperial_bastion",
+  "kind": "building",
+  "materials": ["liga.stone", "liga.roof", "liga.wood", "common.iron", "liga.cloth"],
+  "problems": [],
+  "seconds": 0.12,
+  "triangles": [1880, 892, 445],
+  "type": "imperial_bastion",
+  "visualStage": 2
+}

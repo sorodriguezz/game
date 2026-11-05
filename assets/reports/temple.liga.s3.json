@@ -1,0 +1,14 @@
+{
+  "assetId": "temple.liga.s3",
+  "bytes": 492012,
+  "civilization": "sea_league",
+  "dimensionsMeters": [9.32, 20.41, 13.22],
+  "generator": "tools/asset-gen/assets/buildings.py::temple",
+  "kind": "building",
+  "materials": ["liga.stone", "liga.wood", "liga.roof", "common.iron"],
+  "problems": [],
+  "seconds": 0.13,
+  "triangles": [2672, 1454, 724],
+  "type": "temple",
+  "visualStage": 3
+}

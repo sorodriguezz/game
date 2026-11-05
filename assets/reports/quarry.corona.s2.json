@@ -1,0 +1,14 @@
+{
+  "assetId": "quarry.corona.s2",
+  "bytes": 226020,
+  "civilization": "imperial_crown",
+  "dimensionsMeters": [10.28, 5.99, 10.86],
+  "generator": "tools/asset-gen/assets/buildings.py::quarry",
+  "kind": "building",
+  "materials": ["common.rough_stone", "corona.stone", "corona.wood"],
+  "problems": [],
+  "seconds": 0.07,
+  "triangles": [1232, 534, 266],
+  "type": "quarry",
+  "visualStage": 2
+}

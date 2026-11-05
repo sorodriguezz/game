@@ -1,0 +1,14 @@
+{
+  "assetId": "wall_tower.corona.s2",
+  "bytes": 182624,
+  "civilization": "imperial_crown",
+  "dimensionsMeters": [5.26, 14.07, 5.39],
+  "generator": "tools/asset-gen/assets/buildings.py::wall_tower",
+  "kind": "building",
+  "materials": ["corona.stone", "corona.roof", "common.iron"],
+  "problems": [],
+  "seconds": 0.06,
+  "triangles": [964, 536, 268],
+  "type": "wall_tower",
+  "visualStage": 2
+}

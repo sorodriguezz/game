@@ -55,6 +55,32 @@ describe('API HTTP /api/v1', () => {
     expect(res.headers['x-content-type-options']).toBe('nosniff');
   });
 
+  it('mantiene el límite global de peticiones y el formato del error 429', async () => {
+    const limitedApp = await createApp(h.ctx, {
+      production: false,
+      allowedOrigins: [ORIGIN],
+      rateLimitPerMinute: 2,
+      authRateLimitPerMinute: 10,
+      tactical: {
+        trainingEnabled: false,
+        worldPvpEnabled: false,
+        serviceToken: '',
+        health: async () => ({ ok: false, capacityAvailable: false }),
+      },
+    });
+    try {
+      const server = limitedApp.getHttpServer();
+      await request(server).get('/api/v1/health').expect(200);
+      await request(server).get('/api/v1/health').expect(200);
+      const res = await request(server).get('/api/v1/health').expect(429);
+      expect(res.body.code).toBe('RATE_LIMITED');
+      expect(res.body.correlationId).toBe(res.headers['x-request-id']);
+      expect(res.headers['retry-after']).toBeTruthy();
+    } finally {
+      await limitedApp.close();
+    }
+  });
+
   it('errores con código estable, mensaje y correlationId', async () => {
     const res = await request(app.getHttpServer()).get('/api/v1/worlds').expect(401);
     expect(res.body).toMatchObject({ code: 'UNAUTHENTICATED' });

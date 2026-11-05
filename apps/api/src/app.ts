@@ -1,8 +1,15 @@
 import 'reflect-metadata';
 import { Module, type INestApplication } from '@nestjs/common';
-import { APP_FILTER, APP_GUARD, NestFactory } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, NestFactory, Reflector } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import {
+  ThrottlerGuard,
+  ThrottlerModule,
+  getOptionsToken,
+  getStorageToken,
+  type ThrottlerModuleOptions,
+  type ThrottlerStorage,
+} from '@nestjs/throttler';
 import cookieParser from 'cookie-parser';
 import { API_PREFIX } from '@reinos/contracts';
 import {
@@ -62,6 +69,7 @@ export async function createApp(
       InternalTrainingController,
     ],
     providers: [
+      Reflector,
       { provide: CORE_CONTEXT, useValue: ctx },
       { provide: API_CONFIG, useValue: config },
       { provide: AUTH_SERVICE, useValue: new AuthService(ctx) },
@@ -82,7 +90,16 @@ export async function createApp(
           }),
       },
       { provide: APP_GUARD, useClass: SessionGuard },
-      { provide: APP_GUARD, useClass: ThrottlerGuard },
+      {
+        provide: APP_GUARD,
+        // Resolver explícitamente evita mezclar tokens Reflector de ESM/CJS en tsx.
+        inject: [getOptionsToken(), getStorageToken(), Reflector],
+        useFactory: (
+          options: ThrottlerModuleOptions,
+          storage: ThrottlerStorage,
+          reflector: Reflector,
+        ) => new ThrottlerGuard(options, storage, reflector),
+      },
       { provide: APP_FILTER, useClass: ApiExceptionFilter },
     ],
   })

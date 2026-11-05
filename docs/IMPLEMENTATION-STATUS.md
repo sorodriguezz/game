@@ -2,6 +2,14 @@
 
 **Fecha:** 2026-11-05 · **Regla:** nada se marca como terminado sin prueba ejecutada. Los resultados de abajo son de ejecuciones reales en este repositorio.
 
+Corrección de arranque local (G0-01 / FR-001, ADR-0001/0017): `ThrottlerGuard` se crea con
+una fábrica y tokens explícitos, con `Reflector` registrado en el módulo, para evitar el
+`UnknownDependenciesException` observado con `tsx`. No cambia contratos ni datos; rollback:
+revertir el proveedor en `apps/api/src/app.ts`. Validado con Node 22.23.4 + `tsx`, bundle
+de API, health a través del proxy de Vite (200), sesión ausente (401) y registro inválido
+(422). Suite completa: 101 tests en 11 archivos con PostgreSQL 17; incluye una prueba
+del límite global (429 y `Retry-After`). Typecheck, ESLint y Prettier de la API sin errores.
+
 ## 0. MVP 2 — resumen
 
 El desglose completo (ADR-0021…0037, PRD, backlog, plan de QA y decisiones D-01…D-17) está en

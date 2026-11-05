@@ -1,0 +1,3088 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.accounts": {
+      "name": "accounts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "display_name": {
+          "name": "display_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'ACTIVE'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "accounts_email_uq": {
+          "name": "accounts_email_uq",
+          "columns": [
+            {
+              "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "accounts_display_name_lower_uq": {
+          "name": "accounts_display_name_lower_uq",
+          "columns": [
+            {
+              "expression": "lower(\"display_name\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.alliance_members": {
+      "name": "alliance_members",
+      "schema": "",
+      "columns": {
+        "world_id": {
+          "name": "world_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "alliance_id": {
+          "name": "alliance_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "alliance_members_world_id_account_id_fkey": {
+          "name": "alliance_members_world_id_account_id_fkey",
+          "tableFrom": "alliance_members",
+          "tableTo": "world_players",
+          "columnsFrom": [
+            "world_id",
+            "account_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "account_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "alliance_members_world_id_alliance_id_fkey": {
+          "name": "alliance_members_world_id_alliance_id_fkey",
+          "tableFrom": "alliance_members",
+          "tableTo": "alliances",
+          "columnsFrom": [
+            "world_id",
+            "alliance_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "alliance_members_pkey": {
+          "name": "alliance_members_pkey",
+          "columns": [
+            "world_id",
+            "account_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.alliances": {
+      "name": "alliances",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "world_id": {
+          "name": "world_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "invite_code": {
+          "name": "invite_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "leader_account_id": {
+          "name": "leader_account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "alliances_world_id_fkey": {
+          "name": "alliances_world_id_fkey",
+          "tableFrom": "alliances",
+          "tableTo": "worlds",
+          "columnsFrom": [
+            "world_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "alliances_world_id_leader_account_id_fkey": {
+          "name": "alliances_world_id_leader_account_id_fkey",
+          "tableFrom": "alliances",
+          "tableTo": "world_players",
+          "columnsFrom": [
+            "world_id",
+            "leader_account_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "account_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "alliances_world_id_id_key": {
+          "name": "alliances_world_id_id_key",
+          "nullsNotDistinct": false,
+          "columns": [
+            "world_id",
+            "id"
+          ]
+        },
+        "alliances_world_id_invite_code_key": {
+          "name": "alliances_world_id_invite_code_key",
+          "nullsNotDistinct": false,
+          "columns": [
+            "world_id",
+            "invite_code"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.army_movements": {
+      "name": "army_movements",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "world_id": {
+          "name": "world_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "owner_account_id": {
+          "name": "owner_account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "origin_village_id": {
+          "name": "origin_village_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "target_village_id": {
+          "name": "target_village_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mission": {
+          "name": "mission",
+          "type": "movement_mission",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "movement_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "units": {
+          "name": "units",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "loot": {
+          "name": "loot",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "departed_at": {
+          "name": "departed_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "arrives_at": {
+          "name": "arrives_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "returns_at": {
+          "name": "returns_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "battle_id": {
+          "name": "battle_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "army_movements_target_idx": {
+          "name": "army_movements_target_idx",
+          "columns": [
+            {
+              "expression": "world_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "target_village_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "arrives_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "army_movements_origin_idx": {
+          "name": "army_movements_origin_idx",
+          "columns": [
+            {
+              "expression": "origin_village_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "army_movements_origin_fk": {
+          "name": "army_movements_origin_fk",
+          "tableFrom": "army_movements",
+          "tableTo": "villages",
+          "columnsFrom": [
+            "world_id",
+            "origin_village_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "army_movements_target_fk": {
+          "name": "army_movements_target_fk",
+          "tableFrom": "army_movements",
+          "tableTo": "villages",
+          "columnsFrom": [
+            "world_id",
+            "target_village_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "army_movements_owner_fk": {
+          "name": "army_movements_owner_fk",
+          "tableFrom": "army_movements",
+          "tableTo": "world_players",
+          "columnsFrom": [
+            "world_id",
+            "owner_account_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "account_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "army_movements_world_id_uq": {
+          "name": "army_movements_world_id_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "world_id",
+            "id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "army_movements_distinct_ck": {
+          "name": "army_movements_distinct_ck",
+          "value": "\"army_movements\".\"origin_village_id\" <> \"army_movements\".\"target_village_id\""
+        },
+        "army_movements_time_ck": {
+          "name": "army_movements_time_ck",
+          "value": "\"army_movements\".\"arrives_at\" > \"army_movements\".\"departed_at\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.battles": {
+      "name": "battles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "world_id": {
+          "name": "world_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "movement_id": {
+          "name": "movement_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attacker_account_id": {
+          "name": "attacker_account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "defender_account_id": {
+          "name": "defender_account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "attacker_village_id": {
+          "name": "attacker_village_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "defender_village_id": {
+          "name": "defender_village_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mission": {
+          "name": "mission",
+          "type": "movement_mission",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "outcome": {
+          "name": "outcome",
+          "type": "battle_outcome",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "occurred_at": {
+          "name": "occurred_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "seed": {
+          "name": "seed",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ruleset_version": {
+          "name": "ruleset_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'VILLAGE'"
+        },
+        "encounter_key": {
+          "name": "encounter_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "field_x_milli": {
+          "name": "field_x_milli",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "field_y_milli": {
+          "name": "field_y_milli",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "snapshot": {
+          "name": "snapshot",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "result": {
+          "name": "result",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "battles_encounter_uq": {
+          "name": "battles_encounter_uq",
+          "columns": [
+            {
+              "expression": "world_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "encounter_key",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "battles_movement_idx": {
+          "name": "battles_movement_idx",
+          "columns": [
+            {
+              "expression": "movement_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "battles_attacker_idx": {
+          "name": "battles_attacker_idx",
+          "columns": [
+            {
+              "expression": "world_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "attacker_account_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "occurred_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "battles_defender_idx": {
+          "name": "battles_defender_idx",
+          "columns": [
+            {
+              "expression": "world_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "defender_account_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "occurred_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "battles_movement_fk": {
+          "name": "battles_movement_fk",
+          "tableFrom": "battles",
+          "tableTo": "army_movements",
+          "columnsFrom": [
+            "world_id",
+            "movement_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "battles_attacker_village_fk": {
+          "name": "battles_attacker_village_fk",
+          "tableFrom": "battles",
+          "tableTo": "villages",
+          "columnsFrom": [
+            "world_id",
+            "attacker_village_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "battles_defender_village_fk": {
+          "name": "battles_defender_village_fk",
+          "tableFrom": "battles",
+          "tableTo": "villages",
+          "columnsFrom": [
+            "world_id",
+            "defender_village_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.construction_orders": {
+      "name": "construction_orders",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "world_id": {
+          "name": "world_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "village_id": {
+          "name": "village_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "plot": {
+          "name": "plot",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "building_type": {
+          "name": "building_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "target_level": {
+          "name": "target_level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost_wood": {
+          "name": "cost_wood",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost_stone": {
+          "name": "cost_stone",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost_iron": {
+          "name": "cost_iron",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost_food": {
+          "name": "cost_food",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "order_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'IN_PROGRESS'"
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "completes_at": {
+          "name": "completes_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "construction_orders_one_active_uq": {
+          "name": "construction_orders_one_active_uq",
+          "columns": [
+            {
+              "expression": "village_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"construction_orders\".\"status\" = 'IN_PROGRESS'",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "construction_orders_village_fk": {
+          "name": "construction_orders_village_fk",
+          "tableFrom": "construction_orders",
+          "tableTo": "villages",
+          "columnsFrom": [
+            "world_id",
+            "village_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "construction_orders_time_ck": {
+          "name": "construction_orders_time_ck",
+          "value": "\"construction_orders\".\"completes_at\" > \"construction_orders\".\"started_at\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.garrisons": {
+      "name": "garrisons",
+      "schema": "",
+      "columns": {
+        "world_id": {
+          "name": "world_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "village_id": {
+          "name": "village_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "origin_village_id": {
+          "name": "origin_village_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "owner_account_id": {
+          "name": "owner_account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit_type": {
+          "name": "unit_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "garrisons_world_id_village_id_fkey": {
+          "name": "garrisons_world_id_village_id_fkey",
+          "tableFrom": "garrisons",
+          "tableTo": "villages",
+          "columnsFrom": [
+            "world_id",
+            "village_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "garrisons_world_id_origin_village_id_fkey": {
+          "name": "garrisons_world_id_origin_village_id_fkey",
+          "tableFrom": "garrisons",
+          "tableTo": "villages",
+          "columnsFrom": [
+            "world_id",
+            "origin_village_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "garrisons_world_id_owner_account_id_fkey": {
+          "name": "garrisons_world_id_owner_account_id_fkey",
+          "tableFrom": "garrisons",
+          "tableTo": "world_players",
+          "columnsFrom": [
+            "world_id",
+            "owner_account_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "account_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "garrisons_pkey": {
+          "name": "garrisons_pkey",
+          "columns": [
+            "village_id",
+            "origin_village_id",
+            "unit_type"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "garrisons_quantity_check": {
+          "name": "garrisons_quantity_check",
+          "value": "\"garrisons\".\"quantity\">=0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.idempotency_records": {
+      "name": "idempotency_records",
+      "schema": "",
+      "columns": {
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "world_id": {
+          "name": "world_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "command": {
+          "name": "command",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "request_hash": {
+          "name": "request_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "response": {
+          "name": "response",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "idempotency_records_account_id_accounts_id_fk": {
+          "name": "idempotency_records_account_id_accounts_id_fk",
+          "tableFrom": "idempotency_records",
+          "tableTo": "accounts",
+          "columnsFrom": [
+            "account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "idempotency_records_world_id_worlds_id_fk": {
+          "name": "idempotency_records_world_id_worlds_id_fk",
+          "tableFrom": "idempotency_records",
+          "tableTo": "worlds",
+          "columnsFrom": [
+            "world_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "idempotency_records_account_id_world_id_command_key_pk": {
+          "name": "idempotency_records_account_id_world_id_command_key_pk",
+          "columns": [
+            "account_id",
+            "world_id",
+            "command",
+            "key"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.outbox": {
+      "name": "outbox",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "world_id": {
+          "name": "world_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "payload": {
+          "name": "payload",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "published_at": {
+          "name": "published_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "outbox_unpublished_idx": {
+          "name": "outbox_unpublished_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"outbox\".\"published_at\" is null",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "outbox_world_id_worlds_id_fk": {
+          "name": "outbox_world_id_worlds_id_fk",
+          "tableFrom": "outbox",
+          "tableTo": "worlds",
+          "columnsFrom": [
+            "world_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.recruitment_orders": {
+      "name": "recruitment_orders",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "world_id": {
+          "name": "world_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "village_id": {
+          "name": "village_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "trained_at": {
+          "name": "trained_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit_type": {
+          "name": "unit_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost_wood": {
+          "name": "cost_wood",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost_stone": {
+          "name": "cost_stone",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost_iron": {
+          "name": "cost_iron",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost_food": {
+          "name": "cost_food",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "order_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'IN_PROGRESS'"
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "completes_at": {
+          "name": "completes_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "recruitment_orders_queue_idx": {
+          "name": "recruitment_orders_queue_idx",
+          "columns": [
+            {
+              "expression": "village_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "trained_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "completes_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "recruitment_orders_village_fk": {
+          "name": "recruitment_orders_village_fk",
+          "tableFrom": "recruitment_orders",
+          "tableTo": "villages",
+          "columnsFrom": [
+            "world_id",
+            "village_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "recruitment_orders_qty_ck": {
+          "name": "recruitment_orders_qty_ck",
+          "value": "\"recruitment_orders\".\"quantity\" > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.resource_accounts": {
+      "name": "resource_accounts",
+      "schema": "",
+      "columns": {
+        "world_id": {
+          "name": "world_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "village_id": {
+          "name": "village_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "wood_milli": {
+          "name": "wood_milli",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stone_milli": {
+          "name": "stone_milli",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "iron_milli": {
+          "name": "iron_milli",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "food_milli": {
+          "name": "food_milli",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "wood_rem": {
+          "name": "wood_rem",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "0"
+        },
+        "stone_rem": {
+          "name": "stone_rem",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "0"
+        },
+        "iron_rem": {
+          "name": "iron_rem",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "0"
+        },
+        "food_rem": {
+          "name": "food_rem",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "0"
+        },
+        "wood_rate_milli_h": {
+          "name": "wood_rate_milli_h",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stone_rate_milli_h": {
+          "name": "stone_rate_milli_h",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "iron_rate_milli_h": {
+          "name": "iron_rate_milli_h",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "food_rate_milli_h": {
+          "name": "food_rate_milli_h",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "capacity_milli": {
+          "name": "capacity_milli",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_settled_at": {
+          "name": "last_settled_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "resource_accounts_village_fk": {
+          "name": "resource_accounts_village_fk",
+          "tableFrom": "resource_accounts",
+          "tableTo": "villages",
+          "columnsFrom": [
+            "world_id",
+            "village_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "resource_accounts_nonneg_ck": {
+          "name": "resource_accounts_nonneg_ck",
+          "value": "\"resource_accounts\".\"wood_milli\" >= 0 and \"resource_accounts\".\"stone_milli\" >= 0 and \"resource_accounts\".\"iron_milli\" >= 0 and \"resource_accounts\".\"food_milli\" >= 0"
+        },
+        "resource_accounts_rem_ck": {
+          "name": "resource_accounts_rem_ck",
+          "value": "\"resource_accounts\".\"wood_rem\" between 0 and 3599999 and \"resource_accounts\".\"stone_rem\" between 0 and 3599999 and \"resource_accounts\".\"iron_rem\" between 0 and 3599999 and \"resource_accounts\".\"food_rem\" between 0 and 3599999"
+        },
+        "resource_accounts_capacity_ck": {
+          "name": "resource_accounts_capacity_ck",
+          "value": "\"resource_accounts\".\"capacity_milli\" > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.resource_ledger": {
+      "name": "resource_ledger",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "world_id": {
+          "name": "world_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "village_id": {
+          "name": "village_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ref_id": {
+          "name": "ref_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "wood_milli": {
+          "name": "wood_milli",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stone_milli": {
+          "name": "stone_milli",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "iron_milli": {
+          "name": "iron_milli",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "food_milli": {
+          "name": "food_milli",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "occurred_at": {
+          "name": "occurred_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "resource_ledger_village_idx": {
+          "name": "resource_ledger_village_idx",
+          "columns": [
+            {
+              "expression": "world_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "village_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "occurred_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "resource_ledger_village_fk": {
+          "name": "resource_ledger_village_fk",
+          "tableFrom": "resource_ledger",
+          "tableTo": "villages",
+          "columnsFrom": [
+            "world_id",
+            "village_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "resource_ledger_ref_uq": {
+          "name": "resource_ledger_ref_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "village_id",
+            "reason",
+            "ref_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.scheduled_events": {
+      "name": "scheduled_events",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "world_id": {
+          "name": "world_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "village_id": {
+          "name": "village_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "secondary_village_id": {
+          "name": "secondary_village_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "due_at": {
+          "name": "due_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "priority": {
+          "name": "priority",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "event_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PENDING'"
+        },
+        "attempts": {
+          "name": "attempts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "available_at": {
+          "name": "available_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lease_owner": {
+          "name": "lease_owner",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lease_until": {
+          "name": "lease_until",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dedupe_key": {
+          "name": "dedupe_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "payload": {
+          "name": "payload",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_error": {
+          "name": "last_error",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "processed_at": {
+          "name": "processed_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "scheduled_events_dedupe_uq": {
+          "name": "scheduled_events_dedupe_uq",
+          "columns": [
+            {
+              "expression": "world_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "dedupe_key",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "scheduled_events_claim_idx": {
+          "name": "scheduled_events_claim_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "available_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"scheduled_events\".\"status\" in ('PENDING','PROCESSING')",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "scheduled_events_village_idx": {
+          "name": "scheduled_events_village_idx",
+          "columns": [
+            {
+              "expression": "village_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "due_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"scheduled_events\".\"status\" in ('PENDING','PROCESSING')",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "scheduled_events_secondary_idx": {
+          "name": "scheduled_events_secondary_idx",
+          "columns": [
+            {
+              "expression": "secondary_village_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "due_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"scheduled_events\".\"status\" in ('PENDING','PROCESSING')",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "scheduled_events_world_id_worlds_id_fk": {
+          "name": "scheduled_events_world_id_worlds_id_fk",
+          "tableFrom": "scheduled_events",
+          "tableTo": "worlds",
+          "columnsFrom": [
+            "world_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "scheduled_events_village_fk": {
+          "name": "scheduled_events_village_fk",
+          "tableFrom": "scheduled_events",
+          "tableTo": "villages",
+          "columnsFrom": [
+            "world_id",
+            "village_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "scheduled_events_secondary_village_fk": {
+          "name": "scheduled_events_secondary_village_fk",
+          "tableFrom": "scheduled_events",
+          "tableTo": "villages",
+          "columnsFrom": [
+            "world_id",
+            "secondary_village_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sessions": {
+      "name": "sessions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "csrf_token": {
+          "name": "csrf_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "revoked_at": {
+          "name": "revoked_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_seen_at": {
+          "name": "last_seen_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "sessions_token_hash_uq": {
+          "name": "sessions_token_hash_uq",
+          "columns": [
+            {
+              "expression": "token_hash",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sessions_account_idx": {
+          "name": "sessions_account_idx",
+          "columns": [
+            {
+              "expression": "account_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "sessions_account_id_accounts_id_fk": {
+          "name": "sessions_account_id_accounts_id_fk",
+          "tableFrom": "sessions",
+          "tableTo": "accounts",
+          "columnsFrom": [
+            "account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.settlement_orders": {
+      "name": "settlement_orders",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "world_id": {
+          "name": "world_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "origin_village_id": {
+          "name": "origin_village_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "owner_account_id": {
+          "name": "owner_account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "x": {
+          "name": "x",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "y": {
+          "name": "y",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "departed_at": {
+          "name": "departed_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "arrives_at": {
+          "name": "arrives_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "order_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'IN_PROGRESS'"
+        }
+      },
+      "indexes": {
+        "settlement_spot_uq": {
+          "name": "settlement_spot_uq",
+          "columns": [
+            {
+              "expression": "world_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "x",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "y",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"settlement_orders\".\"status\"='IN_PROGRESS'",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "settlement_orders_world_id_origin_village_id_fkey": {
+          "name": "settlement_orders_world_id_origin_village_id_fkey",
+          "tableFrom": "settlement_orders",
+          "tableTo": "villages",
+          "columnsFrom": [
+            "world_id",
+            "origin_village_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "settlement_orders_world_id_owner_account_id_fkey": {
+          "name": "settlement_orders_world_id_owner_account_id_fkey",
+          "tableFrom": "settlement_orders",
+          "tableTo": "world_players",
+          "columnsFrom": [
+            "world_id",
+            "owner_account_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "account_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.training_matches": {
+      "name": "training_matches",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "invite_code": {
+          "name": "invite_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "host_account_id": {
+          "name": "host_account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "guest_account_id": {
+          "name": "guest_account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "opponent": {
+          "name": "opponent",
+          "type": "training_opponent",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "training_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "terrain_id": {
+          "name": "terrain_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "host_civilization": {
+          "name": "host_civilization",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "host_army": {
+          "name": "host_army",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "guest_civilization": {
+          "name": "guest_civilization",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "guest_army": {
+          "name": "guest_army",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tactical_ruleset_version": {
+          "name": "tactical_ruleset_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "seed": {
+          "name": "seed",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "snapshot": {
+          "name": "snapshot",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "snapshot_hash": {
+          "name": "snapshot_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "room_id": {
+          "name": "room_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "result": {
+          "name": "result",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "result_hash": {
+          "name": "result_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "replay": {
+          "name": "replay",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "finished_at": {
+          "name": "finished_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "training_matches_invite_uq": {
+          "name": "training_matches_invite_uq",
+          "columns": [
+            {
+              "expression": "invite_code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "training_matches_host_idx": {
+          "name": "training_matches_host_idx",
+          "columns": [
+            {
+              "expression": "host_account_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "training_matches_guest_idx": {
+          "name": "training_matches_guest_idx",
+          "columns": [
+            {
+              "expression": "guest_account_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "training_matches_host_account_id_accounts_id_fk": {
+          "name": "training_matches_host_account_id_accounts_id_fk",
+          "tableFrom": "training_matches",
+          "tableTo": "accounts",
+          "columnsFrom": [
+            "host_account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "training_matches_guest_account_id_accounts_id_fk": {
+          "name": "training_matches_guest_account_id_accounts_id_fk",
+          "tableFrom": "training_matches",
+          "tableTo": "accounts",
+          "columnsFrom": [
+            "guest_account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "training_matches_guest_ck": {
+          "name": "training_matches_guest_ck",
+          "value": "\"training_matches\".\"guest_account_id\" is null or \"training_matches\".\"guest_account_id\" <> \"training_matches\".\"host_account_id\""
+        },
+        "training_matches_result_ck": {
+          "name": "training_matches_result_ck",
+          "value": "(\"training_matches\".\"status\" = 'FINISHED') = (\"training_matches\".\"result\" is not null)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.troop_stacks": {
+      "name": "troop_stacks",
+      "schema": "",
+      "columns": {
+        "world_id": {
+          "name": "world_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "village_id": {
+          "name": "village_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit_type": {
+          "name": "unit_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "troop_stacks_village_fk": {
+          "name": "troop_stacks_village_fk",
+          "tableFrom": "troop_stacks",
+          "tableTo": "villages",
+          "columnsFrom": [
+            "world_id",
+            "village_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "troop_stacks_village_id_unit_type_pk": {
+          "name": "troop_stacks_village_id_unit_type_pk",
+          "columns": [
+            "village_id",
+            "unit_type"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "troop_stacks_qty_ck": {
+          "name": "troop_stacks_qty_ck",
+          "value": "\"troop_stacks\".\"quantity\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.village_buildings": {
+      "name": "village_buildings",
+      "schema": "",
+      "columns": {
+        "world_id": {
+          "name": "world_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "village_id": {
+          "name": "village_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "plot": {
+          "name": "plot",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "level": {
+          "name": "level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "village_buildings_type_idx": {
+          "name": "village_buildings_type_idx",
+          "columns": [
+            {
+              "expression": "village_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "village_buildings_village_fk": {
+          "name": "village_buildings_village_fk",
+          "tableFrom": "village_buildings",
+          "tableTo": "villages",
+          "columnsFrom": [
+            "world_id",
+            "village_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "village_buildings_village_id_plot_pk": {
+          "name": "village_buildings_village_id_plot_pk",
+          "columns": [
+            "village_id",
+            "plot"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "village_buildings_level_ck": {
+          "name": "village_buildings_level_ck",
+          "value": "\"village_buildings\".\"level\" >= 1"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.villages": {
+      "name": "villages",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "world_id": {
+          "name": "world_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "owner_account_id": {
+          "name": "owner_account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kind": {
+          "name": "kind",
+          "type": "village_kind",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PLAYER'"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "x": {
+          "name": "x",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "y": {
+          "name": "y",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "coastal": {
+          "name": "coastal",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_capital": {
+          "name": "is_capital",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "loyalty": {
+          "name": "loyalty",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 100
+        },
+        "parent_village_id": {
+          "name": "parent_village_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "traps_used": {
+          "name": "traps_used",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "doctrine_reserve_percent": {
+          "name": "doctrine_reserve_percent",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "doctrine_retreat_threshold_percent": {
+          "name": "doctrine_retreat_threshold_percent",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "villages_owner_idx": {
+          "name": "villages_owner_idx",
+          "columns": [
+            {
+              "expression": "world_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "owner_account_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "villages_world_id_worlds_id_fk": {
+          "name": "villages_world_id_worlds_id_fk",
+          "tableFrom": "villages",
+          "tableTo": "worlds",
+          "columnsFrom": [
+            "world_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "villages_owner_member_fk": {
+          "name": "villages_owner_member_fk",
+          "tableFrom": "villages",
+          "tableTo": "world_players",
+          "columnsFrom": [
+            "world_id",
+            "owner_account_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "account_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "villages_parent_fk": {
+          "name": "villages_parent_fk",
+          "tableFrom": "villages",
+          "tableTo": "villages",
+          "columnsFrom": [
+            "world_id",
+            "parent_village_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "villages_world_id_uq": {
+          "name": "villages_world_id_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "world_id",
+            "id"
+          ]
+        },
+        "villages_world_xy_uq": {
+          "name": "villages_world_xy_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "world_id",
+            "x",
+            "y"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "villages_loyalty_check": {
+          "name": "villages_loyalty_check",
+          "value": "\"villages\".\"loyalty\" between 0 and 100"
+        },
+        "villages_traps_used_check": {
+          "name": "villages_traps_used_check",
+          "value": "\"villages\".\"traps_used\">=0"
+        },
+        "villages_owner_kind_ck": {
+          "name": "villages_owner_kind_ck",
+          "value": "(\"villages\".\"kind\" <> 'PLAYER' or \"villages\".\"owner_account_id\" is not null) and (\"villages\".\"kind\" <> 'NPC' or \"villages\".\"owner_account_id\" is null)"
+        },
+        "villages_doctrine_reserve_ck": {
+          "name": "villages_doctrine_reserve_ck",
+          "value": "\"villages\".\"doctrine_reserve_percent\" between 0 and 100"
+        },
+        "villages_doctrine_retreat_ck": {
+          "name": "villages_doctrine_retreat_ck",
+          "value": "\"villages\".\"doctrine_retreat_threshold_percent\" is null or \"villages\".\"doctrine_retreat_threshold_percent\" >= 100"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.world_players": {
+      "name": "world_players",
+      "schema": "",
+      "columns": {
+        "world_id": {
+          "name": "world_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "civilization": {
+          "name": "civilization",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "join_ordinal": {
+          "name": "join_ordinal",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "joined_at": {
+          "name": "joined_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "protection_until": {
+          "name": "protection_until",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "world_players_world_id_worlds_id_fk": {
+          "name": "world_players_world_id_worlds_id_fk",
+          "tableFrom": "world_players",
+          "tableTo": "worlds",
+          "columnsFrom": [
+            "world_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "world_players_account_id_accounts_id_fk": {
+          "name": "world_players_account_id_accounts_id_fk",
+          "tableFrom": "world_players",
+          "tableTo": "accounts",
+          "columnsFrom": [
+            "account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "world_players_world_id_account_id_pk": {
+          "name": "world_players_world_id_account_id_pk",
+          "columns": [
+            "world_id",
+            "account_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "world_players_ordinal_uq": {
+          "name": "world_players_ordinal_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "world_id",
+            "join_ordinal"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.worlds": {
+      "name": "worlds",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "world_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PLANNED'"
+        },
+        "profile": {
+          "name": "profile",
+          "type": "world_profile",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ruleset_version": {
+          "name": "ruleset_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "speed_multiplier": {
+          "name": "speed_multiplier",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "map_seed": {
+          "name": "map_seed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "map_size": {
+          "name": "map_size",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "protection_hours": {
+          "name": "protection_hours",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "opens_at": {
+          "name": "opens_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ends_at": {
+          "name": "ends_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "worlds_slug_uq": {
+          "name": "worlds_slug_uq",
+          "columns": [
+            {
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "worlds_speed_ck": {
+          "name": "worlds_speed_ck",
+          "value": "\"worlds\".\"speed_multiplier\" between 1 and 1000"
+        },
+        "worlds_map_size_ck": {
+          "name": "worlds_map_size_ck",
+          "value": "\"worlds\".\"map_size\" between 16 and 1024"
+        },
+        "worlds_protection_ck": {
+          "name": "worlds_protection_ck",
+          "value": "\"worlds\".\"protection_hours\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.wounded_stacks": {
+      "name": "wounded_stacks",
+      "schema": "",
+      "columns": {
+        "world_id": {
+          "name": "world_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "village_id": {
+          "name": "village_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit_type": {
+          "name": "unit_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "wounded_stacks_village_fk": {
+          "name": "wounded_stacks_village_fk",
+          "tableFrom": "wounded_stacks",
+          "tableTo": "villages",
+          "columnsFrom": [
+            "world_id",
+            "village_id"
+          ],
+          "columnsTo": [
+            "world_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "wounded_stacks_village_id_unit_type_pk": {
+          "name": "wounded_stacks_village_id_unit_type_pk",
+          "columns": [
+            "village_id",
+            "unit_type"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "wounded_stacks_qty_ck": {
+          "name": "wounded_stacks_qty_ck",
+          "value": "\"wounded_stacks\".\"quantity\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.battle_outcome": {
+      "name": "battle_outcome",
+      "schema": "public",
+      "values": [
+        "ATTACKER",
+        "DEFENDER"
+      ]
+    },
+    "public.event_status": {
+      "name": "event_status",
+      "schema": "public",
+      "values": [
+        "PENDING",
+        "PROCESSING",
+        "DONE",
+        "DEAD"
+      ]
+    },
+    "public.movement_mission": {
+      "name": "movement_mission",
+      "schema": "public",
+      "values": [
+        "ATTACK",
+        "RAID",
+        "TRANSFER",
+        "REINFORCE",
+        "CONQUER"
+      ]
+    },
+    "public.movement_status": {
+      "name": "movement_status",
+      "schema": "public",
+      "values": [
+        "IN_TRANSIT",
+        "RETURNING",
+        "COMPLETED"
+      ]
+    },
+    "public.order_status": {
+      "name": "order_status",
+      "schema": "public",
+      "values": [
+        "IN_PROGRESS",
+        "COMPLETED",
+        "CANCELLED"
+      ]
+    },
+    "public.training_opponent": {
+      "name": "training_opponent",
+      "schema": "public",
+      "values": [
+        "DOCTRINE",
+        "PLAYER"
+      ]
+    },
+    "public.training_status": {
+      "name": "training_status",
+      "schema": "public",
+      "values": [
+        "WAITING_OPPONENT",
+        "LIVE",
+        "FINISHED",
+        "EXPIRED",
+        "FAILED"
+      ]
+    },
+    "public.village_kind": {
+      "name": "village_kind",
+      "schema": "public",
+      "values": [
+        "PLAYER",
+        "NPC",
+        "OASIS"
+      ]
+    },
+    "public.world_profile": {
+      "name": "world_profile",
+      "schema": "public",
+      "values": [
+        "test",
+        "alpha",
+        "seasonal"
+      ]
+    },
+    "public.world_status": {
+      "name": "world_status",
+      "schema": "public",
+      "values": [
+        "PLANNED",
+        "OPEN",
+        "WONDER_ERA",
+        "FINALIZING",
+        "ARCHIVED"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "id": "ff2f8c80-16ed-4e76-b896-a6f7e6d42f63",
+  "prevId": "dac1a036-09d3-49b4-99c9-2a3c8d35a966"
+}

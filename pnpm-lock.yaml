@@ -271,6 +271,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@reinos/game-rules':
+        specifier: workspace:*
+        version: link:../game-rules
       '@reinos/game-config':
         specifier: workspace:*
         version: link:../game-config

@@ -10,6 +10,19 @@ de API, health a través del proxy de Vite (200), sesión ausente (401) y regist
 (422). Suite completa: 101 tests en 11 archivos con PostgreSQL 17; incluye una prueba
 del límite global (429 y `Retry-After`). Typecheck, ESLint y Prettier de la API sin errores.
 
+## Rediseño terrestre — encargo más reciente
+
+Implementación y evidencia en [`territory/DESIGN.md`](territory/DESIGN.md), decisión
+[ADR-0056](adr/ADR-0056-reinos-terrestres.md). Nuevo mundo **Reinos Terrestres ×50**,
+reglas `frontier-alpha.1`, tres razas, mapa fijo terrestre y aldeas 3D con tres murallas.
+Incluye expansión, traslado de tropas propias, refuerzo aliado, encuentros en campo,
+NPC/oasis, procesamiento productivo y privacidad de marchas en servidor.
+
+Validación más reciente: **118 tests en 13 archivos**, typecheck/lint/formato/build correctos;
+148 assets válidos, 39 GLB nuevos pendientes de aprobación. Revisión real en Chrome y
+navegador integrado, escritorio y 390 px. No cambia la aprobación de gates anteriores;
+las limitaciones del alcance alfa están declaradas en el documento territorial.
+
 ## 0. MVP 2 — resumen
 
 El desglose completo (ADR-0021…0037, PRD, backlog, plan de QA y decisiones D-01…D-17) está en

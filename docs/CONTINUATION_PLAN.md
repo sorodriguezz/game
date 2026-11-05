@@ -3,6 +3,14 @@
 **Fecha:** 2026-11-05 · **Estado del código:** `main` = rama `claude/practical-clarke-ya4vg6`.
 Documento de traspaso para retomar el trabajo en otra sesión sin perder contexto. Leer primero: `AGENTS.md`, este documento y los documentos de estado enlazados.
 
+## Cambio de alcance más reciente
+
+El propietario pidió el 2026-11-05 el rediseño terrestre descrito en
+[`territory/DESIGN.md`](territory/DESIGN.md): mapa fijo sin mar, tres razas nuevas, tres
+murallas, expansión, traslados propios, refuerzos aliados, encuentros en campo y oasis/NPC.
+Esta es la prioridad vigente para `frontier-alpha.1`; el plan naval de abajo se conserva
+como antecedente y no debe reactivarse por defecto. El mundo `mvp1-alpha.0` se conserva.
+
 ## 1. Dónde estamos
 
 | Bloque | Estado | Documento |

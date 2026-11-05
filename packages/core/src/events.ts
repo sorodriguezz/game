@@ -23,6 +23,8 @@ export const EVENT_TYPES = {
   RECRUITMENT_COMPLETE: { priority: 20 },
   MOVEMENT_RETURN: { priority: 30 },
   MOVEMENT_ARRIVAL: { priority: 40 },
+  SETTLEMENT_COMPLETE: { priority: 25 },
+  FIELD_ENCOUNTER: { priority: 35 },
 } as const;
 export type EventType = keyof typeof EVENT_TYPES;
 
@@ -104,7 +106,17 @@ export function rowToEvent(r: RawEventRow): GameEvent {
   };
 }
 
-export function locksetOf(ev: Pick<GameEvent, 'villageId' | 'secondaryVillageId'>): string[] {
+export function locksetOf(
+  ev: Pick<GameEvent, 'villageId' | 'secondaryVillageId'> & { payload?: Record<string, unknown> },
+): string[] {
+  if (Array.isArray(ev.payload?.lockVillageIds))
+    return [
+      ...new Set([
+        ev.villageId,
+        ...(ev.secondaryVillageId ? [ev.secondaryVillageId] : []),
+        ...ev.payload.lockVillageIds.filter((v): v is string => typeof v === 'string'),
+      ]),
+    ].sort();
   return ev.secondaryVillageId ? [ev.villageId, ev.secondaryVillageId] : [ev.villageId];
 }
 
@@ -121,19 +133,21 @@ export async function processEventsUpTo(
   handlers: Record<EventType, EventHandler>,
   locked: ReadonlySet<string>,
   limit: { dueAt: Date; priority?: number; id?: string },
+  skipEventId?: string,
 ): Promise<number> {
   const ids = [...locked];
   const res = await tx.execute(sql`
     select id, world_id, type, village_id, secondary_village_id, due_at, priority, payload, attempts
     from scheduled_events
     where status in ('PENDING', 'PROCESSING')
-      and (village_id = any(${sql.param(ids)}::uuid[]) or secondary_village_id = any(${sql.param(ids)}::uuid[]))
+      and (village_id = any(${sql.param(ids)}::uuid[]) or secondary_village_id = any(${sql.param(ids)}::uuid[]) or (payload->'lockVillageIds') ?| ${sql.param(ids)}::text[])
       and (due_at, priority, id) <= (${limit.dueAt.toISOString()}::timestamptz, ${limit.priority ?? 32767}::smallint, ${limit.id ?? MAX_UUID}::uuid)
     order by due_at, priority, id
   `);
   let applied = 0;
   for (const row of res.rows as unknown as RawEventRow[]) {
     const ev = rowToEvent(row);
+    if (ev.id === skipEventId) continue;
     if (!locksetOf(ev).every((v) => locked.has(v))) throw new EventOrderingConflict(ev.id);
     await handlers[ev.type](tx, ctx, ev);
     await ctx.faults?.afterEventApplied?.({ id: ev.id, type: ev.type });

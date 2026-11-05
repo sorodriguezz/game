@@ -14,6 +14,13 @@
       "size": 512,
       "tileMeters": 2.0
     },
+    "common.clay": {
+      "base": "common/clay_base.webp",
+      "normal": "common/clay_normal.webp",
+      "orm": "common/clay_orm.webp",
+      "size": 512,
+      "tileMeters": 2.0
+    },
     "common.crop": {
       "base": "common/crop_base.webp",
       "normal": "common/crop_normal.webp",

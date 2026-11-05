@@ -110,7 +110,7 @@ function JoinForm({
   onJoined: (villageId: string) => void;
 }) {
   const r = getRuleset(world.rulesetVersion);
-  const [civ, setCiv] = useState<CivilizationId>('imperial_crown');
+  const [civ, setCiv] = useState<CivilizationId>(r.civilizations[0]!.id);
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
   const toast = useToast();

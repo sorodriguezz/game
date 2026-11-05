@@ -35,6 +35,10 @@ import { duration, fmt, localTime } from '../format.js';
 import { RESOURCE_LABEL, ResourceIcon, liveAmount } from './VillagePage.js';
 
 const PLOT_KIND_LABEL = {
+  field: 'Campo de recursos',
+  citadel: 'Ciudadela',
+  industry: 'Distrito productivo',
+  fortification: 'Muralla',
   center: 'Plaza central',
   standard: 'Parcela',
   coastal: 'Parcela costera',
@@ -115,7 +119,9 @@ export function CityPanel({
       ? r.buildings
           .filter(
             (b) =>
-              b.plotKind === plot.kind && (!b.civilization || b.civilization === view.civilization),
+              b.plotKind === plot.kind &&
+              (!plot.allowedTypes || plot.allowedTypes.includes(b.type)) &&
+              (!b.civilization || b.civilization === view.civilization),
           )
           .map((b) => b.type)
       : [];
@@ -302,7 +308,9 @@ export function ArmyPanel({
     }
   };
 
-  const units = r.units.filter((u) => !u.civilization || u.civilization === view.civilization);
+  const units = r.units.filter(
+    (u) => !u.npcOnly && (!u.civilization || u.civilization === view.civilization),
+  );
   return (
     <div className="panel">
       <h3>Guarnición</h3>
@@ -766,6 +774,7 @@ export function ReportsPanel({ worldId }: { worldId: string }) {
                 <span className={`badge ${won ? 'badge-ok' : 'badge-danger'}`}>
                   {won ? 'Victoria' : 'Derrota'}
                 </span>{' '}
+                {b.location === 'FIELD' ? '⚔ Campo abierto · ' : ''}
                 {b.attackerVillageName} → {b.defenderVillageName}
               </button>
               <small className="muted">{localTime(b.occurredAt)}</small>
@@ -788,8 +797,14 @@ function ReportDetail({ report, onBack }: { report: BattleReportDetail; onBack: 
         ← Informes
       </button>
       <h3>
-        {report.mission === 'RAID' ? 'Saqueo' : 'Ataque'}: {report.attackerVillageName} →{' '}
-        {report.defenderVillageName}
+        {report.location === 'FIELD'
+          ? 'Encuentro en campo'
+          : report.mission === 'CONQUER'
+            ? 'Conquista'
+            : report.mission === 'RAID'
+              ? 'Saqueo'
+              : 'Ataque'}
+        : {report.attackerVillageName} → {report.defenderVillageName}
       </h3>
       <p className="muted small">
         {localTime(report.occurredAt)} · reglas {report.rulesetVersion} · semilla{' '}
@@ -801,6 +816,12 @@ function ReportDetail({ report, onBack }: { report: BattleReportDetail; onBack: 
         fuerza ⚔ {fmt(res.powers.attack)} vs 🛡 {fmt(res.powers.defense)} · suerte{' '}
         {res.powers.luckPermille / 10}% · muralla +{res.powers.wallPermille / 10}%
       </p>
+      {report.location === 'FIELD' && report.fieldPosition && (
+        <p className="muted small">
+          Campo abierto ({report.fieldPosition.x}|{report.fieldPosition.y}) · Sin murallas ni botín
+        </p>
+      )}
+      {res.trapsUsed ? <p className="muted small">Trampas utilizadas: {res.trapsUsed}</p> : null}
       <h4>Atacante — {report.attackerName}</h4>
       <table className="units">
         <thead>

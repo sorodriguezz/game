@@ -1,6 +1,9 @@
+import { areAllies, hostile } from './territory.js';
 import { aliasedTable, and, asc, desc, eq, gte, inArray, lte, or, sql } from 'drizzle-orm';
 import {
   accounts,
+  garrisons,
+  settlementOrders,
   armyMovements,
   battles,
   constructionOrders,
@@ -45,7 +48,7 @@ import {
 interface ReportRow {
   id: string;
   occurredAt: Date;
-  mission: 'ATTACK' | 'RAID';
+  mission: import('@reinos/contracts').MovementMission;
   outcome: 'ATTACKER' | 'DEFENDER';
   attackerAccountId: string;
   rulesetVersion: string;
@@ -55,6 +58,9 @@ interface ReportRow {
   defenderVillageName: string;
   attackerName: string;
   defenderName: string | null;
+  location: string;
+  fieldX: number | null;
+  fieldY: number | null;
 }
 
 /**
@@ -79,7 +85,7 @@ export class GameQueries {
     const myVillages = await this.ctx.db
       .select({ id: villages.id, worldId: villages.worldId })
       .from(villages)
-      .where(eq(villages.ownerAccountId, accountId))
+      .where(and(eq(villages.ownerAccountId, accountId), eq(villages.kind, 'PLAYER')))
       .orderBy(asc(villages.createdAt));
     return rows.map(({ w, playerCount }) => {
       const m = memberships.find((x) => x.worldId === w.id);
@@ -123,6 +129,7 @@ export class GameQueries {
           eq(villages.worldId, worldId),
           eq(villages.id, villageId),
           eq(villages.ownerAccountId, accountId),
+          eq(villages.kind, 'PLAYER'),
         ),
       );
     if (!village) throw err.notFound('VILLAGE_NOT_FOUND', 'Aldea no encontrada');
@@ -157,7 +164,7 @@ export class GameQueries {
       )
       .orderBy(asc(recruitmentOrders.completesAt));
 
-    const movements = await this.movementsFor(worldId, villageId);
+    const movements = await this.movementsFor(worldId, villageId, accountId);
 
     const n = (b: bigint) => toSafeNumber(b);
     return {
@@ -218,10 +225,27 @@ export class GameQueries {
       },
       movements,
       protectionUntil: iso(member.protectionUntil),
+      isCapital: village.isCapital,
+      loyalty: village.loyalty,
+      garrisons: (
+        await db
+          .select()
+          .from(garrisons)
+          .where(and(eq(garrisons.worldId, worldId), eq(garrisons.villageId, villageId)))
+      ).map((g) => ({
+        ownerAccountId: g.ownerAccountId,
+        originVillageId: g.originVillageId,
+        unitType: g.unitType as UnitType,
+        quantity: g.quantity,
+      })),
     };
   }
 
-  private async movementsFor(worldId: string, villageId: string): Promise<MovementView[]> {
+  private async movementsFor(
+    worldId: string,
+    villageId: string,
+    accountId: string,
+  ): Promise<MovementView[]> {
     const origin = aliasedTable(villages, 'origin');
     const target = aliasedTable(villages, 'target');
     const rows = await this.ctx.db
@@ -245,49 +269,65 @@ export class GameQueries {
         ),
       )
       .orderBy(asc(armyMovements.arrivesAt));
-    return rows.map(({ m, originName, targetName }) => {
-      const mine = m.originVillageId === villageId;
-      const returning = m.status === 'RETURNING';
-      return {
-        id: m.id,
-        direction: mine ? (returning ? 'RETURNING' : 'OUTGOING') : 'INCOMING',
-        mission: m.mission,
-        status: m.status,
-        originVillageId: m.originVillageId,
-        originName,
-        targetVillageId: m.targetVillageId,
-        targetName,
-        departedAt: iso(m.departedAt),
-        arrivesAt: iso(returning && m.returnsAt ? m.returnsAt : m.arrivesAt),
-        // El defensor no ve la composición del ataque entrante.
-        units: mine
-          ? Object.entries(m.units).map(([unitType, quantity]) => ({
-              unitType: unitType as UnitType,
-              quantity,
-            }))
-          : null,
-        loot:
-          mine && m.loot
-            ? {
-                wood: m.loot.wood ?? 0,
-                stone: m.loot.stone ?? 0,
-                iron: m.loot.iron ?? 0,
-                food: m.loot.food ?? 0,
-              }
+    return rows
+      .filter(
+        ({ m }) =>
+          m.ownerAccountId === accountId ||
+          (m.targetVillageId === villageId && m.status === 'IN_TRANSIT' && hostile(m.mission)),
+      )
+      .map(({ m, originName, targetName }) => {
+        const mine = m.ownerAccountId === accountId;
+        const returning = m.status === 'RETURNING';
+        return {
+          id: m.id,
+          direction: mine ? (returning ? 'RETURNING' : 'OUTGOING') : 'INCOMING',
+          mission: m.mission,
+          status: m.status,
+          originVillageId: m.originVillageId,
+          originName,
+          targetVillageId: m.targetVillageId,
+          targetName,
+          departedAt: iso(m.departedAt),
+          arrivesAt: iso(returning && m.returnsAt ? m.returnsAt : m.arrivesAt),
+          // El defensor no ve la composición del ataque entrante.
+          units: mine
+            ? Object.entries(m.units).map(([unitType, quantity]) => ({
+                unitType: unitType as UnitType,
+                quantity,
+              }))
             : null,
-      };
-    });
+          loot:
+            mine && m.loot
+              ? {
+                  wood: m.loot.wood ?? 0,
+                  stone: m.loot.stone ?? 0,
+                  iron: m.loot.iron ?? 0,
+                  food: m.loot.food ?? 0,
+                }
+              : null,
+        };
+      });
   }
 
   async mapRegion(accountId: string, worldId: string, query: MapQuery): Promise<MapRegionView> {
     const q = mapQuerySchema.parse(query);
     await this.requireMembership(accountId, worldId);
     const world = await loadWorld(this.ctx.db, worldId);
+    if (q.x >= world.mapSize || q.y >= world.mapSize)
+      throw err.unprocessable('TARGET_INVALID', 'Coordenadas fuera del mundo');
     const x0 = Math.max(0, q.x - q.radius);
     const y0 = Math.max(0, q.y - q.radius);
     const x1 = Math.min(world.mapSize - 1, q.x + q.radius);
     const y1 = Math.min(world.mapSize - 1, q.y + q.radius);
-    const region = renderRegion(world.mapSeed, world.mapSize, x0, y0, x1 - x0 + 1, y1 - y0 + 1);
+    const region = renderRegion(
+      world.mapSeed,
+      world.mapSize,
+      x0,
+      y0,
+      x1 - x0 + 1,
+      y1 - y0 + 1,
+      rulesetOf(world).territory ? 'LAND' : 'ARCHIPELAGO',
+    );
     const rows = await this.ctx.db
       .select({
         id: villages.id,
@@ -295,6 +335,9 @@ export class GameQueries {
         x: villages.x,
         y: villages.y,
         owner: villages.ownerAccountId,
+        kind: villages.kind,
+        isCapital: villages.isCapital,
+        loyalty: villages.loyalty,
         ownerName: accounts.displayName,
         civilization: worldPlayers.civilization,
       })
@@ -316,17 +359,108 @@ export class GameQueries {
           lte(villages.y, y1),
         ),
       );
+    const allVillages = await this.ctx.db
+      .select()
+      .from(villages)
+      .where(eq(villages.worldId, worldId));
+    const byId = new Map(allVillages.map((v) => [v.id, v]));
+    const myIds = allVillages.filter((v) => v.ownerAccountId === accountId).map((v) => v.id);
+    // Filtro autoritativo: ninguna marcha de terceros sale de la API.
+    const marchRows = await this.ctx.db
+      .select()
+      .from(armyMovements)
+      .where(
+        and(
+          eq(armyMovements.worldId, worldId),
+          inArray(armyMovements.status, ['IN_TRANSIT', 'RETURNING']),
+          or(
+            eq(armyMovements.ownerAccountId, accountId),
+            and(
+              inArray(armyMovements.targetVillageId, myIds),
+              eq(armyMovements.status, 'IN_TRANSIT'),
+              inArray(armyMovements.mission, ['ATTACK', 'RAID', 'CONQUER']),
+            ),
+          ),
+        ),
+      );
+    const movements: NonNullable<MapRegionView['movements']> = [];
+    for (const m of marchRows) {
+      const returning = m.status === 'RETURNING',
+        origin = byId.get(m.originVillageId)!,
+        target = byId.get(m.targetVillageId)!;
+      let from = returning ? { x: target.x, y: target.y } : { x: origin.x, y: origin.y };
+      let departedAt = returning ? m.arrivesAt : m.departedAt;
+      if (returning && m.battleId) {
+        const [b] = await this.ctx.db.select().from(battles).where(eq(battles.id, m.battleId));
+        if (b?.location === 'FIELD') {
+          from = { x: b.fieldX! / 1000, y: b.fieldY! / 1000 };
+          departedAt = b.occurredAt;
+        }
+      }
+      movements.push({
+        id: m.id,
+        mission: m.mission,
+        isMine: m.ownerAccountId === accountId,
+        from,
+        to: returning ? { x: origin.x, y: origin.y } : { x: target.x, y: target.y },
+        departedAt: iso(departedAt),
+        arrivesAt: iso(returning ? m.returnsAt! : m.arrivesAt),
+        units:
+          m.ownerAccountId === accountId
+            ? Object.entries(m.units).map(([unitType, quantity]) => ({
+                unitType: unitType as UnitType,
+                quantity,
+              }))
+            : null,
+      });
+    }
+    const settling = await this.ctx.db
+      .select()
+      .from(settlementOrders)
+      .where(
+        and(
+          eq(settlementOrders.worldId, worldId),
+          eq(settlementOrders.ownerAccountId, accountId),
+          eq(settlementOrders.status, 'IN_PROGRESS'),
+        ),
+      );
+    for (const o of settling) {
+      const origin = byId.get(o.originVillageId)!;
+      movements.push({
+        id: o.id,
+        mission: 'SETTLE',
+        isMine: true,
+        from: { x: origin.x, y: origin.y },
+        to: { x: o.x, y: o.y },
+        departedAt: iso(o.departedAt),
+        arrivesAt: iso(o.arrivesAt),
+        units: [{ unitType: 'settler', quantity: rulesetOf(world).territory!.settlersRequired }],
+      });
+    }
+    const allied = new Set<string>();
+    for (const v of rows)
+      if (v.owner && (await areAllies(this.ctx.db, worldId, accountId, v.owner))) allied.add(v.id);
     return {
       ...region,
-      villages: rows.map((v) => ({
-        id: v.id,
-        name: v.name,
-        x: v.x,
-        y: v.y,
-        ownerName: v.ownerName ?? null,
-        civilization: (v.civilization as CivilizationId | null) ?? null,
-        isMine: v.owner === accountId,
-      })),
+      mapSize: world.mapSize,
+      serverTime: iso(this.ctx.clock.now()),
+      movements,
+      villages: await Promise.all(
+        rows.map(async (v) => ({
+          id: v.id,
+          name: v.name,
+          x: v.x,
+          y: v.y,
+          ownerName: v.ownerName ?? null,
+          civilization: (v.civilization as CivilizationId | null) ?? null,
+          animals: v.kind === 'OASIS' && !v.owner ? await loadTroops(this.ctx.db, v.id) : undefined,
+          isMine: v.owner === accountId,
+          kind: v.kind,
+          isCapital: v.isCapital,
+          loyalty: v.loyalty,
+          isAlly: allied.has(v.id),
+        })),
+      ),
     };
   }
 
@@ -350,6 +484,9 @@ export class GameQueries {
         rulesetVersion: battles.rulesetVersion,
         seed: battles.seed,
         result: battles.result,
+        location: battles.location,
+        fieldX: battles.fieldX,
+        fieldY: battles.fieldY,
         attackerVillageName: av.name,
         defenderVillageName: dv.name,
         attackerName: aa.displayName,
@@ -383,6 +520,9 @@ export class GameQueries {
       defenderVillageName: row.defenderVillageName,
       attackerName: row.attackerName,
       defenderName: row.defenderName ?? 'Aldea anárquica',
+      location: row.location === 'FIELD' ? 'FIELD' : 'VILLAGE',
+      fieldPosition:
+        row.location === 'FIELD' ? { x: row.fieldX! / 1000, y: row.fieldY! / 1000 } : null,
     };
   }
 

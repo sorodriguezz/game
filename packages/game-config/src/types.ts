@@ -3,7 +3,13 @@ import { z } from 'zod';
 export const RESOURCE_KEYS = ['wood', 'stone', 'iron', 'food'] as const;
 export type ResourceKey = (typeof RESOURCE_KEYS)[number];
 
-export const CIVILIZATION_IDS = ['imperial_crown', 'sea_league'] as const;
+export const CIVILIZATION_IDS = [
+  'imperial_crown',
+  'sea_league',
+  'stone_wardens',
+  'steppe_clans',
+  'forest_kin',
+] as const;
 export type CivilizationId = (typeof CIVILIZATION_IDS)[number];
 
 export const BUILDING_TYPES = [
@@ -20,6 +26,20 @@ export const BUILDING_TYPES = [
   'wall',
   'imperial_bastion',
   'naval_arsenal',
+  'lumber_mill',
+  'brickyard',
+  'iron_foundry',
+  'grain_mill',
+  'bakery',
+  'castle',
+  'rally_point',
+  'middle_wall',
+  'inner_wall',
+  'watchtower',
+  'war_camp',
+  'trapper',
+  'stable',
+  'workshop',
 ] as const;
 export type BuildingType = (typeof BUILDING_TYPES)[number];
 
@@ -31,10 +51,29 @@ export const UNIT_TYPES = [
   'priest',
   'imperial_guard',
   'naval_escort',
+  'settler',
+  'chieftain',
+  'ward_guard',
+  'raider',
+  'forest_archer',
+  'ram',
+  'catapult',
+  'wolf',
+  'boar',
+  'bear',
 ] as const;
 export type UnitType = (typeof UNIT_TYPES)[number];
 
-export const PLOT_KINDS = ['center', 'standard', 'coastal', 'wall'] as const;
+export const PLOT_KINDS = [
+  'center',
+  'standard',
+  'coastal',
+  'wall',
+  'field',
+  'citadel',
+  'industry',
+  'fortification',
+] as const;
 export type PlotKind = (typeof PLOT_KINDS)[number];
 
 const nonNegInt = z.number().int().nonnegative();
@@ -78,8 +117,13 @@ export const buildingDefSchema = z.object({
     'priest_recruitment',
     'naval_transport',
     'naval_capacity',
+    'processing',
+    'administration',
+    'traps',
   ]),
   produces: z.enum(RESOURCE_KEYS).optional(),
+  bonusPerLevelPermille: nonNegInt.optional(),
+  repeatable: z.boolean().optional(),
   civilization: z.enum(CIVILIZATION_IDS).optional(),
   plotKind: z.enum(PLOT_KINDS),
   requires: z.array(requirementSchema),
@@ -91,6 +135,7 @@ export const unitDefSchema = z.object({
   name: z.string().min(1),
   unitClass: z.enum(['infantry', 'cavalry', 'support']),
   ranged: z.boolean(),
+  npcOnly: z.boolean().optional(),
   cost: resourceBundleSchema,
   trainingSeconds: posInt,
   attack: nonNegInt,
@@ -135,6 +180,9 @@ export const plotDefSchema = z.object({
   x: z.number(),
   z: z.number(),
   rotationY: z.number(),
+  allowedTypes: z.array(z.enum(BUILDING_TYPES)).optional(),
+  label: z.string().optional(),
+  radius: z.number().optional(),
 });
 export type PlotDef = z.infer<typeof plotDefSchema>;
 
@@ -185,6 +233,19 @@ export const rulesetSchema = z.object({
   civilizations: z.array(civilizationDefSchema),
   buildings: z.array(buildingDefSchema),
   units: z.array(unitDefSchema),
+  territory: z
+    .object({
+      mapMode: z.literal('LAND'),
+      settlersRequired: posInt,
+      foundingCost: resourceBundleSchema,
+      foundingHallLevel: posInt,
+      loyaltyPerChief: posInt,
+      oasisBonusPermille: nonNegInt,
+      maxOasesPerVillage: posInt,
+      trapsPerLevel: posInt,
+      fieldEncounterRadiusMilli: posInt,
+    })
+    .optional(),
   cityLayout: z.object({ plots: z.array(plotDefSchema) }),
   startingBuildings: z.array(
     z.object({ plot: nonNegInt, type: z.enum(BUILDING_TYPES), level: posInt }),

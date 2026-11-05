@@ -87,6 +87,10 @@ async function player(name: string) {
 /** Huella de TODAS las tablas del mundo: un entrenamiento no puede cambiarla (ADR-0037, G1-12). */
 async function worldFingerprint(): Promise<string> {
   const tables = [
+    'alliances',
+    'alliance_members',
+    'garrisons',
+    'settlement_orders',
     'resource_accounts',
     'resource_ledger',
     'troop_stacks',
@@ -122,6 +126,21 @@ const until = async (cond: () => boolean | Promise<boolean>, ms = 30_000) => {
 };
 
 describe('entrenamiento táctico de punta a punta (Gate 1)', () => {
+  it('rechaza razas de otro ruleset antes de crear un entrenamiento', async () => {
+    const p = await player('TrainingRaceCheck');
+    const res = await p.agent
+      .post('/api/v1/training')
+      .set('x-csrf-token', p.csrf)
+      .send({
+        opponent: 'DOCTRINE',
+        civilization: 'stone_wardens',
+        army: 'balanced',
+        terrainId: 'plain',
+      })
+      .expect(422);
+    expect(res.body.code).toBe('CIVILIZATION_INVALID');
+  });
+
   it('battle-config publica flags y salud', async () => {
     const res = await request(app.getHttpServer()).get('/api/v1/battle-config').expect(200);
     expect(res.body).toMatchObject({

@@ -26,6 +26,8 @@ import {
   type SendMovementResponse,
   type VillageView,
   type WorldSummary,
+  type TerritoryView,
+  type FoundVillageRequest,
 } from '@reinos/contracts';
 
 export class ApiError extends Error {
@@ -126,6 +128,23 @@ export const api = {
   reports: (worldId: string) => call<BattleReportSummary[]>('GET', `${w(worldId)}/reports`),
   report: (worldId: string, battleId: string) =>
     call<BattleReportDetail>('GET', `${w(worldId)}/reports/${battleId}`),
+  territory: (worldId: string) => call<TerritoryView>('GET', `${w(worldId)}/territory`),
+  found: (worldId: string, villageId: string, body: FoundVillageRequest) =>
+    call<{ id: string; arrivesAt: string }>(
+      'POST',
+      `${v(worldId, villageId)}/settlements`,
+      body,
+      true,
+    ),
+  alliance: (worldId: string, body: { name: string } | { inviteCode: string }) =>
+    call<{ id: string }>('POST', `${w(worldId)}/alliance`, body, true),
+  recall: (worldId: string, villageId: string, originId: string) =>
+    call<{ id: string; arrivesAt: string }>(
+      'POST',
+      `${v(worldId, villageId)}/recall/${originId}`,
+      {},
+      true,
+    ),
   // MVP 2 — entrenamiento táctico
   battleConfig: () => call<BattleConfigView>('GET', '/battle-config'),
   trainings: () => call<TrainingMatchView[]>('GET', '/training'),

@@ -1,3 +1,5 @@
+import { RealmPage } from './RealmPage.js';
+import { getRuleset } from '@reinos/game-config';
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
 import {
   PROFILES,
@@ -14,9 +16,9 @@ import { ArmyPanel, CampaignPanel, CityPanel, ReportsPanel } from './panels.js';
 
 export const RESOURCE_LABEL: Record<ResourceKey, string> = {
   wood: 'Madera',
-  stone: 'Piedra',
+  stone: 'Barro',
   iron: 'Hierro',
-  food: 'Alimentos',
+  food: 'Cereal',
 };
 
 export function ResourceIcon({ k }: { k: ResourceKey }) {
@@ -58,12 +60,14 @@ export function VillagePage({
   villageId,
   onBack,
   onLogout,
+  onOpenVillage,
 }: {
   account: AccountView;
   worldId: string;
   villageId: string;
   onBack: () => void;
   onLogout: () => void;
+  onOpenVillage: (id: string) => void;
 }) {
   const [view, setView] = useState<VillageView | null>(null);
   const [tab, setTab] = useState<Tab>('city');
@@ -109,6 +113,19 @@ export function VillagePage({
   }, [view, refresh]);
 
   if (!view) return <div className="splash">Cargando ciudad…</div>;
+
+  if (getRuleset(view.rulesetVersion).territory)
+    return (
+      <RealmPage
+        account={account}
+        view={view}
+        now={now}
+        onRefresh={refresh}
+        onOpenVillage={onOpenVillage}
+        onBack={onBack}
+        onLogout={onLogout}
+      />
+    );
 
   const incoming = view.movements.filter((m) => m.direction === 'INCOMING');
 
@@ -236,7 +253,7 @@ export function VillagePage({
 }
 
 /** Calidad gráfica (Baja/Media/Alta): cambia resolución, sombras, LOD y postproceso de la escena. */
-function GraphicsSelect() {
+export function GraphicsSelect() {
   const profile = useGraphicsProfile();
   return (
     <label className="graphics-select">

@@ -68,10 +68,10 @@ export const SEA_LEVEL = -0.35;
 export const SHORE_Z = -33;
 
 /** Altura del terreno (m). Plano dentro del recinto (r < 58 m) para no afectar a las parcelas. */
-export function terrainHeight(x: number, z: number, coastal: boolean): number {
+export function terrainHeight(x: number, z: number, coastal: boolean, flatRadius = 58): number {
   const r = Math.hypot(x, z);
   const n = fbm(x / 42 + 17.3, z / 42 - 4.1);
-  let h = smooth(58, 110, r) * (n * 9 + Math.max(0, r - 110) * 0.08);
+  let h = smooth(flatRadius, flatRadius + 52, r) * (n * 9 + Math.max(0, r - 110) * 0.08);
   // sierras lejanas como fondo (siguen siendo terreno, no conos)
   h += smooth(190, 320, r) * fbm(x / 70, z / 70) * 70;
   if (coastal) {
@@ -156,9 +156,11 @@ function addMesh(
 export function CityTerrain({
   coastal,
   paths,
+  flatRadius = 58,
 }: {
   coastal: boolean;
   paths: Array<[number, number]>;
+  flatRadius?: number;
 }) {
   const app = useApp();
   const water = useMemo(() => ({ t: 0, mat: null as StandardMaterial | null }), []);
@@ -166,7 +168,7 @@ export function CityTerrain({
     const rt = AssetRuntime.for(app);
     const ents: Entity[] = [];
     const meshes: Mesh[] = [];
-    const h = (x: number, z: number) => terrainHeight(x, z, coastal);
+    const h = (x: number, z: number) => terrainHeight(x, z, coastal, flatRadius);
     // variación macro en color de vértice: zonas secas, hondonadas más oscuras, orilla arenosa
     const tint = (x: number, z: number, y: number): [number, number, number, number] => {
       const m = fbm(x / 23 + 3.1, z / 23 + 8.7);
@@ -255,12 +257,20 @@ export function CityTerrain({
       meshes.push(mesh);
       ents.push(addMesh(app, 'path', mesh, pathMat));
     }
-    return () => {
+    let disposed = false;
+    const dispose = () => {
+      if (disposed) return;
+      disposed = true;
       for (const e of ents) e.destroy();
       for (const m of meshes) m.destroy();
       water.mat = null;
     };
-  }, [app, coastal, paths, water]);
+    app.once('destroy', dispose);
+    return () => {
+      app.off('destroy', dispose);
+      dispose();
+    };
+  }, [app, coastal, paths, water, flatRadius]);
 
   useAppEvent('update', (dt: number) => {
     const m = water.mat;
@@ -363,11 +373,18 @@ export function InstancedProps({
         tmpl.destroy();
       });
     }
-    return () => {
+    const dispose = () => {
+      if (!alive) return;
       alive = false;
       for (const e of ents) e.destroy();
       for (const b of buffers) b.destroy();
       for (const url of byUrl.keys()) rt.release(url);
+    };
+    // React puede limpiar efectos después de Application.destroy: liberar GPU antes.
+    app.once('destroy', dispose);
+    return () => {
+      app.off('destroy', dispose);
+      dispose();
     };
   }, [app, parent, items, lod, castShadows, attachToParent]);
   return null;
@@ -440,7 +457,7 @@ export function wallRing(
 ): PropInstance[] {
   const out: PropInstance[] = [];
   const url = (id: string) => `/assets/models/${id}.glb`;
-  const segs = 20;
+  const segs = Math.max(10, Math.ceil((2 * Math.PI * radius) / 14.6));
   const SEG_LEN = 14.6;
   const piece = level > 0 ? `wall_segment.${civ}.s${stage}` : `palisade.${civ}.s1`;
   const gateHalf = level > 0 ? Math.asin(6.9 / radius) : Math.asin(3 / radius);

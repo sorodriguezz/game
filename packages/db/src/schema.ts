@@ -39,9 +39,15 @@ export const worldStatus = pgEnum('world_status', [
   'ARCHIVED',
 ]);
 export const worldProfile = pgEnum('world_profile', ['test', 'alpha', 'seasonal']);
-export const villageKind = pgEnum('village_kind', ['PLAYER', 'NPC']);
+export const villageKind = pgEnum('village_kind', ['PLAYER', 'NPC', 'OASIS']);
 export const orderStatus = pgEnum('order_status', ['IN_PROGRESS', 'COMPLETED', 'CANCELLED']);
-export const movementMission = pgEnum('movement_mission', ['ATTACK', 'RAID']);
+export const movementMission = pgEnum('movement_mission', [
+  'ATTACK',
+  'RAID',
+  'TRANSFER',
+  'REINFORCE',
+  'CONQUER',
+]);
 export const movementStatus = pgEnum('movement_status', ['IN_TRANSIT', 'RETURNING', 'COMPLETED']);
 export const battleOutcome = pgEnum('battle_outcome', ['ATTACKER', 'DEFENDER']);
 export const eventStatus = pgEnum('event_status', ['PENDING', 'PROCESSING', 'DONE', 'DEAD']);
@@ -150,6 +156,10 @@ export const villages = pgTable(
     x: integer('x').notNull(),
     y: integer('y').notNull(),
     coastal: boolean('coastal').notNull(),
+    isCapital: boolean('is_capital').notNull().default(false),
+    loyalty: integer('loyalty').notNull().default(100),
+    parentVillageId: uuid('parent_village_id'),
+    trapsUsed: integer('traps_used').notNull().default(0),
     doctrineReservePercent: integer('doctrine_reserve_percent').notNull().default(0),
     doctrineRetreatThresholdPercent: integer('doctrine_retreat_threshold_percent'),
     createdAt: ts('created_at').notNull().defaultNow(),
@@ -162,10 +172,17 @@ export const villages = pgTable(
       columns: [t.worldId, t.ownerAccountId],
       foreignColumns: [worldPlayers.worldId, worldPlayers.accountId],
     }),
+    foreignKey({
+      name: 'villages_parent_fk',
+      columns: [t.worldId, t.parentVillageId],
+      foreignColumns: [t.worldId, t.id],
+    }),
+    check('villages_loyalty_check', sql`${t.loyalty} between 0 and 100`),
+    check('villages_traps_used_check', sql`${t.trapsUsed}>=0`),
     index('villages_owner_idx').on(t.worldId, t.ownerAccountId),
     check(
       'villages_owner_kind_ck',
-      sql`(${t.kind} = 'PLAYER') = (${t.ownerAccountId} is not null)`,
+      sql`(${t.kind} <> 'PLAYER' or ${t.ownerAccountId} is not null) and (${t.kind} <> 'NPC' or ${t.ownerAccountId} is null)`,
     ),
     check('villages_doctrine_reserve_ck', sql`${t.doctrineReservePercent} between 0 and 100`),
     check(
@@ -186,7 +203,7 @@ export const villageBuildings = pgTable(
   },
   (t) => [
     primaryKey({ columns: [t.villageId, t.plot] }),
-    unique('village_buildings_type_uq').on(t.villageId, t.type),
+    index('village_buildings_type_idx').on(t.villageId, t.type),
     foreignKey({
       name: 'village_buildings_village_fk',
       columns: [t.worldId, t.villageId],
@@ -434,13 +451,18 @@ export const battles = pgTable(
     occurredAt: ts('occurred_at').notNull(),
     seed: text('seed').notNull(),
     rulesetVersion: text('ruleset_version').notNull(),
+    location: text('location').notNull().default('VILLAGE'),
+    encounterKey: text('encounter_key'),
+    fieldX: integer('field_x_milli'),
+    fieldY: integer('field_y_milli'),
     snapshot: jsonb('snapshot').notNull(),
     result: jsonb('result').notNull(),
     createdAt: ts('created_at').notNull().defaultNow(),
   },
   (t) => [
     // Un movimiento produce como máximo una batalla (idempotencia, FR-BAT-05).
-    uniqueIndex('battles_movement_uq').on(t.movementId),
+    uniqueIndex('battles_encounter_uq').on(t.worldId, t.encounterKey),
+    index('battles_movement_idx').on(t.movementId),
     foreignKey({
       name: 'battles_movement_fk',
       columns: [t.worldId, t.movementId],
@@ -605,5 +627,111 @@ export const trainingMatches = pgTable(
       'training_matches_result_ck',
       sql`(${t.status} = 'FINISHED') = (${t.result} is not null)`,
     ),
+  ],
+);
+
+export const alliances = pgTable(
+  'alliances',
+  {
+    id: uuid('id').primaryKey(),
+    worldId: uuid('world_id').notNull(),
+    name: text('name').notNull(),
+    inviteCode: text('invite_code').notNull(),
+    leaderAccountId: uuid('leader_account_id').notNull(),
+  },
+  (t) => [
+    foreignKey({
+      name: 'alliances_world_id_fkey',
+      columns: [t.worldId],
+      foreignColumns: [worlds.id],
+    }),
+    unique('alliances_world_id_id_key').on(t.worldId, t.id),
+    unique('alliances_world_id_invite_code_key').on(t.worldId, t.inviteCode),
+    foreignKey({
+      name: 'alliances_world_id_leader_account_id_fkey',
+      columns: [t.worldId, t.leaderAccountId],
+      foreignColumns: [worldPlayers.worldId, worldPlayers.accountId],
+    }),
+  ],
+);
+export const allianceMembers = pgTable(
+  'alliance_members',
+  {
+    worldId: uuid('world_id').notNull(),
+    accountId: uuid('account_id').notNull(),
+    allianceId: uuid('alliance_id').notNull(),
+  },
+  (t) => [
+    primaryKey({ name: 'alliance_members_pkey', columns: [t.worldId, t.accountId] }),
+    foreignKey({
+      name: 'alliance_members_world_id_account_id_fkey',
+      columns: [t.worldId, t.accountId],
+      foreignColumns: [worldPlayers.worldId, worldPlayers.accountId],
+    }),
+    foreignKey({
+      name: 'alliance_members_world_id_alliance_id_fkey',
+      columns: [t.worldId, t.allianceId],
+      foreignColumns: [alliances.worldId, alliances.id],
+    }),
+  ],
+);
+export const garrisons = pgTable(
+  'garrisons',
+  {
+    worldId: uuid('world_id').notNull(),
+    villageId: uuid('village_id').notNull(),
+    originVillageId: uuid('origin_village_id').notNull(),
+    ownerAccountId: uuid('owner_account_id').notNull(),
+    unitType: text('unit_type').notNull(),
+    quantity: integer('quantity').notNull(),
+  },
+  (t) => [
+    primaryKey({ name: 'garrisons_pkey', columns: [t.villageId, t.originVillageId, t.unitType] }),
+    check('garrisons_quantity_check', sql`${t.quantity}>=0`),
+    foreignKey({
+      name: 'garrisons_world_id_village_id_fkey',
+      columns: [t.worldId, t.villageId],
+      foreignColumns: [villages.worldId, villages.id],
+    }),
+    foreignKey({
+      name: 'garrisons_world_id_origin_village_id_fkey',
+      columns: [t.worldId, t.originVillageId],
+      foreignColumns: [villages.worldId, villages.id],
+    }),
+    foreignKey({
+      name: 'garrisons_world_id_owner_account_id_fkey',
+      columns: [t.worldId, t.ownerAccountId],
+      foreignColumns: [worldPlayers.worldId, worldPlayers.accountId],
+    }),
+  ],
+);
+export const settlementOrders = pgTable(
+  'settlement_orders',
+  {
+    id: uuid('id').primaryKey(),
+    worldId: uuid('world_id').notNull(),
+    originVillageId: uuid('origin_village_id').notNull(),
+    ownerAccountId: uuid('owner_account_id').notNull(),
+    name: text('name').notNull(),
+    x: integer('x').notNull(),
+    y: integer('y').notNull(),
+    departedAt: ts('departed_at').notNull(),
+    arrivesAt: ts('arrives_at').notNull(),
+    status: orderStatus('status').notNull().default('IN_PROGRESS'),
+  },
+  (t) => [
+    uniqueIndex('settlement_spot_uq')
+      .on(t.worldId, t.x, t.y)
+      .where(sql`${t.status}='IN_PROGRESS'`),
+    foreignKey({
+      name: 'settlement_orders_world_id_origin_village_id_fkey',
+      columns: [t.worldId, t.originVillageId],
+      foreignColumns: [villages.worldId, villages.id],
+    }),
+    foreignKey({
+      name: 'settlement_orders_world_id_owner_account_id_fkey',
+      columns: [t.worldId, t.ownerAccountId],
+      foreignColumns: [worldPlayers.worldId, worldPlayers.accountId],
+    }),
   ],
 );

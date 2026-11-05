@@ -115,7 +115,7 @@ export interface BuildingLevel {
 }
 
 export function levelOf(buildings: readonly BuildingLevel[], type: BuildingType): number {
-  return buildings.find((b) => b.type === type)?.level ?? 0;
+  return Math.max(0, ...buildings.filter((b) => b.type === type).map((b) => b.level));
 }
 
 /** Producción por hora (milésimas) de un edificio productor de nivel `level`. */
@@ -138,6 +138,7 @@ export function computeRates(
   r: Ruleset,
   buildings: readonly BuildingLevel[],
   upkeep: number,
+  speed = 1,
 ): ResourceMap<bigint> {
   const base = BigInt(r.economy.villageBaseProductionPerHour) * MILLI;
   const rates = mapResources(() => base);
@@ -147,6 +148,19 @@ export function computeRates(
       rates[def.produces] += productionMilliPerHour(r, b.level);
     }
   }
+  for (const k of RESOURCE_KEYS) {
+    const bonus = buildings.reduce((sum, b) => {
+      const d = buildingDef(r, b.type);
+      return (
+        sum +
+        (d.effect === 'processing' && d.produces === k
+          ? (d.bonusPerLevelPermille ?? 0) * b.level
+          : 0)
+      );
+    }, 0);
+    rates[k] = (rates[k] * BigInt(1000 + bonus)) / 1000n;
+  }
+  if (r.territory) for (const k of RESOURCE_KEYS) rates[k] *= BigInt(speed);
   rates.food -= BigInt(upkeep) * MILLI;
   return rates;
 }

@@ -16,6 +16,7 @@ import {
 import {
   DEFAULT_TACTICAL_RULESET_VERSION,
   getTacticalRuleset,
+  getRuleset,
   type CivilizationId,
 } from '@reinos/game-config';
 import {
@@ -197,6 +198,15 @@ export class TrainingService {
     this.assertEnabled();
     const req = createTrainingMatchRequestSchema.parse(input);
     const tactical = getTacticalRuleset(DEFAULT_TACTICAL_RULESET_VERSION);
+    const available = getRuleset(tactical.baseRulesetVersion).civilizations;
+    if (
+      !available.some((c) => c.id === req.civilization) ||
+      (req.opponent === 'DOCTRINE' && !available.some((c) => c.id === req.opponentCivilization))
+    )
+      throw err.unprocessable(
+        'CIVILIZATION_INVALID',
+        'Esta civilización no está disponible en el entrenamiento',
+      );
     const now = this.ctx.clock.now();
     const id = randomUUID();
     const [m] = await this.ctx.db
@@ -233,6 +243,15 @@ export class TrainingService {
   ): Promise<TrainingMatchView> {
     this.assertEnabled();
     const req = joinTrainingMatchRequestSchema.parse(input);
+    if (
+      !getRuleset(
+        getTacticalRuleset(DEFAULT_TACTICAL_RULESET_VERSION).baseRulesetVersion,
+      ).civilizations.some((c) => c.id === req.civilization)
+    )
+      throw err.unprocessable(
+        'CIVILIZATION_INVALID',
+        'Esta civilización no está disponible en el entrenamiento',
+      );
     const code = inviteCode.trim().toUpperCase();
     const now = this.ctx.clock.now();
     // Reserva atómica del puesto de invitado: dos invitados simultáneos nunca entran ambos.

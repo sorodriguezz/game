@@ -1,4 +1,5 @@
-import { sql } from 'drizzle-orm';
+import { worlds } from '@reinos/db';
+import { eq, sql } from 'drizzle-orm';
 import type { CoreContext } from './context.js';
 import {
   EventOrderingConflict,
@@ -8,7 +9,7 @@ import {
   type GameEvent,
 } from './events.js';
 import { EVENT_HANDLERS } from './handlers.js';
-import { lockVillages } from './village-state.js';
+import { lockVillages, loadWorld, rulesetOf } from './village-state.js';
 
 export interface WorkerOptions {
   workerId: string;
@@ -84,6 +85,9 @@ export class EventWorker {
   async process(ev: GameEvent): Promise<'applied' | 'skipped' | 'deferred' | 'failed'> {
     try {
       const applied = await this.ctx.db.transaction(async (tx) => {
+        const world = await loadWorld(tx, ev.worldId);
+        if (rulesetOf(world).territory)
+          await tx.select().from(worlds).where(eq(worlds.id, ev.worldId)).for('update');
         const lockset = locksetOf(ev);
         await lockVillages(tx, ev.worldId, lockset);
         return processEventsUpTo(tx, this.ctx, EVENT_HANDLERS, new Set(lockset), {

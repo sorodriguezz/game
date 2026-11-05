@@ -112,7 +112,7 @@ export interface UnitStackView {
   quantity: number;
 }
 
-export const MOVEMENT_MISSIONS = ['ATTACK', 'RAID'] as const;
+export const MOVEMENT_MISSIONS = ['ATTACK', 'RAID', 'TRANSFER', 'REINFORCE', 'CONQUER'] as const;
 export type MovementMission = (typeof MOVEMENT_MISSIONS)[number];
 
 export interface MovementView {
@@ -157,6 +157,14 @@ export interface VillageView {
   doctrine: DoctrineView;
   movements: MovementView[];
   protectionUntil: string;
+  isCapital?: boolean;
+  loyalty?: number;
+  garrisons?: Array<{
+    ownerAccountId: string;
+    originVillageId: string;
+    unitType: (typeof UNIT_TYPES)[number];
+    quantity: number;
+  }>;
 }
 
 export const buildRequestSchema = z.object({
@@ -233,6 +241,11 @@ export interface MapVillageView {
   ownerName: string | null;
   civilization: (typeof CIVILIZATION_IDS)[number] | null;
   isMine: boolean;
+  isAlly?: boolean;
+  kind?: 'PLAYER' | 'NPC' | 'OASIS';
+  isCapital?: boolean;
+  loyalty?: number;
+  animals?: UnitStackView[];
 }
 
 export interface MapRegionView {
@@ -245,6 +258,9 @@ export interface MapRegionView {
   /** Una letra por celda: 1 si la celda de tierra toca el mar. */
   coastal: string;
   villages: MapVillageView[];
+  mapSize?: number;
+  serverTime?: string;
+  movements?: MapMovementView[];
 }
 
 // ---------------------------------------------------------------------------
@@ -260,6 +276,8 @@ export interface BattleReportSummary {
   defenderVillageName: string;
   attackerName: string;
   defenderName: string;
+  location?: 'VILLAGE' | 'FIELD';
+  fieldPosition?: { x: number; y: number } | null;
 }
 
 export interface BattleReportDetail extends BattleReportSummary {
@@ -267,3 +285,41 @@ export interface BattleReportDetail extends BattleReportSummary {
   seed: string;
   result: unknown;
 }
+
+export interface MapMovementView {
+  id: string;
+  mission: MovementMission | 'SETTLE';
+  isMine: boolean;
+  from: { x: number; y: number };
+  to: { x: number; y: number };
+  departedAt: string;
+  arrivesAt: string;
+  units: UnitStackView[] | null;
+}
+export const foundVillageRequestSchema = z.object({
+  x: z.number().int().min(0).max(1023),
+  y: z.number().int().min(0).max(1023),
+  name: z.string().trim().min(3).max(32),
+});
+export type FoundVillageRequest = z.infer<typeof foundVillageRequestSchema>;
+export interface TerritoryView {
+  villages: Array<{ id: string; name: string; x: number; y: number; isCapital: boolean }>;
+  settlements: Array<{ id: string; name: string; x: number; y: number; arrivesAt: string }>;
+  alliance: null | {
+    id: string;
+    name: string;
+    inviteCode: string | null;
+    members: Array<{ accountId: string; displayName: string }>;
+  };
+  reinforcements: Array<{
+    villageId: string;
+    villageName: string;
+    originVillageId: string;
+    unitType: (typeof UNIT_TYPES)[number];
+    quantity: number;
+  }>;
+}
+export const allianceRequestSchema = z.union([
+  z.object({ name: z.string().trim().min(3).max(32) }),
+  z.object({ inviteCode: z.string().trim().min(6).max(32) }),
+]);

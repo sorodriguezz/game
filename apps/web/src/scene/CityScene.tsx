@@ -37,7 +37,7 @@ const WALL_RADIUS = 46;
 const FOCUS = new Vec3(0, 0, 4);
 // Cámara acotada (FR-CITY-02): sin pasar bajo el suelo ni alejarse del valle.
 const PITCH_RANGE = new Vec2(-85, -14);
-const ZOOM_RANGE = new Vec2(30, 200);
+const ZOOM_RANGE = new Vec2(30, 310);
 
 /** Generador pseudoaleatorio local (decorativo, no autoritativo). */
 function rand(seed: number) {
@@ -52,21 +52,27 @@ function Wall({
   level,
   coastal,
   civilization,
+  radius = WALL_RADIUS,
 }: {
   level: number;
   coastal: boolean;
   civilization: CivilizationId;
+  radius?: number;
 }) {
   const items = useMemo(
     () =>
       wallRing(
         level,
         visualStage(Math.max(1, level)),
-        civilization === 'imperial_crown' ? 'corona' : 'liga',
+        civilization === 'imperial_crown' ||
+          civilization === 'stone_wardens' ||
+          civilization === 'steppe_clans'
+          ? 'corona'
+          : 'liga',
         coastal,
-        WALL_RADIUS,
+        radius,
       ),
-    [level, coastal, civilization],
+    [level, coastal, civilization, radius],
   );
   return <InstancedProps items={items} lod="LOD0" attachToParent />;
 }
@@ -235,7 +241,20 @@ function BuildingSlot({
   stage: 1 | 2 | 3;
 }) {
   if (!manifest) return null;
-  const v: ManifestAsset | null = findVariant(manifest, type, civilization, stage);
+  const newCiv = ['stone_wardens', 'steppe_clans', 'forest_kin'].includes(civilization);
+  const visualType =
+    type === 'quarry' && newCiv
+      ? 'clay_pit'
+      : type === 'middle_wall' || type === 'inner_wall'
+        ? 'wall'
+        : type;
+  const visualCiv =
+    civilization === 'stone_wardens' || civilization === 'steppe_clans'
+      ? 'imperial_crown'
+      : civilization === 'forest_kin'
+        ? 'sea_league'
+        : civilization;
+  const v: ManifestAsset | null = findVariant(manifest, visualType, visualCiv, stage);
   if (!v?.file) return <BuildingModel type={type} stage={stage} />;
   return <GlbModel url={`/${v.file}`} rotationY={v.facing === 'outward' ? 0 : 180} />;
 }
@@ -245,6 +264,7 @@ function City(props: CitySceneProps & { dragGuard: React.MutableRefObject<boolea
   const manifest = useManifest();
   const r = getRuleset(props.rulesetVersion);
   const plots = r.cityLayout.plots;
+  const terrestrial = !!r.territory;
   const pathTargets = useMemo<Array<[number, number]>>(
     () =>
       plots
@@ -252,11 +272,15 @@ function City(props: CitySceneProps & { dragGuard: React.MutableRefObject<boolea
         .map((p) => [p.x, p.kind === 'wall' ? WALL_RADIUS + 6 : p.z]),
     [plots, props.coastal],
   );
-  const scenery = useMemo(() => cityScenery(props.coastal, WALL_RADIUS), [props.coastal]);
+  const scenery = useMemo(
+    () => cityScenery(props.coastal, terrestrial ? 99 : WALL_RADIUS),
+    [props.coastal, terrestrial],
+  );
   const byPlot = new Map(props.buildings.map((b) => [b.plot, b]));
   const wallLevel = props.buildings.find((b) => b.type === 'wall')?.level ?? 0;
   const targets = useMemo<Array<[number, number]>>(
-    () => plots.filter((p) => p.kind === 'standard').map((p) => [p.x, p.z]),
+    () =>
+      plots.filter((p) => p.kind === 'standard' || p.kind === 'industry').map((p) => [p.x, p.z]),
     [plots],
   );
   const click = (plot: number) => () => {
@@ -267,7 +291,11 @@ function City(props: CitySceneProps & { dragGuard: React.MutableRefObject<boolea
 
   return (
     <>
-      <CityTerrain coastal={props.coastal} paths={pathTargets} />
+      <CityTerrain
+        coastal={props.coastal}
+        paths={pathTargets}
+        flatRadius={terrestrial ? 105 : 58}
+      />
       <InstancedProps items={scenery} />
       {props.coastal && (
         <CoastalShips
@@ -275,11 +303,31 @@ function City(props: CitySceneProps & { dragGuard: React.MutableRefObject<boolea
           hasPort={props.buildings.some((b) => b.type === 'port')}
         />
       )}
-      <Entity onClick={click(13)}>
-        <Wall level={wallLevel} coastal={props.coastal} civilization={props.civilization} />
-      </Entity>
+      {!terrestrial && (
+        <Entity onClick={click(13)}>
+          <Wall level={wallLevel} coastal={props.coastal} civilization={props.civilization} />
+        </Entity>
+      )}
+      {terrestrial &&
+        plots
+          .filter((p) => p.kind === 'fortification')
+          .map((p) => (
+            <Entity key={p.id} onClick={click(p.id)}>
+              <Wall
+                radius={p.radius!}
+                level={byPlot.get(p.id)?.level ?? 0}
+                coastal={false}
+                civilization={props.civilization}
+              />
+            </Entity>
+          ))}
       {plots
-        .filter((p) => p.kind !== 'wall' && (p.kind !== 'coastal' || props.coastal))
+        .filter(
+          (p) =>
+            p.kind !== 'wall' &&
+            p.kind !== 'fortification' &&
+            (p.kind !== 'coastal' || props.coastal),
+        )
         .map((p) => {
           const b = byPlot.get(p.id);
           const building = props.construction?.plot === p.id;
@@ -348,7 +396,11 @@ export function CityScene(props: CitySceneProps) {
         <SceneLighting
           profile={profile}
           camera={cameraRef}
-          fog={{ color: '#c4d3dc', start: 170, end: 560 }}
+          fog={
+            props.rulesetVersion === 'frontier-alpha.1'
+              ? { color: '#a7b89a', start: 450, end: 1000 }
+              : { color: '#c4d3dc', start: 170, end: 560 }
+          }
           exposure={0.95}
           envIntensity={0.6}
         />
@@ -368,7 +420,11 @@ export function CityScene(props: CitySceneProps) {
               shadowType={SHADOW_PCF3_32F}
             />
           </Entity>
-          <Entity name="camera" position={[0, 70, 95]} ref={(e) => void (cameraRef.current = e)}>
+          <Entity
+            name="camera"
+            position={props.rulesetVersion === 'frontier-alpha.1' ? [0, 155, 210] : [0, 70, 95]}
+            ref={(e) => void (cameraRef.current = e)}
+          >
             <Camera clearColor="#b9cdd9" fov={42} farClip={1400} nearClip={0.5} />
             <Script
               script={CameraControls}

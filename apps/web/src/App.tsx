@@ -107,6 +107,7 @@ export function App() {
         account={account}
         worldId={route.worldId}
         villageId={route.villageId}
+        onOpenVillage={(villageId) => go({ name: 'village', worldId: route.worldId, villageId })}
         onBack={() => go({ name: 'worlds' })}
         onLogout={logout}
       />

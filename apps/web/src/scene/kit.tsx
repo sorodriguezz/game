@@ -33,6 +33,9 @@ function mat(
 }
 
 const CIV_COLORS: Record<CivilizationId, { roof: string; banner: string; trim: string }> = {
+  stone_wardens: { roof: '#6c7780', banner: '#3b6585', trim: '#d8ba69' },
+  steppe_clans: { roof: '#8d442d', banner: '#a13d28', trim: '#d8aa64' },
+  forest_kin: { roof: '#456c4a', banner: '#366645', trim: '#c8b86c' },
   imperial_crown: { roof: '#8b3a2b', banner: '#a3242a', trim: '#d4b25a' },
   sea_league: { roof: '#2f5a7a', banner: '#1f6f8b', trim: '#e8e2cf' },
 };

@@ -38,6 +38,7 @@ LIBRARY: dict[str, tuple[TexFn, float]] = {
     'common.thatch': (lambda n: T.thatch(n, 302, '#B89A5A'), 2.5),
     'common.rough_stone': (lambda n: T.ground(n, 303, 'rock'), 3.0),
     'common.dirt': (lambda n: T.ground(n, 304, 'dirt'), 4.0),
+    'common.clay': (lambda n: T.plaster(n, 320, '#9B593E'), 2.0),
     'common.crop': (lambda n: T.ground(n, 305, 'dry_grass'), 3.0),
     'common.water': (lambda n: T.water(n, 310), 9.0),
     'common.skin': (lambda n: T.plaster(n, 317, '#C9997A'), 0.5),

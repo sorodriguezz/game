@@ -16,7 +16,8 @@
   "dependencies": {
     "@reinos/game-config": "workspace:*",
     "drizzle-orm": "^0.45.4",
-    "pg": "^8.23.1"
+    "pg": "^8.23.1",
+    "@reinos/game-rules": "workspace:*"
   },
   "devDependencies": {
     "@types/pg": "^8.15.6",

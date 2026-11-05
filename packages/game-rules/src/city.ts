@@ -1,7 +1,5 @@
 import {
-  buildingDef,
   plotDef,
-  unitDef,
   type BuildingType,
   type CivilizationId,
   type Ruleset,
@@ -35,7 +33,10 @@ export function validateConstruction(
 ): RuleCheck<{ targetLevel: number }> {
   const plot = plotDef(r, input.plot);
   if (!plot) return { ok: false, code: 'PLOT_NOT_FOUND' };
-  const def = buildingDef(r, input.type);
+  const def = r.buildings.find((b) => b.type === input.type);
+  if (!def) return { ok: false, code: 'VALIDATION_FAILED' };
+  if (plot.allowedTypes && !plot.allowedTypes.includes(input.type))
+    return { ok: false, code: 'PLOT_KIND_MISMATCH' };
   if (plot.kind !== def.plotKind)
     return { ok: false, code: 'PLOT_KIND_MISMATCH', details: { expected: def.plotKind } };
   if (def.civilization && def.civilization !== input.civilization) {
@@ -46,7 +47,7 @@ export function validateConstruction(
   const onPlot = input.buildings.find((b) => b.plot === input.plot);
   if (onPlot && onPlot.type !== input.type) return { ok: false, code: 'PLOT_OCCUPIED' };
   const sameType = input.buildings.find((b) => b.type === input.type);
-  if (sameType && sameType.plot !== input.plot) {
+  if (!def.repeatable && sameType && sameType.plot !== input.plot) {
     return { ok: false, code: 'BUILDING_ALREADY_EXISTS', details: { plot: sameType.plot } };
   }
   const current = onPlot?.level ?? 0;
@@ -63,7 +64,9 @@ export function validateRecruitment(
   r: Ruleset,
   input: { civilization: CivilizationId; buildings: readonly PlacedBuilding[]; unitType: UnitType },
 ): RuleCheck<{ trainedAt: BuildingType }> {
-  const def = unitDef(r, input.unitType);
+  const def = r.units.find((u) => u.type === input.unitType);
+  if (!def) return { ok: false, code: 'UNIT_NOT_AVAILABLE' };
+  if (def.npcOnly) return { ok: false, code: 'UNIT_NOT_AVAILABLE' };
   if (def.civilization && def.civilization !== input.civilization) {
     return { ok: false, code: 'CIVILIZATION_RESTRICTED' };
   }

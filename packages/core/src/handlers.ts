@@ -1,6 +1,10 @@
-import { and, eq } from 'drizzle-orm';
+import { fieldEncounter, settlementComplete } from './territory-handlers.js';
+import { areAllies, scheduleInterceptions } from './territory.js';
+import { and, eq, sql } from 'drizzle-orm';
 import {
   armyMovements,
+  garrisons,
+  settlementOrders,
   battles,
   constructionOrders,
   outbox,
@@ -28,10 +32,18 @@ import {
   type BattleSnapshot,
 } from '@reinos/game-rules';
 import { DomainError } from './context.js';
-import { scheduleEvent, type EventHandler, type EventType, type GameEvent } from './events.js';
+import {
+  scheduleEvent,
+  processEventsUpTo,
+  locksetOf,
+  type EventHandler,
+  type EventType,
+  type GameEvent,
+} from './events.js';
 import { addSeconds, newId } from './util.js';
 import {
   addToStacks,
+  lockVillages,
   loadBuildings,
   loadEconomy,
   loadTroops,
@@ -154,7 +166,7 @@ const movementReturn: EventHandler = async (tx, _ctx, ev) => {
     .from(armyMovements)
     .where(eq(armyMovements.id, movementId))
     .for('update');
-  if (!m || m.status !== 'RETURNING') return;
+  if (!m || m.status !== 'RETURNING' || (m.returnsAt && m.returnsAt > ev.dueAt)) return;
   if (m.originVillageId !== ev.villageId)
     throw new DomainError('WORLD_MISMATCH', 500, 'retorno a aldea distinta');
   let state = await settledEconomy(tx, ev.villageId, ev);
@@ -165,6 +177,85 @@ const movementReturn: EventHandler = async (tx, _ctx, ev) => {
     ev.villageId,
     Object.entries(m.units).map(([unitType, quantity]) => ({ unitType, quantity })),
   );
+  const [home] = await tx.select().from(villages).where(eq(villages.id, ev.villageId));
+  if (home?.ownerAccountId !== m.ownerAccountId) {
+    // Nunca entregar un ejército al conquistador de su antigua aldea.
+    await removeFromStacks(
+      tx,
+      ev.villageId,
+      Object.entries(m.units).map(([unitType, quantity]) => ({ unitType, quantity })),
+    );
+    const [fallback] = await tx
+      .select()
+      .from(villages)
+      .where(
+        and(
+          eq(villages.worldId, ev.worldId),
+          eq(villages.ownerAccountId, m.ownerAccountId),
+          eq(villages.kind, 'PLAYER'),
+        ),
+      )
+      .orderBy(villages.id)
+      .limit(1);
+    if (fallback) {
+      await lockVillages(tx, ev.worldId, [fallback.id]);
+      await processEventsUpTo(
+        tx,
+        _ctx,
+        EVENT_HANDLERS,
+        new Set([...locksetOf(ev), fallback.id]),
+        { dueAt: ev.dueAt, priority: ev.priority, id: ev.id },
+        ev.id,
+      );
+      const fallbackState = settle(await loadEconomy(tx, fallback.id), ev.dueAt.getTime());
+      const world = await loadWorld(tx, ev.worldId),
+        r = rulesetOf(world);
+      const returnsAt = addSeconds(
+        ev.dueAt,
+        travelSeconds(
+          distanceMilli(home!, fallback),
+          slowestSpeed(
+            r,
+            Object.entries(m.units).map(([unitType, quantity]) => ({
+              unitType: unitType as UnitType,
+              quantity,
+            })),
+          ),
+          world.speedMultiplier,
+        ),
+      );
+      await tx
+        .update(armyMovements)
+        .set({
+          originVillageId: fallback.id,
+          targetVillageId: home!.id,
+          departedAt: ev.dueAt,
+          arrivesAt: addSeconds(ev.dueAt, 1),
+          returnsAt,
+          battleId: null,
+        })
+        .where(eq(armyMovements.id, m.id));
+      await scheduleEvent(tx, {
+        worldId: ev.worldId,
+        type: 'MOVEMENT_RETURN',
+        villageId: fallback.id,
+        dueAt: returnsAt,
+        dedupeKey: `reroute:${m.id}:${ev.id}`,
+        payload: { movementId: m.id },
+      });
+      await scheduleInterceptions(tx, world, m.id, ev.dueAt);
+      await saveEconomy(
+        tx,
+        fallback.id,
+        await withRecomputedRates(tx, r, fallback.id, fallbackState),
+      );
+    } else
+      await tx
+        .update(armyMovements)
+        .set({ status: 'COMPLETED', units: {} })
+        .where(eq(armyMovements.id, m.id));
+    return;
+  }
   const loot = m.loot ?? { wood: 0, stone: 0, iron: 0, food: 0 };
   const lootMilli = bundleToMilli({
     wood: loot.wood ?? 0,
@@ -186,8 +277,13 @@ const movementReturn: EventHandler = async (tx, _ctx, ev) => {
     .update(armyMovements)
     .set({ status: 'COMPLETED' })
     .where(eq(armyMovements.id, movementId));
-  // Tasas sin cambios: las tropas ya contaban para el mantenimiento mientras estaban fuera.
-  await saveEconomy(tx, ev.villageId, state);
+  // Recalcular también si la aldea de origen fue reasignada tras una conquista.
+  const world = await loadWorld(tx, ev.worldId);
+  await saveEconomy(
+    tx,
+    ev.villageId,
+    await withRecomputedRates(tx, rulesetOf(world), ev.villageId, state),
+  );
   await tx.insert(outbox).values({
     worldId: ev.worldId,
     type: 'ArmyReturned',
@@ -222,6 +318,109 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
   if (!target || !origin)
     throw new DomainError('VILLAGE_NOT_FOUND', 500, 'aldea del combate inexistente');
 
+  if (m.mission === 'TRANSFER' || m.mission === 'REINFORCE') {
+    const valid =
+      m.mission === 'TRANSFER'
+        ? target.ownerAccountId === m.ownerAccountId
+        : await areAllies(tx, ev.worldId, m.ownerAccountId, target.ownerAccountId);
+    if (valid) {
+      let targetState = await settledEconomy(tx, target.id, ev);
+      let originState = await settledEconomy(tx, origin.id, ev);
+      if (m.mission === 'TRANSFER')
+        await addToStacks(
+          tx,
+          troopStacks,
+          ev.worldId,
+          target.id,
+          Object.entries(m.units).map(([unitType, quantity]) => ({ unitType, quantity })),
+        );
+      else
+        for (const [unitType, quantity] of Object.entries(m.units))
+          await tx
+            .insert(garrisons)
+            .values({
+              worldId: ev.worldId,
+              villageId: target.id,
+              originVillageId: origin.id,
+              ownerAccountId: m.ownerAccountId,
+              unitType,
+              quantity,
+            })
+            .onConflictDoUpdate({
+              target: [garrisons.villageId, garrisons.originVillageId, garrisons.unitType],
+              set: { quantity: sql`${garrisons.quantity}+${quantity}` },
+            });
+      await tx.update(armyMovements).set({ status: 'COMPLETED' }).where(eq(armyMovements.id, m.id));
+      targetState = await withRecomputedRates(tx, r, target.id, targetState);
+      originState = await withRecomputedRates(tx, r, origin.id, originState);
+      await saveEconomy(tx, target.id, targetState);
+      await saveEconomy(tx, origin.id, originState);
+      return;
+    }
+    const returnsAt = addSeconds(
+      ev.dueAt,
+      travelSeconds(
+        distanceMilli(origin, target),
+        slowestSpeed(
+          r,
+          Object.entries(m.units).map(([unitType, quantity]) => ({
+            unitType: unitType as UnitType,
+            quantity,
+          })),
+        ),
+        world.speedMultiplier,
+      ),
+    );
+    await tx
+      .update(armyMovements)
+      .set({ status: 'RETURNING', returnsAt })
+      .where(eq(armyMovements.id, m.id));
+    await scheduleEvent(tx, {
+      worldId: ev.worldId,
+      type: 'MOVEMENT_RETURN',
+      villageId: origin.id,
+      dueAt: returnsAt,
+      dedupeKey: `return:${m.id}`,
+      payload: { movementId: m.id },
+    });
+    await scheduleInterceptions(tx, world, m.id, ev.dueAt);
+    return;
+  }
+  // Un destino propio o aliado al llegar ya no es un blanco hostil.
+  if (
+    target.ownerAccountId === m.ownerAccountId ||
+    (await areAllies(tx, ev.worldId, m.ownerAccountId, target.ownerAccountId))
+  ) {
+    const returnsAt = addSeconds(
+      ev.dueAt,
+      travelSeconds(
+        distanceMilli(origin, target),
+        slowestSpeed(
+          r,
+          Object.entries(m.units).map(([unitType, quantity]) => ({
+            unitType: unitType as UnitType,
+            quantity,
+          })),
+        ),
+        world.speedMultiplier,
+      ),
+    );
+    await tx
+      .update(armyMovements)
+      .set({ status: 'RETURNING', returnsAt })
+      .where(eq(armyMovements.id, m.id));
+    await scheduleEvent(tx, {
+      worldId: ev.worldId,
+      type: 'MOVEMENT_RETURN',
+      villageId: origin.id,
+      dueAt: returnsAt,
+      dedupeKey: `return:${m.id}`,
+      payload: { movementId: m.id },
+    });
+    await scheduleInterceptions(tx, world, m.id, ev.dueAt);
+    return;
+  }
+
   const civOf = async (accountId: string | null): Promise<CivilizationId | null> => {
     if (!accountId) return null;
     const [p] = await tx
@@ -234,11 +433,33 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
   if (!attackerCiv) throw new DomainError('NOT_A_MEMBER', 500, 'atacante sin membresía');
   const defenderCiv = await civOf(target.ownerAccountId);
 
+  const affectedParents = new Set<string>();
+  if (m.mission === 'CONQUER' && target.parentVillageId && target.parentVillageId !== origin.id) {
+    await lockVillages(tx, ev.worldId, [target.parentVillageId]);
+    await processEventsUpTo(
+      tx,
+      ctx,
+      EVENT_HANDLERS,
+      new Set([...locksetOf(ev), target.parentVillageId]),
+      { dueAt: ev.dueAt, priority: ev.priority, id: ev.id },
+      ev.id,
+    );
+    affectedParents.add(target.parentVillageId);
+  }
   // Ambas aldeas liquidadas hasta el instante del impacto.
   let targetState = await settledEconomy(tx, target.id, ev);
   let originState = await settledEconomy(tx, origin.id, ev);
 
-  const defenderTroops = await loadTroops(tx, target.id);
+  const ownDefenders = await loadTroops(tx, target.id);
+  const guests = await tx
+    .select()
+    .from(garrisons)
+    .where(and(eq(garrisons.worldId, ev.worldId), eq(garrisons.villageId, target.id)))
+    .orderBy(garrisons.originVillageId, garrisons.unitType);
+  const defenderTroops = [
+    ...ownDefenders,
+    ...guests.map((g) => ({ unitType: g.unitType as UnitType, quantity: g.quantity })),
+  ];
   const tBuildings = await loadBuildings(tx, target.id);
   const battleId = newId();
   const seed = `${world.mapSeed}:${movementId}`;
@@ -247,7 +468,7 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
     worldId: ev.worldId,
     seed,
     rulesetVersion: r.version,
-    mission: m.mission,
+    mission: m.mission === 'RAID' ? 'RAID' : 'ATTACK',
     attacker: {
       civilization: attackerCiv,
       units: Object.entries(m.units).map(([unitType, quantity]) => ({
@@ -264,19 +485,68 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
       },
     },
     defenses: {
-      wallLevel: levelOf(tBuildings, 'wall'),
-      bastionLevel: levelOf(tBuildings, 'imperial_bastion'),
-      hospitalLevel: levelOf(tBuildings, 'hospital'),
+      wallLevel:
+        levelOf(tBuildings, 'wall') +
+        levelOf(tBuildings, 'middle_wall') +
+        levelOf(tBuildings, 'inner_wall'),
+      bastionLevel: levelOf(tBuildings, 'imperial_bastion') + levelOf(tBuildings, 'watchtower'),
+      hospitalLevel: guests.length ? 0 : levelOf(tBuildings, 'hospital'),
     },
     terrain: { kind: 'PLAIN' },
     defenderResources: milliToWholeUnits(targetState.amounts),
   };
+  if (r.territory)
+    snapshot.defenses.traps = Math.max(
+      0,
+      levelOf(tBuildings, 'trapper') * r.territory.trapsPerLevel - target.trapsUsed,
+    );
   const result = resolveBattle(r, snapshot);
+  if (result.trapsUsed)
+    await tx
+      .update(villages)
+      .set({ trapsUsed: target.trapsUsed + result.trapsUsed })
+      .where(eq(villages.id, target.id));
 
   // --- Defensor: bajas, heridos y botín ------------------------------------
-  const dead = [...result.defender.killed, ...result.defender.wounded];
-  await removeFromStacks(tx, target.id, dead);
-  await addToStacks(tx, woundedStacks, ev.worldId, target.id, result.defender.wounded);
+  const dead = new Map<UnitType, number>();
+  for (const loss of [...result.defender.killed, ...result.defender.wounded])
+    dead.set(loss.unitType, (dead.get(loss.unitType) ?? 0) + loss.quantity);
+  const ownWounded: Array<{ unitType: UnitType; quantity: number }> = [];
+  for (const [unitType, totalLoss] of dead) {
+    const own = ownDefenders.find((s) => s.unitType === unitType)?.quantity ?? 0;
+    const matching = guests.filter((g) => g.unitType === unitType);
+    const total = own + matching.reduce((sum, g) => sum + g.quantity, 0);
+    const portions = [
+      { own: true, quantity: own },
+      ...matching.map((g) => ({ own: false, quantity: g.quantity })),
+    ];
+    const losses = portions.map((p) => Math.floor((totalLoss * p.quantity) / Math.max(1, total)));
+    let remaining = totalLoss - losses.reduce((sum, n) => sum + n, 0);
+    for (let i = 0; remaining > 0 && i < portions.length; i++)
+      if (losses[i]! < portions[i]!.quantity) {
+        losses[i]!++;
+        remaining--;
+      }
+    if (losses[0]) await removeFromStacks(tx, target.id, [{ unitType, quantity: losses[0] }]);
+    for (const [i, g] of matching.entries())
+      if (losses[i + 1])
+        await tx
+          .update(garrisons)
+          .set({ quantity: sql`${garrisons.quantity}-${losses[i + 1]}` })
+          .where(
+            and(
+              eq(garrisons.villageId, g.villageId),
+              eq(garrisons.originVillageId, g.originVillageId),
+              eq(garrisons.unitType, unitType),
+            ),
+          );
+    const wounded = result.defender.wounded.find((w) => w.unitType === unitType)?.quantity ?? 0;
+    ownWounded.push({
+      unitType,
+      quantity: Math.min(losses[0] ?? 0, Math.floor((wounded * own) / Math.max(1, total))),
+    });
+  }
+  await addToStacks(tx, woundedStacks, ev.worldId, target.id, ownWounded);
   const lootMilli = bundleToMilli(result.loot);
   if (lootMilli.wood + lootMilli.stone + lootMilli.iron + lootMilli.food > 0n) {
     targetState = debit(targetState, lootMilli);
@@ -290,6 +560,104 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
     });
   }
 
+  if (m.mission === 'CONQUER' && r.territory && result.outcome === 'ATTACKER') {
+    const chiefs = result.attacker.survivors.find((s) => s.unitType === 'chieftain')?.quantity ?? 0;
+    const loyalty =
+      target.kind === 'OASIS'
+        ? 0
+        : Math.max(0, target.loyalty - chiefs * r.territory.loyaltyPerChief);
+    const [countRow] = await tx
+      .select({ count: sql<number>`count(*)::int` })
+      .from(villages)
+      .where(
+        and(
+          eq(villages.worldId, ev.worldId),
+          eq(
+            villages.ownerAccountId,
+            target.ownerAccountId ?? '00000000-0000-0000-0000-000000000000',
+          ),
+          eq(villages.kind, 'PLAYER'),
+        ),
+      );
+    const noDefenders = result.defender.survivors.length === 0;
+    if (
+      !target.isCapital &&
+      (target.kind === 'OASIS' || chiefs > 0) &&
+      (!target.ownerAccountId || target.kind === 'OASIS' || (countRow?.count ?? 0) > 1)
+    ) {
+      await tx.update(villages).set({ loyalty }).where(eq(villages.id, target.id));
+      if (loyalty === 0 && noDefenders) {
+        if (target.kind === 'OASIS') {
+          const [oasisCountRow] = await tx
+            .select({ count: sql<number>`count(*)::int` })
+            .from(villages)
+            .where(
+              and(
+                eq(villages.worldId, ev.worldId),
+                eq(villages.kind, 'OASIS'),
+                eq(villages.parentVillageId, origin.id),
+              ),
+            );
+          if ((oasisCountRow?.count ?? 0) < r.territory.maxOasesPerVillage)
+            await tx
+              .update(villages)
+              .set({ ownerAccountId: m.ownerAccountId, parentVillageId: origin.id, loyalty: 100 })
+              .where(eq(villages.id, target.id));
+        } else {
+          await tx
+            .update(villages)
+            .set({ ownerAccountId: m.ownerAccountId, kind: 'PLAYER', loyalty: 100, trapsUsed: 0 })
+            .where(eq(villages.id, target.id));
+          await tx
+            .update(villages)
+            .set({ ownerAccountId: m.ownerAccountId })
+            .where(
+              and(
+                eq(villages.worldId, ev.worldId),
+                eq(villages.parentVillageId, target.id),
+                eq(villages.kind, 'OASIS'),
+              ),
+            );
+          await tx
+            .update(constructionOrders)
+            .set({ status: 'CANCELLED' })
+            .where(
+              and(
+                eq(constructionOrders.villageId, target.id),
+                eq(constructionOrders.status, 'IN_PROGRESS'),
+              ),
+            );
+          await tx
+            .update(recruitmentOrders)
+            .set({ status: 'CANCELLED' })
+            .where(
+              and(
+                eq(recruitmentOrders.villageId, target.id),
+                eq(recruitmentOrders.status, 'IN_PROGRESS'),
+              ),
+            );
+          await tx
+            .update(settlementOrders)
+            .set({ status: 'CANCELLED' })
+            .where(
+              and(
+                eq(settlementOrders.originVillageId, target.id),
+                eq(settlementOrders.status, 'IN_PROGRESS'),
+              ),
+            );
+          for (const b of tBuildings) {
+            const def = r.buildings.find((d) => d.type === b.type);
+            if (def?.civilization && def.civilization !== attackerCiv)
+              await tx
+                .delete(villageBuildings)
+                .where(
+                  and(eq(villageBuildings.villageId, target.id), eq(villageBuildings.plot, b.plot)),
+                );
+          }
+        }
+      }
+    }
+  }
   // --- Atacante: supervivientes regresan con el botín ----------------------
   const survivors = Object.fromEntries(
     result.attacker.survivors.map((s) => [s.unitType, s.quantity]),
@@ -343,11 +711,18 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
     });
   }
 
+  await scheduleInterceptions(tx, world, m.id, ev.dueAt);
   // Mantenimiento: las bajas dejan de consumir desde el instante del combate.
   targetState = await withRecomputedRates(tx, r, target.id, targetState);
   originState = await withRecomputedRates(tx, r, origin.id, originState);
   await saveEconomy(tx, target.id, targetState);
   await saveEconomy(tx, origin.id, originState);
+  for (const parent of affectedParents)
+    await saveEconomy(
+      tx,
+      parent,
+      await withRecomputedRates(tx, r, parent, await settledEconomy(tx, parent, ev)),
+    );
 
   await tx.insert(outbox).values({
     worldId: ev.worldId,
@@ -370,4 +745,6 @@ export const EVENT_HANDLERS: Record<EventType, EventHandler> = {
   RECRUITMENT_COMPLETE: recruitmentComplete,
   MOVEMENT_RETURN: movementReturn,
   MOVEMENT_ARRIVAL: movementArrival,
+  SETTLEMENT_COMPLETE: settlementComplete,
+  FIELD_ENCOUNTER: fieldEncounter,
 };

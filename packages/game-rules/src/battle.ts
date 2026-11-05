@@ -38,13 +38,14 @@ export interface BattleSnapshot {
   seed: string;
   rulesetVersion: string;
   mission: BattleMission;
+  location?: 'VILLAGE' | 'FIELD';
   attacker: { civilization: CivilizationId; units: UnitStack[] };
   defender: {
     civilization: CivilizationId | null;
     units: UnitStack[];
     doctrine: DefenseDoctrine;
   };
-  defenses: { wallLevel: number; bastionLevel: number; hospitalLevel: number };
+  defenses: { wallLevel: number; bastionLevel: number; hospitalLevel: number; traps?: number };
   terrain: { kind: TerrainKind };
   /** Recursos (unidades enteras) del defensor liquidados al instante del combate. */
   defenderResources: ResourceBundle;
@@ -90,6 +91,7 @@ export interface BattleResult {
     wounded: UnitStack[];
     survivors: UnitStack[];
   };
+  trapsUsed?: number;
   carryCapacity: number;
   loot: ResourceBundle;
   milestones: BattleMilestone[];
@@ -164,7 +166,16 @@ export function resolveBattle(r: Ruleset, snap: BattleSnapshot): BattleResult {
   const prng = createPrng(`${snap.seed}|${snap.battleId}|${snap.rulesetVersion}`);
   const c = r.combat;
 
-  const sent = normalizeStacks(r, snap.attacker.units);
+  const originalSent = normalizeStacks(r, snap.attacker.units);
+  const trapCapacity =
+    snap.location === 'FIELD' ? 0 : Math.max(0, Math.floor(snap.defenses.traps ?? 0));
+  let remainingTraps = trapCapacity;
+  const trapped = originalSent.map((stack) => {
+    const quantity = Math.min(stack.quantity, remainingTraps);
+    remainingTraps -= quantity;
+    return { unitType: stack.unitType, quantity };
+  });
+  const sent = sub(originalSent, trapped);
   const present = normalizeStacks(r, snap.defender.units);
 
   // --- Ataque -------------------------------------------------------------
@@ -211,7 +222,7 @@ export function resolveBattle(r: Ruleset, snap: BattleSnapshot): BattleResult {
     const unitsPower = attRaw > 0n ? (inf * attInf + cav * attCav) / attRaw : inf;
     const morale = moralePermille(r, units);
     const power =
-      ((unitsPower + BigInt(c.baseVillageDefense)) *
+      ((unitsPower + BigInt(snap.location === 'FIELD' ? 0 : c.baseVillageDefense)) *
         BigInt(1000 + wallPermille) *
         BigInt(1000 + morale)) /
       1_000_000n;
@@ -259,6 +270,7 @@ export function resolveBattle(r: Ruleset, snap: BattleSnapshot): BattleResult {
     unitType: s.unitType,
     quantity: lossCount(prng, s.quantity, attLoss),
   }));
+  const allLost = normalizeStacks(r, [...lost, ...trapped]);
   const dead = engaged.map((s) => ({
     unitType: s.unitType,
     quantity: lossCount(prng, s.quantity, defLoss),
@@ -335,7 +347,7 @@ export function resolveBattle(r: Ruleset, snap: BattleSnapshot): BattleResult {
   };
   phases.forEach((phase, i) => {
     const losses: Array<{ side: BattleSide; unitType: UnitType; count: number }> = [];
-    for (const s of lost) {
+    for (const s of allLost) {
       const count = split(s.quantity, i);
       if (count > 0) losses.push({ side: 'ATTACKER', unitType: s.unitType, count });
     }
@@ -363,7 +375,8 @@ export function resolveBattle(r: Ruleset, snap: BattleSnapshot): BattleResult {
       defenderMoralePermille: def.morale,
       wallPermille,
     },
-    attacker: { sent, lost: nonZero(lost), survivors: nonZero(survivorsAtt) },
+    attacker: { sent: originalSent, lost: allLost, survivors: nonZero(survivorsAtt) },
+    ...(trapCapacity > 0 ? { trapsUsed: trapCapacity - remainingTraps } : {}),
     defender: {
       present,
       reserve: nonZero(reserve),

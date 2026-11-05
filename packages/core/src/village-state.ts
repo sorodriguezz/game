@@ -1,6 +1,7 @@
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import {
   armyMovements,
+  garrisons,
   recruitmentOrders,
   resourceAccounts,
   resourceLedger,
@@ -85,6 +86,7 @@ export async function lockOwnedVillage(
         eq(villages.worldId, worldId),
         eq(villages.id, villageId),
         eq(villages.ownerAccountId, accountId),
+        eq(villages.kind, 'PLAYER'),
       ),
     )
     .for('update');
@@ -132,6 +134,7 @@ export async function loadAwayTroops(
     .where(
       and(
         eq(armyMovements.originVillageId, villageId),
+        sql`${armyMovements.ownerAccountId}=(select owner_account_id from villages where id=${villageId})`,
         inArray(armyMovements.status, ['IN_TRANSIT', 'RETURNING']),
       ),
     );
@@ -220,10 +223,28 @@ export async function withRecomputedRates(
   const buildings = await loadBuildings(db, villageId);
   const home = await loadTroops(db, villageId);
   const away = await loadAwayTroops(db, villageId);
-  const upkeep = upkeepPerHour(r, [...home, ...away]);
+  const guests = await db.select().from(garrisons).where(eq(garrisons.villageId, villageId));
+  const upkeep = upkeepPerHour(r, [
+    ...home,
+    ...away,
+    ...guests.map((g) => ({ unitType: g.unitType as UnitType, quantity: g.quantity })),
+  ]);
+  const [village] = await db.select().from(villages).where(eq(villages.id, villageId));
+  const world = await loadWorld(db, village!.worldId);
+  const production = computeRates(r, buildings, 0, world.speedMultiplier);
+  const rates = { ...production };
+  if (r.territory) {
+    const oases = await db
+      .select()
+      .from(villages)
+      .where(and(eq(villages.parentVillageId, villageId), eq(villages.kind, 'OASIS')));
+    for (const k of ['wood', 'stone', 'iron', 'food'] as const)
+      rates[k] = (rates[k] * BigInt(1000 + oases.length * r.territory.oasisBonusPermille)) / 1000n;
+  }
+  rates.food -= BigInt(upkeep) * 1000n;
   return {
     ...state,
-    rates: computeRates(r, buildings, upkeep),
+    rates,
     capacity: capacityMilli(r, levelOf(buildings, 'warehouse')),
   };
 }

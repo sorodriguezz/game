@@ -219,6 +219,12 @@ export const tacticalMvp2Alpha0: TacticalRuleset = {
     },
   },
   units: {
+    ...(Object.fromEntries(
+      UNIT_TYPES.map((type) => [
+        type,
+        { kind: 'melee' as const, rangeCm: 0, meleePenaltyPermille: 1000, chargeBonusPermille: 0 },
+      ]),
+    ) as Record<UnitType, z.infer<typeof unitTacticalProfileSchema>>),
     militia: { kind: 'melee', rangeCm: 0, meleePenaltyPermille: 1000, chargeBonusPermille: 0 },
     spearman: { kind: 'melee', rangeCm: 0, meleePenaltyPermille: 1000, chargeBonusPermille: 0 },
     archer: { kind: 'ranged', rangeCm: 50 * M, meleePenaltyPermille: 400, chargeBonusPermille: 0 },

@@ -3,6 +3,123 @@
   "styleVersion": "realistic-stylized-v1",
   "assets": [
     {
+      "assetId": "bakery.common.s1",
+      "kind": "building",
+      "type": "bakery",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/bakery.common.s1.glb",
+      "visualStage": 1,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [1640, 620, 230],
+      "materials": [
+        "corona.stone",
+        "corona.wood",
+        "corona.roof",
+        "corona.plaster",
+        "common.iron",
+        "common.crop"
+      ],
+      "dimensionsMeters": [10.6, 6.34, 10.6],
+      "bytes": 187124,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "bakery.common.s2",
+      "kind": "building",
+      "type": "bakery",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/bakery.common.s2.glb",
+      "visualStage": 2,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [1996, 620, 230],
+      "materials": [
+        "corona.stone",
+        "corona.wood",
+        "corona.roof",
+        "corona.plaster",
+        "common.iron",
+        "common.crop"
+      ],
+      "dimensionsMeters": [10.6, 6.34, 10.6],
+      "bytes": 206720,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "bakery.common.s3",
+      "kind": "building",
+      "type": "bakery",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/bakery.common.s3.glb",
+      "visualStage": 3,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [5328, 1818, 678],
+      "materials": [
+        "corona.stone",
+        "corona.wood",
+        "corona.plaster",
+        "corona.roof",
+        "common.iron",
+        "common.crop"
+      ],
+      "dimensionsMeters": [10.6, 9.7, 10.6],
+      "bytes": 573328,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
       "assetId": "barracks.corona.s1",
       "kind": "building",
       "type": "barracks",
@@ -243,6 +360,102 @@
       }
     },
     {
+      "assetId": "brickyard.common.s1",
+      "kind": "building",
+      "type": "brickyard",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/brickyard.common.s1.glb",
+      "visualStage": 1,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [2068, 986, 370],
+      "materials": ["corona.stone", "corona.roof", "common.iron", "corona.wood"],
+      "dimensionsMeters": [10.6, 7.36, 10.6],
+      "bytes": 262028,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "brickyard.common.s2",
+      "kind": "building",
+      "type": "brickyard",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/brickyard.common.s2.glb",
+      "visualStage": 2,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [2424, 1156, 434],
+      "materials": ["corona.stone", "corona.roof", "common.iron", "corona.wood"],
+      "dimensionsMeters": [10.6, 7.86, 10.6],
+      "bytes": 305960,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "brickyard.common.s3",
+      "kind": "building",
+      "type": "brickyard",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/brickyard.common.s3.glb",
+      "visualStage": 3,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [3152, 1506, 564],
+      "materials": ["corona.stone", "corona.roof", "common.iron", "corona.wood"],
+      "dimensionsMeters": [10.6, 8.36, 10.6],
+      "bytes": 397216,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
       "assetId": "bush.v0",
       "kind": "prop",
       "type": "bush",
@@ -287,6 +500,102 @@
       "bytes": 52224,
       "thumbnail": null,
       "version": 2,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "castle.common.s1",
+      "kind": "building",
+      "type": "castle",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/castle.common.s1.glb",
+      "visualStage": 1,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [3260, 1410, 523],
+      "materials": ["corona.stone", "corona.wood", "corona.roof", "corona.cloth", "common.iron"],
+      "dimensionsMeters": [14, 14.67, 14],
+      "bytes": 368220,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "castle.common.s2",
+      "kind": "building",
+      "type": "castle",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/castle.common.s2.glb",
+      "visualStage": 2,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [3996, 1740, 642],
+      "materials": ["corona.stone", "corona.wood", "corona.roof", "corona.cloth", "common.iron"],
+      "dimensionsMeters": [14, 16.27, 14],
+      "bytes": 450524,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "castle.common.s3",
+      "kind": "building",
+      "type": "castle",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/castle.common.s3.glb",
+      "visualStage": 3,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [5724, 2524, 941],
+      "materials": ["corona.stone", "corona.wood", "corona.roof", "corona.cloth", "common.iron"],
+      "dimensionsMeters": [14, 17.87, 14],
+      "bytes": 649000,
+      "thumbnail": null,
+      "version": 1,
       "source": {
         "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
         "provider": "generaci\u00f3n procedural propia",
@@ -543,6 +852,102 @@
       }
     },
     {
+      "assetId": "clay_pit.common.s1",
+      "kind": "building",
+      "type": "clay_pit",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/clay_pit.common.s1.glb",
+      "visualStage": 1,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [1532, 608, 225],
+      "materials": ["common.dirt", "common.clay", "corona.wood", "corona.roof", "common.iron"],
+      "dimensionsMeters": [10.6, 4.68, 10.6],
+      "bytes": 192752,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "clay_pit.common.s2",
+      "kind": "building",
+      "type": "clay_pit",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/clay_pit.common.s2.glb",
+      "visualStage": 2,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [1788, 730, 271],
+      "materials": ["common.dirt", "common.clay", "corona.wood", "corona.roof", "common.iron"],
+      "dimensionsMeters": [10.6, 4.68, 10.6],
+      "bytes": 226884,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "clay_pit.common.s3",
+      "kind": "building",
+      "type": "clay_pit",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/clay_pit.common.s3.glb",
+      "visualStage": 3,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [2200, 928, 347],
+      "materials": ["common.dirt", "common.clay", "corona.wood", "corona.roof", "common.iron"],
+      "dimensionsMeters": [10.6, 4.68, 10.6],
+      "bytes": 281240,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
       "assetId": "farm.corona.s1",
       "kind": "building",
       "type": "farm",
@@ -767,6 +1172,102 @@
       "bytes": 387156,
       "thumbnail": null,
       "version": 4,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "grain_mill.common.s1",
+      "kind": "building",
+      "type": "grain_mill",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/grain_mill.common.s1.glb",
+      "visualStage": 1,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [2112, 1002, 374],
+      "materials": ["corona.stone", "corona.roof", "corona.wood", "corona.plaster", "common.iron"],
+      "dimensionsMeters": [10.6, 9.52, 10.6],
+      "bytes": 261172,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "grain_mill.common.s2",
+      "kind": "building",
+      "type": "grain_mill",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/grain_mill.common.s2.glb",
+      "visualStage": 2,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [2604, 1226, 458],
+      "materials": ["corona.stone", "corona.roof", "corona.wood", "corona.plaster", "common.iron"],
+      "dimensionsMeters": [10.6, 10.12, 10.6],
+      "bytes": 322184,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "grain_mill.common.s3",
+      "kind": "building",
+      "type": "grain_mill",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/grain_mill.common.s3.glb",
+      "visualStage": 3,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [3072, 1324, 492],
+      "materials": ["corona.stone", "corona.roof", "corona.wood", "corona.plaster", "common.iron"],
+      "dimensionsMeters": [10.6, 10.72, 10.6],
+      "bytes": 362496,
+      "thumbnail": null,
+      "version": 1,
       "source": {
         "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
         "provider": "generaci\u00f3n procedural propia",
@@ -1205,6 +1706,198 @@
       "bytes": 231456,
       "thumbnail": null,
       "version": 3,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "iron_foundry.common.s1",
+      "kind": "building",
+      "type": "iron_foundry",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/iron_foundry.common.s1.glb",
+      "visualStage": 1,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [1328, 624, 232],
+      "materials": ["corona.stone", "corona.wood", "corona.roof", "corona.plaster", "common.iron"],
+      "dimensionsMeters": [10.6, 8.5, 10.6],
+      "bytes": 172100,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "iron_foundry.common.s2",
+      "kind": "building",
+      "type": "iron_foundry",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/iron_foundry.common.s2.glb",
+      "visualStage": 2,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [1688, 776, 288],
+      "materials": ["corona.stone", "corona.wood", "corona.roof", "corona.plaster", "common.iron"],
+      "dimensionsMeters": [10.6, 9.2, 10.6],
+      "bytes": 213176,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "iron_foundry.common.s3",
+      "kind": "building",
+      "type": "iron_foundry",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/iron_foundry.common.s3.glb",
+      "visualStage": 3,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [2004, 928, 346],
+      "materials": ["corona.stone", "corona.wood", "corona.roof", "corona.plaster", "common.iron"],
+      "dimensionsMeters": [10.6, 9.9, 10.6],
+      "bytes": 251284,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "lumber_mill.common.s1",
+      "kind": "building",
+      "type": "lumber_mill",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/lumber_mill.common.s1.glb",
+      "visualStage": 1,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [1152, 482, 180],
+      "materials": ["corona.stone", "corona.wood", "corona.roof", "common.iron"],
+      "dimensionsMeters": [10.6, 6.13, 10.6],
+      "bytes": 134488,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "lumber_mill.common.s2",
+      "kind": "building",
+      "type": "lumber_mill",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/lumber_mill.common.s2.glb",
+      "visualStage": 2,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [1604, 574, 213],
+      "materials": ["corona.stone", "corona.wood", "corona.roof", "common.iron"],
+      "dimensionsMeters": [10.6, 6.13, 10.6],
+      "bytes": 172540,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "lumber_mill.common.s3",
+      "kind": "building",
+      "type": "lumber_mill",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/lumber_mill.common.s3.glb",
+      "visualStage": 3,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [4660, 1710, 637],
+      "materials": ["corona.stone", "corona.wood", "corona.roof", "common.iron", "corona.plaster"],
+      "dimensionsMeters": [10.6, 8.77, 10.63],
+      "bytes": 510864,
+      "thumbnail": null,
+      "version": 1,
       "source": {
         "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
         "provider": "generaci\u00f3n procedural propia",
@@ -2093,6 +2786,109 @@
       }
     },
     {
+      "assetId": "rally_point.common.s1",
+      "kind": "building",
+      "type": "rally_point",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/rally_point.common.s1.glb",
+      "visualStage": 1,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [1096, 390, 145],
+      "materials": ["corona.stone", "corona.wood", "corona.plaster", "corona.cloth", "common.iron"],
+      "dimensionsMeters": [10.6, 5.4, 10.6],
+      "bytes": 124188,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "rally_point.common.s2",
+      "kind": "building",
+      "type": "rally_point",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/rally_point.common.s2.glb",
+      "visualStage": 2,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [1360, 518, 193],
+      "materials": ["corona.stone", "corona.wood", "corona.plaster", "corona.cloth", "common.iron"],
+      "dimensionsMeters": [10.6, 6, 10.6],
+      "bytes": 157740,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "rally_point.common.s3",
+      "kind": "building",
+      "type": "rally_point",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/rally_point.common.s3.glb",
+      "visualStage": 3,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [1648, 656, 245],
+      "materials": [
+        "corona.stone",
+        "corona.wood",
+        "corona.plaster",
+        "corona.cloth",
+        "corona.roof",
+        "common.iron"
+      ],
+      "dimensionsMeters": [10.6, 6.6, 10.6],
+      "bytes": 195380,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
       "assetId": "rock.v0",
       "kind": "prop",
       "type": "rock",
@@ -2523,6 +3319,123 @@
       }
     },
     {
+      "assetId": "stable.common.s1",
+      "kind": "building",
+      "type": "stable",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/stable.common.s1.glb",
+      "visualStage": 1,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [2512, 1162, 432],
+      "materials": [
+        "corona.stone",
+        "corona.wood",
+        "corona.roof",
+        "common.leather",
+        "common.iron",
+        "common.crop"
+      ],
+      "dimensionsMeters": [10.6, 5.92, 10.6],
+      "bytes": 327340,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "stable.common.s2",
+      "kind": "building",
+      "type": "stable",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/stable.common.s2.glb",
+      "visualStage": 2,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [3644, 1664, 618],
+      "materials": [
+        "corona.stone",
+        "corona.wood",
+        "corona.roof",
+        "common.leather",
+        "common.iron",
+        "common.crop"
+      ],
+      "dimensionsMeters": [10.6, 5.92, 10.6],
+      "bytes": 468812,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "stable.common.s3",
+      "kind": "building",
+      "type": "stable",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/stable.common.s3.glb",
+      "visualStage": 3,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [3840, 1758, 651],
+      "materials": [
+        "corona.stone",
+        "corona.wood",
+        "corona.roof",
+        "common.leather",
+        "common.iron",
+        "common.crop"
+      ],
+      "dimensionsMeters": [10.6, 7.52, 10.6],
+      "bytes": 493172,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
       "assetId": "temple.corona.s1",
       "kind": "building",
       "type": "temple",
@@ -2705,6 +3618,102 @@
       "bytes": 354728,
       "thumbnail": null,
       "version": 4,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "trapper.common.s1",
+      "kind": "building",
+      "type": "trapper",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/trapper.common.s1.glb",
+      "visualStage": 1,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [1780, 842, 316],
+      "materials": ["corona.stone", "corona.wood", "corona.roof", "corona.plaster", "common.iron"],
+      "dimensionsMeters": [10.6, 5.5, 10.6],
+      "bytes": 227948,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "trapper.common.s2",
+      "kind": "building",
+      "type": "trapper",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/trapper.common.s2.glb",
+      "visualStage": 2,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [2836, 1348, 506],
+      "materials": ["corona.stone", "corona.wood", "corona.roof", "corona.plaster", "common.iron"],
+      "dimensionsMeters": [10.6, 5.5, 10.6],
+      "bytes": 361336,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "trapper.common.s3",
+      "kind": "building",
+      "type": "trapper",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/trapper.common.s3.glb",
+      "visualStage": 3,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [3784, 1804, 676],
+      "materials": ["corona.stone", "corona.wood", "corona.roof", "corona.plaster", "common.iron"],
+      "dimensionsMeters": [10.6, 5.5, 10.6],
+      "bytes": 478364,
+      "thumbnail": null,
+      "version": 1,
       "source": {
         "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
         "provider": "generaci\u00f3n procedural propia",
@@ -3564,6 +4573,102 @@
       }
     },
     {
+      "assetId": "war_camp.common.s1",
+      "kind": "building",
+      "type": "war_camp",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/war_camp.common.s1.glb",
+      "visualStage": 1,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [752, 226, 80],
+      "materials": ["corona.stone", "corona.cloth", "corona.wood", "common.iron"],
+      "dimensionsMeters": [10.6, 4.7, 10.6],
+      "bytes": 84948,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "war_camp.common.s2",
+      "kind": "building",
+      "type": "war_camp",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/war_camp.common.s2.glb",
+      "visualStage": 2,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [1588, 606, 222],
+      "materials": ["corona.stone", "corona.cloth", "corona.wood", "common.iron"],
+      "dimensionsMeters": [10.6, 5.2, 10.6],
+      "bytes": 186700,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "war_camp.common.s3",
+      "kind": "building",
+      "type": "war_camp",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/war_camp.common.s3.glb",
+      "visualStage": 3,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [1628, 624, 228],
+      "materials": ["corona.stone", "corona.cloth", "corona.wood", "common.iron"],
+      "dimensionsMeters": [10.6, 5.7, 10.6],
+      "bytes": 190456,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
       "assetId": "warehouse.corona.s1",
       "kind": "building",
       "type": "warehouse",
@@ -3746,6 +4851,198 @@
       "bytes": 141976,
       "thumbnail": null,
       "version": 3,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "watchtower.common.s1",
+      "kind": "building",
+      "type": "watchtower",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/watchtower.common.s1.glb",
+      "visualStage": 1,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [1208, 544, 204],
+      "materials": ["corona.stone", "corona.wood", "common.iron"],
+      "dimensionsMeters": [7.8, 7.4, 7.8],
+      "bytes": 146220,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "watchtower.common.s2",
+      "kind": "building",
+      "type": "watchtower",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/watchtower.common.s2.glb",
+      "visualStage": 2,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [1408, 630, 236],
+      "materials": ["corona.stone", "corona.roof", "corona.wood", "common.iron"],
+      "dimensionsMeters": [7.8, 11.94, 7.8],
+      "bytes": 168116,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "watchtower.common.s3",
+      "kind": "building",
+      "type": "watchtower",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/watchtower.common.s3.glb",
+      "visualStage": 3,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [1448, 650, 243],
+      "materials": ["corona.stone", "corona.roof", "corona.wood", "corona.cloth", "common.iron"],
+      "dimensionsMeters": [8.2, 12.94, 7.8],
+      "bytes": 174568,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "workshop.common.s1",
+      "kind": "building",
+      "type": "workshop",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/workshop.common.s1.glb",
+      "visualStage": 1,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [2212, 1060, 396],
+      "materials": ["corona.stone", "corona.wood", "corona.roof", "common.iron"],
+      "dimensionsMeters": [10.6, 5.56, 10.6],
+      "bytes": 275700,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "workshop.common.s2",
+      "kind": "building",
+      "type": "workshop",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/workshop.common.s2.glb",
+      "visualStage": 2,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [2592, 1222, 452],
+      "materials": ["corona.stone", "corona.wood", "corona.roof", "common.iron"],
+      "dimensionsMeters": [10.6, 5.56, 10.6],
+      "bytes": 318496,
+      "thumbnail": null,
+      "version": 1,
+      "source": {
+        "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
+        "provider": "generaci\u00f3n procedural propia",
+        "author": "Reinos de la Frontera (scripts del repositorio)",
+        "license": "Propia del proyecto",
+        "createdAt": "2026-11-05"
+      },
+      "validation": {
+        "geometry": "PASS",
+        "materials": "PASS",
+        "engineScreenshot": "PENDING",
+        "performance": "PASS",
+        "humanApproval": "PENDING"
+      }
+    },
+    {
+      "assetId": "workshop.common.s3",
+      "kind": "building",
+      "type": "workshop",
+      "status": "PENDING_REVIEW",
+      "file": "assets/models/workshop.common.s3.glb",
+      "visualStage": 3,
+      "units": "meters",
+      "lodCount": 3,
+      "facing": "plaza",
+      "belowGroundOk": false,
+      "triangles": [6280, 2566, 953],
+      "materials": ["corona.stone", "corona.wood", "corona.roof", "common.iron", "corona.plaster"],
+      "dimensionsMeters": [10.6, 8.95, 10.63],
+      "bytes": 725652,
+      "thumbnail": null,
+      "version": 1,
       "source": {
         "workflow": "tools/asset-gen (Blender bpy) \u2192 glTF Transform \u2192 validaci\u00f3n",
         "provider": "generaci\u00f3n procedural propia",

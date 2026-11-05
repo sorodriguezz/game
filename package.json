@@ -2,13 +2,14 @@
   "name": "reinos-de-la-frontera",
   "private": true,
   "version": "0.1.0",
-  "description": "Reinos de la Frontera — MMORTS web 3D por temporadas (MVP 1 + MVP 2 táctico)",
+  "description": "Reinos de la Frontera \u2014 MMORTS web 3D por temporadas (MVP 1 + MVP 2 t\u00e1ctico)",
   "type": "module",
   "packageManager": "pnpm@10.28.0",
   "engines": {
     "node": ">=22.23.2"
   },
   "scripts": {
+    "dev": "pnpm --parallel --filter @reinos/api --filter @reinos/worker --filter @reinos/web --filter @reinos/battle-server dev",
     "dev:api": "pnpm --filter @reinos/api dev",
     "dev:worker": "pnpm --filter @reinos/worker dev",
     "dev:web": "pnpm --filter @reinos/web dev",

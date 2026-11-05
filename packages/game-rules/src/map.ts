@@ -60,8 +60,18 @@ export const SEA_LEVEL = 17000;
 const MOUNTAIN_LEVEL = 42000;
 const FOREST_MOISTURE = 37000;
 
-export function terrainAt(seed: number, size: number, x: number, y: number): TerrainKind {
+export function terrainAt(
+  seed: number,
+  size: number,
+  x: number,
+  y: number,
+  mode: 'ARCHIPELAGO' | 'LAND' = 'ARCHIPELAGO',
+): TerrainKind {
   if (x < 0 || y < 0 || x >= size || y >= size) return 'SEA';
+  if (mode === 'LAND') {
+    const h = hash2d(seed, x, y, 99);
+    return h % 37 === 0 ? 'OASIS' : h % 9 === 0 ? 'MOUNTAIN' : h % 5 === 0 ? 'FOREST' : 'PLAIN';
+  }
   const e = elevationAt(seed, size, x, y);
   if (e < SEA_LEVEL) return 'SEA';
   if (e > MOUNTAIN_LEVEL) return 'MOUNTAIN';
@@ -107,13 +117,14 @@ export function renderRegion(
   y0: number,
   w: number,
   h: number,
+  mode: 'ARCHIPELAGO' | 'LAND' = 'ARCHIPELAGO',
 ): MapRegion {
   let tiles = '';
   let coastal = '';
   for (let y = y0; y < y0 + h; y++) {
     for (let x = x0; x < x0 + w; x++) {
-      tiles += TERRAIN_CODE[terrainAt(seed, size, x, y)];
-      coastal += isCoastal(seed, size, x, y) ? '1' : '0';
+      tiles += TERRAIN_CODE[terrainAt(seed, size, x, y, mode)];
+      coastal += mode !== 'LAND' && isCoastal(seed, size, x, y) ? '1' : '0';
     }
   }
   return { originX: x0, originY: y0, width: w, height: h, tiles, coastal };

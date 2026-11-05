@@ -1,3 +1,4 @@
+import { rulesetFrontierAlpha1 } from './rulesets/frontier-alpha.1.js';
 import { rulesetMvp1Alpha0 } from './rulesets/mvp1-alpha.0.js';
 import {
   rulesetSchema,
@@ -14,7 +15,7 @@ import {
 export * from './types.js';
 
 const REGISTRY: ReadonlyMap<string, Ruleset> = new Map(
-  [rulesetMvp1Alpha0].map((r) => [r.version, Object.freeze(r)]),
+  [rulesetMvp1Alpha0, rulesetFrontierAlpha1].map((r) => [r.version, Object.freeze(r)]),
 );
 
 export const DEFAULT_RULESET_VERSION = rulesetMvp1Alpha0.version;
@@ -64,7 +65,9 @@ export function validateRuleset(input: unknown): Ruleset {
   }
   const plotIds = new Set(r.cityLayout.plots.map((p) => p.id));
   if (plotIds.size !== r.cityLayout.plots.length) problems.push('parcelas duplicadas');
-  for (const kind of ['center', 'coastal', 'wall'] as const) {
+  for (const kind of (r.territory ? ['center'] : ['center', 'coastal', 'wall']) as Array<
+    'center' | 'coastal' | 'wall'
+  >) {
     if (r.cityLayout.plots.filter((p) => p.kind === kind).length !== 1)
       problems.push(`debe existir exactamente una parcela ${kind}`);
   }

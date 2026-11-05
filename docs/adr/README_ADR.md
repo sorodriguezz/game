@@ -30,3 +30,7 @@ Textos completos en [`Reinos_de_la_Frontera_MVP2/docs/adr/`](../../Reinos_de_la_
 ## Convenciones
 - Una ADR sustituida no se elimina; se marca `Superseded by ADR-xxxx`.
 - Las ADR de este paquete son decisiones propuestas para MVP 1; pueden revisarse antes de implementación, no son evidencia de funcionalidades ya programadas.
+
+## Cambio de alcance terrestre
+
+- [ADR-0056: Mundo terrestre con expansión y ejércitos redistribuibles](ADR-0056-reinos-terrestres.md).

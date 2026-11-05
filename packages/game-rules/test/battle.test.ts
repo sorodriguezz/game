@@ -96,7 +96,7 @@ describe('resolveBattle — determinismo (NFR-11, ADR-0005)', () => {
 
   it('propiedad: conservación de tropas y botín acotado', () => {
     const stack = fc.record({
-      unitType: fc.constantFrom(...UNIT_TYPES),
+      unitType: fc.constantFrom(...r.units.map((u) => u.type)),
       quantity: fc.integer({ min: 0, max: 5000 }),
     });
     fc.assert(

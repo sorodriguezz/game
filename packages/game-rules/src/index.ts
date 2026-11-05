@@ -5,3 +5,5 @@ export * from './travel.js';
 export * from './battle.js';
 export * from './map.js';
 export * from './city.js';
+
+export * from './territory.js';

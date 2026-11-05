@@ -1,3 +1,4 @@
+import { areAllies, hostile, scheduleInterceptions } from './territory.js';
 import { and, desc, eq, sql } from 'drizzle-orm';
 import {
   armyMovements,
@@ -27,7 +28,7 @@ import {
   type SendMovementRequest,
   type SendMovementResponse,
 } from '@reinos/contracts';
-import { RESOURCE_KEYS, type UnitType } from '@reinos/game-config';
+import { RESOURCE_KEYS, type CivilizationId, type UnitType } from '@reinos/game-config';
 import {
   bundleToMilli,
   buildingCost,
@@ -38,6 +39,8 @@ import {
   debit,
   distanceMilli,
   isCoastal,
+  isSettleable,
+  terrainAt,
   isStarving,
   levelOf,
   normalizeStacks,
@@ -89,7 +92,7 @@ export interface Actor {
  * se rechaza con EVENTS_PENDING (reintentable): nunca se adelanta el reloj de
  * una aldea por delante de un evento anterior sin aplicar.
  */
-async function prepareVillage(
+export async function prepareVillage(
   tx: Tx,
   ctx: CoreContext,
   actor: Actor,
@@ -98,6 +101,8 @@ async function prepareVillage(
 ): Promise<{ world: WorldRow; village: VillageRow; state: ResourceState; now: Date }> {
   const world = await loadWorld(tx, worldId);
   assertWorldActive(world);
+  if (rulesetOf(world).territory)
+    await tx.select().from(worlds).where(eq(worlds.id, worldId)).for('update');
   const village = await lockOwnedVillage(tx, worldId, villageId, actor.accountId);
   const now = ctx.clock.now();
   try {
@@ -156,6 +161,11 @@ export class GameCommands {
           if (!world) throw err.notFound('WORLD_NOT_FOUND');
           assertWorldActive(world);
           const r = rulesetOf(world);
+          if (!r.civilizations.some((c) => c.id === req.civilization))
+            throw err.unprocessable(
+              'CIVILIZATION_RESTRICTED',
+              'Civilización no disponible en este mundo',
+            );
           const [existing] = await tx
             .select()
             .from(worldPlayers)
@@ -180,7 +190,7 @@ export class GameCommands {
 
           const spot = await this.findSpawn(tx, world, count);
           const villageId = newId();
-          const coastal = isCoastal(world.mapSeed, world.mapSize, spot.x, spot.y);
+          const coastal = !r.territory && isCoastal(world.mapSeed, world.mapSize, spot.x, spot.y);
           await tx.insert(villages).values({
             id: villageId,
             worldId,
@@ -190,6 +200,7 @@ export class GameCommands {
             x: spot.x,
             y: spot.y,
             coastal,
+            isCapital: true,
           });
           await tx.insert(villageBuildings).values(
             r.startingBuildings.map((b) => ({
@@ -208,7 +219,7 @@ export class GameCommands {
           const state: ResourceState = {
             amounts: bundleToMilli(r.economy.startingResources),
             remainders: { wood: 0n, stone: 0n, iron: 0n, food: 0n },
-            rates: computeRates(r, buildings, 0),
+            rates: computeRates(r, buildings, 0, world.speedMultiplier),
             capacity: capacityMilli(r, levelOf(buildings, 'warehouse')),
             lastSettledAt: now.getTime(),
           };
@@ -239,7 +250,20 @@ export class GameCommands {
     const cands: Array<{ x: number; y: number }> = [];
     for (let round = 0; round < 4; round++)
       cands.push(...spawnCandidates(world.mapSeed, world.mapSize, ordinal + round * 1000, 50));
-    const coastal = cands.filter((c) => isCoastal(world.mapSeed, world.mapSize, c.x, c.y));
+    if (r.territory) {
+      cands.length = 0;
+      for (let i = 0; i < world.mapSize * world.mapSize; i++) {
+        const n =
+          (i * 97 + ordinal * 173 + Math.abs(world.mapSeed)) % (world.mapSize * world.mapSize);
+        const x = n % world.mapSize,
+          y = Math.floor(n / world.mapSize);
+        if (isSettleable(terrainAt(world.mapSeed, world.mapSize, x, y, 'LAND')))
+          cands.push({ x, y });
+      }
+    }
+    const coastal = r.territory
+      ? []
+      : cands.filter((c) => isCoastal(world.mapSeed, world.mapSize, c.x, c.y));
     for (const c of [...coastal, ...cands]) {
       const near = await tx
         .select({ id: villages.id })
@@ -301,7 +325,7 @@ export class GameCommands {
             .where(
               and(eq(worldPlayers.worldId, worldId), eq(worldPlayers.accountId, actor.accountId)),
             );
-          const civilization = player!.civilization as 'imperial_crown' | 'sea_league';
+          const civilization = player!.civilization as CivilizationId;
           const buildings = await loadBuildings(tx, villageId);
           const check = validateConstruction(r, {
             civilization,
@@ -408,7 +432,7 @@ export class GameCommands {
             );
           const buildings = await loadBuildings(tx, villageId);
           const check = validateRecruitment(r, {
-            civilization: player!.civilization as 'imperial_crown' | 'sea_league',
+            civilization: player!.civilization as CivilizationId,
             buildings,
             unitType: req.unitType,
           });
@@ -559,12 +583,15 @@ export class GameCommands {
         { accountId: actor.accountId, worldId, command: `march:${originVillageId}`, key },
         req,
         async (): Promise<SendMovementResponse> => {
+          await tx.select().from(worlds).where(eq(worlds.id, worldId)).for('update');
           const {
             world,
             village: origin,
             now,
           } = await prepareVillage(tx, this.ctx, actor, worldId, originVillageId);
           const r = rulesetOf(world);
+          if (!r.territory && !hostile(req.mission))
+            throw err.unprocessable('FEATURE_DISABLED', 'Traslado disponible en mundos terrestres');
           // El objetivo se busca SIEMPRE dentro del mismo mundo (aislamiento ADR-0002).
           const [target] = await tx
             .select()
@@ -572,10 +599,30 @@ export class GameCommands {
             .where(and(eq(villages.worldId, worldId), eq(villages.id, req.targetVillageId)));
           if (!target || target.id === origin.id)
             throw err.unprocessable('TARGET_INVALID', 'Objetivo inválido');
-          if (target.ownerAccountId === actor.accountId) {
+          const friendly = !hostile(req.mission);
+          const allied = await areAllies(tx, worldId, actor.accountId, target.ownerAccountId);
+          if (req.mission === 'TRANSFER' && target.ownerAccountId !== actor.accountId)
+            throw err.unprocessable(
+              'TARGET_INVALID',
+              'Solo puedes trasladar tropas a aldeas propias',
+            );
+          if (req.mission === 'REINFORCE' && !allied)
+            throw err.unprocessable('TARGET_INVALID', 'Solo puedes reforzar a tu alianza');
+          if (friendly && target.kind !== 'PLAYER')
+            throw err.unprocessable('TARGET_INVALID', 'El destino debe ser una aldea');
+          if (!friendly && allied)
+            throw err.conflict('PACT_RESTRICTS_ATTACK', 'No puedes atacar a un aliado');
+          if (req.mission === 'CONQUER' && !r.territory)
+            throw err.unprocessable(
+              'FEATURE_DISABLED',
+              'Conquista disponible en mundos terrestres',
+            );
+          if (req.mission === 'CONQUER' && target.isCapital)
+            throw err.conflict('TARGET_PROTECTED', 'Las capitales no se pueden conquistar');
+          if (!friendly && target.ownerAccountId === actor.accountId) {
             throw err.unprocessable('TARGET_INVALID', 'No puedes atacar tus propias aldeas');
           }
-          if (target.ownerAccountId) {
+          if (!friendly && target.ownerAccountId) {
             const [defender] = await tx
               .select({ protectionUntil: worldPlayers.protectionUntil })
               .from(worldPlayers)
@@ -603,6 +650,12 @@ export class GameCommands {
           );
           if (units.length === 0)
             throw err.unprocessable('NO_UNITS_SELECTED', 'Selecciona al menos una unidad');
+          if (
+            req.mission === 'CONQUER' &&
+            target.kind !== 'OASIS' &&
+            !units.some((u) => u.unitType === 'chieftain')
+          )
+            throw err.unprocessable('REQUIREMENTS_NOT_MET', 'La conquista requiere emisarios');
           // Compromete tropas: UPDATE condicional + CHECK >= 0 ⇒ nunca doble gasto.
           await removeFromStacks(tx, origin.id, units);
 
@@ -634,17 +687,19 @@ export class GameCommands {
             dedupeKey: `arrival:${movementId}`,
             payload: { movementId },
           });
+          await scheduleInterceptions(tx, world, movementId, now);
           // Atacar termina la protección propia de principiante.
-          await tx
-            .update(worldPlayers)
-            .set({ protectionUntil: now })
-            .where(
-              and(
-                eq(worldPlayers.worldId, worldId),
-                eq(worldPlayers.accountId, actor.accountId),
-                sql`${worldPlayers.protectionUntil} > ${iso(now)}::timestamptz`,
-              ),
-            );
+          if (!friendly)
+            await tx
+              .update(worldPlayers)
+              .set({ protectionUntil: now })
+              .where(
+                and(
+                  eq(worldPlayers.worldId, worldId),
+                  eq(worldPlayers.accountId, actor.accountId),
+                  sql`${worldPlayers.protectionUntil} > ${iso(now)}::timestamptz`,
+                ),
+              );
           this.ctx.log.info('army.departed', {
             world_id: worldId,
             movement_id: movementId,

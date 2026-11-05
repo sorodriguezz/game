@@ -9,3 +9,5 @@ export * from './queries.js';
 export * from './worker.js';
 export { loadEconomy, loadTroops, loadBuildings } from './village-state.js';
 export * from './training.js';
+
+export * from './territory.js';

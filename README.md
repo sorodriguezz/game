@@ -6,6 +6,39 @@ MMORTS web 3D por temporadas. Este directorio contiene la **documentación de pr
 - Desglose del MVP 2 (ADR-0021…0037, PRD, backlog y QA contra el código): [`docs/mvp2/DESGLOSE-MVP2.md`](docs/mvp2/DESGLOSE-MVP2.md)
 - Arte 3D: la ciudad usa un **kit procedural de validación ("blockout")**, no arte final. Gate 0 sigue abierto.
 
+## Nuevo mundo terrestre y rediseño
+
+El encargo del 2026-11-05 añade **Reinos Terrestres ×50**, con reglas propias `frontier-alpha.1`:
+mapa isométrico fijo por coordenadas, todo tierra, tres razas nuevas y aldeas 3D con tres
+recintos. Campos exteriores individuales de madera, barro, hierro y cereal; industria y
+cuarteles; ciudadela con castillo, centro urbano y plaza de reuniones.
+
+Para actualizar una instalación existente:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm db:migrate
+pnpm db:seed
+pnpm dev
+```
+
+Abre http://localhost:5173 y entra en **Reinos Terrestres ×50**. Los mundos anteriores
+conservan sus reglas. Desde el mapa selecciona una casilla libre para fundar (centro urbano 5,
+plaza 1, tres colonos y recursos), o una aldea para atacar, saquear, conquistar, trasladar o
+reforzar según propiedad y alianza. Los emisarios reducen lealtad; las capitales y últimas
+aldeas están protegidas. Los oasis tienen animales persistentes y se vinculan a una aldea.
+
+Los traslados propios pasan a ser tropas desplegables de la aldea receptora; los refuerzos
+aliados conservan dueño y solo defienden. El servidor filtra las marchas visibles. Dos
+marchas enemigas que coinciden en espacio y tiempo combaten en campo sin murallas ni botín;
+los supervivientes regresan. Si no se interceptan, el combate sucede en el destino.
+
+Diseño, balance propuesto y validación: [`docs/territory/DESIGN.md`](docs/territory/DESIGN.md).
+Es una implementación alfa propia inspirada en el género: no pretende reproducir todas
+las versiones, tablas ni sistemas de Travian. Los NPC son aldeas defensoras persistentes;
+las patrullas autónomas, la regeneración de animales, la curación y el asedio dirigido
+quedan fuera de esta entrega. Los modelos nuevos siguen pendientes de aprobación artística.
+
 ## Documentación
 
 1. [`PRD_MVP1.md`](PRD_MVP1.md) — Requisitos funcionales y no funcionales.

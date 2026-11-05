@@ -1,3 +1,4 @@
+import { TerritoryController } from './territory.controllers.js';
 import 'reflect-metadata';
 import { Module, type INestApplication } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, NestFactory, Reflector } from '@nestjs/core';
@@ -61,6 +62,7 @@ export async function createApp(
     ],
     controllers: [
       HealthController,
+      TerritoryController,
       AuthController,
       WorldsController,
       VillagesController,

@@ -7,7 +7,7 @@
 - [ADR-0003: PostgreSQL como única persistencia y cola durable del MVP](ADR-0003-postgresql-como-única-persistencia-y-cola-durable-del-mvp.md)
 - [ADR-0004: Economía por tiempo transcurrido y unidades de precisión fija](ADR-0004-economía-por-tiempo-transcurrido-y-unidades-de-precisión-fija.md)
 - [ADR-0005: Motor de combate determinista y servidor autoritativo](ADR-0005-motor-de-combate-determinista-y-servidor-autoritativo.md)
-- [ADR-0006: Batallas tácticas controlables quedan fuera del MVP 1](ADR-0006-batallas-tácticas-controlables-quedan-fuera-del-mvp-1.md) — *ampliada (no sustituida) por ADR-0022/0023 para MVP 2: el combate obligatorio sigue AUTO*
+- [ADR-0006: Batallas tácticas controlables quedan fuera del MVP 1](ADR-0006-batallas-tácticas-controlables-quedan-fuera-del-mvp-1.md) — _ampliada (no sustituida) por ADR-0022/0023 para MVP 2: el combate obligatorio sigue AUTO_
 - [ADR-0007: PlayCanvas React y escenas 3D por contexto](ADR-0007-playcanvas-react-y-escenas-3d-por-contexto.md)
 - [ADR-0008: Pipeline 3D con IA asistida y control de calidad](ADR-0008-pipeline-3d-con-ia-asistida-y-control-de-calidad.md)
 - [ADR-0009: Sistema de ciudades por parcelas y edificio visual escalable](ADR-0009-sistema-de-ciudades-por-parcelas-y-edificio-visual-escalable.md)
@@ -28,9 +28,17 @@
 Textos completos en [`Reinos_de_la_Frontera_MVP2/docs/adr/`](../../Reinos_de_la_Frontera_MVP2/docs/adr/README_ADR_MVP2.md). Estado de adopción en este repositorio, decisiones concretas y desviaciones: [`docs/mvp2/DESGLOSE-MVP2.md`](../mvp2/DESGLOSE-MVP2.md).
 
 ## Convenciones
+
 - Una ADR sustituida no se elimina; se marca `Superseded by ADR-xxxx`.
 - Las ADR de este paquete son decisiones propuestas para MVP 1; pueden revisarse antes de implementación, no son evidencia de funcionalidades ya programadas.
 
 ## Cambio de alcance terrestre
 
 - [ADR-0056: Mundo terrestre con expansión y ejércitos redistribuibles](ADR-0056-reinos-terrestres.md).
+- [ADR-0057: Plano persistente y combate AUTO por recintos](ADR-0057-urbanismo-y-defensa-escalonada.md).
+- [ADR-0058: Perfiles y entrada automática](ADR-0058-perfiles-y-experiencia-inicial.md).
+- [ADR-0059: Coordenadas cartesianas](ADR-0059-coordenadas-y-ventana-del-mapa.md).
+- [ADR-0060: Partida inicial, cereal, oasis y atlas completo](ADR-0060-partida-vacia-cereal-oasis-y-atlas.md).
+- [ADR-0061: Investigación, mejoras y demolición](ADR-0061-desarrollo-militar-y-demolicion.md).
+- [ADR-0062: Cultura y expansión](ADR-0062-cultura-y-expansion.md).
+- [ADR-0063: Comercio durable](ADR-0063-comercio-durable.md).

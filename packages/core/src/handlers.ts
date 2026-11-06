@@ -1,4 +1,10 @@
 import { fieldEncounter, settlementComplete } from './territory-handlers.js';
+import { tradeArrival, tradeReturn, tradeRouteDue } from './trade.js';
+import { wallRepairComplete } from './fortification-state.js';
+import { npcRegenerate } from './npc.js';
+import { developmentComplete, combatResearch, defendingResearch } from './development.js';
+import { applyStarvation } from './starvation.js';
+import { refreshCulture, completeExpansion, celebrationComplete } from './culture.js';
 import { areAllies, scheduleInterceptions } from './territory.js';
 import { and, eq, sql } from 'drizzle-orm';
 import {
@@ -14,9 +20,15 @@ import {
   villages,
   woundedStacks,
   worldPlayers,
+  villageLayouts,
+  wallSections,
+  wallRepairOrders,
+  villageResearch,
+  developmentOrders,
+  celebrations,
   type Tx,
 } from '@reinos/db';
-import type { CivilizationId, UnitType } from '@reinos/game-config';
+import type { CivilizationId, UnitType, Deployment, Precinct } from '@reinos/game-config';
 import {
   MILLI,
   bundleToMilli,
@@ -29,6 +41,7 @@ import {
   settle,
   slowestSpeed,
   travelSeconds,
+  oasisEligibility,
   type BattleSnapshot,
 } from '@reinos/game-rules';
 import { DomainError } from './context.js';
@@ -54,6 +67,7 @@ import {
   saveEconomy,
   withRecomputedRates,
   writeLedger,
+  militarySpeedOf,
 } from './village-state.js';
 
 const at = (ev: GameEvent) => ev.dueAt.getTime();
@@ -115,6 +129,7 @@ const constructionComplete: EventHandler = async (tx, ctx, ev) => {
 
   state = await withRecomputedRates(tx, r, ev.villageId, state);
   await saveEconomy(tx, ev.villageId, state);
+  await refreshCulture(tx, world, ev.villageId, ev.dueAt);
   await tx.insert(outbox).values({
     worldId: ev.worldId,
     type: 'BuildingCompleted',
@@ -221,7 +236,7 @@ const movementReturn: EventHandler = async (tx, _ctx, ev) => {
               quantity,
             })),
           ),
-          world.speedMultiplier,
+          militarySpeedOf(world),
         ),
       );
       await tx
@@ -368,7 +383,7 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
             quantity,
           })),
         ),
-        world.speedMultiplier,
+        militarySpeedOf(world),
       ),
     );
     await tx
@@ -402,7 +417,7 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
             quantity,
           })),
         ),
-        world.speedMultiplier,
+        militarySpeedOf(world),
       ),
     );
     await tx
@@ -434,7 +449,12 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
   const defenderCiv = await civOf(target.ownerAccountId);
 
   const affectedParents = new Set<string>();
-  if (m.mission === 'CONQUER' && target.parentVillageId && target.parentVillageId !== origin.id) {
+  if (
+    (m.mission === 'CONQUER' ||
+      (m.mission === 'ATTACK' && target.kind === 'OASIS' && r.territory?.oasisConquest)) &&
+    target.parentVillageId &&
+    target.parentVillageId !== origin.id
+  ) {
     await lockVillages(tx, ev.worldId, [target.parentVillageId]);
     await processEventsUpTo(
       tx,
@@ -469,8 +489,11 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
     seed,
     rulesetVersion: r.version,
     mission: m.mission === 'RAID' ? 'RAID' : 'ATTACK',
+    location: target.kind === 'OASIS' ? 'FIELD' : 'VILLAGE',
+    siegeTargetPlot: m.siegeTargetPlot ?? undefined,
     attacker: {
       civilization: attackerCiv,
+      ...(r.development ? { improvements: await combatResearch(tx, ev.worldId, origin.id) } : {}),
       units: Object.entries(m.units).map(([unitType, quantity]) => ({
         unitType: unitType as UnitType,
         quantity,
@@ -478,10 +501,14 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
     },
     defender: {
       civilization: defenderCiv,
+      ...(r.development
+        ? { improvements: await defendingResearch(tx, ev.worldId, target.id, ownDefenders, guests) }
+        : {}),
       units: defenderTroops,
       doctrine: {
         reservePercent: target.doctrineReservePercent,
         retreatThresholdPercent: target.doctrineRetreatThresholdPercent,
+        deployment: target.doctrineDeployment as Deployment,
       },
     },
     defenses: {
@@ -500,7 +527,67 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
       0,
       levelOf(tBuildings, 'trapper') * r.territory.trapsPerLevel - target.trapsUsed,
     );
+  if (r.fortifications && target.kind !== 'OASIS') {
+    const sections = await tx
+      .select()
+      .from(wallSections)
+      .where(and(eq(wallSections.worldId, ev.worldId), eq(wallSections.villageId, target.id)));
+    const [layoutRow] = await tx
+      .select()
+      .from(villageLayouts)
+      .where(and(eq(villageLayouts.worldId, ev.worldId), eq(villageLayouts.villageId, target.id)));
+    if (!layoutRow)
+      throw new DomainError('CONCURRENT_MODIFICATION', 500, 'Plano defensivo ausente');
+    snapshot.fortifications = {
+      walls: sections.map((w) => ({
+        precinct: w.precinct as Precinct,
+        integrity: w.integrity,
+        level: levelOf(
+          tBuildings,
+          w.precinct === 3 ? 'wall' : w.precinct === 2 ? 'middle_wall' : 'inner_wall',
+        ),
+      })),
+      buildings: tBuildings.map((b) => ({
+        ...b,
+        precinct: layoutRow.layout.plots.find((p) => p.id === b.plot)?.precinct ?? 1,
+      })),
+      layout: layoutRow.layout,
+    };
+  }
   const result = resolveBattle(r, snapshot);
+  for (const phase of result.precincts ?? [])
+    if (phase.wallDamage > 0)
+      await tx
+        .update(wallSections)
+        .set({ integrity: phase.integrityAfter })
+        .where(
+          and(
+            eq(wallSections.worldId, ev.worldId),
+            eq(wallSections.villageId, target.id),
+            eq(wallSections.precinct, phase.precinct),
+          ),
+        );
+  for (const damage of result.buildingDamage ?? []) {
+    const filter = and(
+      eq(villageBuildings.worldId, ev.worldId),
+      eq(villageBuildings.villageId, target.id),
+      eq(villageBuildings.plot, damage.plot),
+    );
+    if (damage.toLevel === 0) await tx.delete(villageBuildings).where(filter);
+    else await tx.update(villageBuildings).set({ level: damage.toLevel }).where(filter);
+    // La obra del objetivo dañado no puede reconstruir mágicamente un nivel anterior.
+    await tx
+      .update(constructionOrders)
+      .set({ status: 'CANCELLED' })
+      .where(
+        and(
+          eq(constructionOrders.worldId, ev.worldId),
+          eq(constructionOrders.villageId, target.id),
+          eq(constructionOrders.plot, damage.plot),
+          eq(constructionOrders.status, 'IN_PROGRESS'),
+        ),
+      );
+  }
   if (result.trapsUsed)
     await tx
       .update(villages)
@@ -560,11 +647,48 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
     });
   }
 
-  if (m.mission === 'CONQUER' && r.territory && result.outcome === 'ATTACKER') {
+  const [heldOases] =
+    target.kind === 'OASIS' && r.territory?.oasisConquest
+      ? await tx
+          .select({ n: sql<number>`count(*)::int` })
+          .from(villages)
+          .where(
+            and(
+              eq(villages.worldId, ev.worldId),
+              eq(villages.parentVillageId, origin.id),
+              eq(villages.kind, 'OASIS'),
+            ),
+          )
+      : [];
+  const canClaimOasis =
+    target.kind !== 'OASIS' ||
+    !r.territory?.oasisConquest ||
+    !oasisEligibility(
+      r,
+      origin,
+      target,
+      levelOf(await loadBuildings(tx, origin.id), 'treasury'),
+      heldOases?.n ?? 0,
+    );
+  if (
+    canClaimOasis &&
+    (m.mission === 'CONQUER' ||
+      (m.mission === 'ATTACK' && target.kind === 'OASIS' && r.territory?.oasisConquest)) &&
+    r.territory &&
+    result.outcome === 'ATTACKER' &&
+    (!r.fortifications ||
+      target.kind === 'OASIS' ||
+      result.precincts?.some((p) => p.precinct === 1 && p.advanced)) &&
+    (!r.fortifications ||
+      target.kind === 'OASIS' ||
+      levelOf(await loadBuildings(tx, target.id), 'castle') === 0)
+  ) {
     const chiefs = result.attacker.survivors.find((s) => s.unitType === 'chieftain')?.quantity ?? 0;
     const loyalty =
       target.kind === 'OASIS'
-        ? 0
+        ? r.territory.npcRegeneration
+          ? Math.max(0, target.loyalty - r.territory.npcRegeneration.oasisLoyaltyPerAttack)
+          : 0
         : Math.max(0, target.loyalty - chiefs * r.territory.loyaltyPerChief);
     const [countRow] = await tx
       .select({ count: sql<number>`count(*)::int` })
@@ -581,6 +705,7 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
       );
     const noDefenders = result.defender.survivors.length === 0;
     if (
+      noDefenders &&
       !target.isCapital &&
       (target.kind === 'OASIS' || chiefs > 0) &&
       (!target.ownerAccountId || target.kind === 'OASIS' || (countRow?.count ?? 0) > 1)
@@ -598,12 +723,59 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
                 eq(villages.parentVillageId, origin.id),
               ),
             );
-          if ((oasisCountRow?.count ?? 0) < r.territory.maxOasesPerVillage)
+          if (
+            !oasisEligibility(
+              r,
+              origin,
+              target,
+              levelOf(await loadBuildings(tx, origin.id), 'treasury'),
+              oasisCountRow?.count ?? 0,
+            )
+          )
             await tx
               .update(villages)
               .set({ ownerAccountId: m.ownerAccountId, parentVillageId: origin.id, loyalty: 100 })
               .where(eq(villages.id, target.id));
         } else {
+          await completeExpansion(tx, world, origin.id, target.id, ev.dueAt);
+          await tx
+            .update(celebrations)
+            .set({ status: 'CANCELLED' })
+            .where(
+              and(
+                eq(celebrations.worldId, ev.worldId),
+                eq(celebrations.villageId, target.id),
+                eq(celebrations.status, 'IN_PROGRESS'),
+              ),
+            );
+          await tx
+            .delete(villageResearch)
+            .where(
+              and(
+                eq(villageResearch.worldId, ev.worldId),
+                eq(villageResearch.villageId, target.id),
+              ),
+            );
+          await tx
+            .update(developmentOrders)
+            .set({ status: 'CANCELLED' })
+            .where(
+              and(
+                eq(developmentOrders.worldId, ev.worldId),
+                eq(developmentOrders.villageId, target.id),
+                eq(developmentOrders.status, 'IN_PROGRESS'),
+              ),
+            );
+          await tx
+            .update(wallRepairOrders)
+            .set({ status: 'CANCELLED' })
+            .where(
+              and(
+                eq(wallRepairOrders.worldId, ev.worldId),
+                eq(wallRepairOrders.villageId, target.id),
+                eq(wallRepairOrders.status, 'IN_PROGRESS'),
+              ),
+            );
           await tx
             .update(villages)
             .set({ ownerAccountId: m.ownerAccountId, kind: 'PLAYER', loyalty: 100, trapsUsed: 0 })
@@ -668,7 +840,7 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
     const secs = travelSeconds(
       distanceMilli(origin, target),
       slowestSpeed(r, result.attacker.survivors),
-      world.speedMultiplier,
+      militarySpeedOf(world),
     );
     returnsAt = addSeconds(ev.dueAt, secs);
   }
@@ -723,6 +895,7 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
       parent,
       await withRecomputedRates(tx, r, parent, await settledEconomy(tx, parent, ev)),
     );
+  await refreshCulture(tx, world, target.id, ev.dueAt);
 
   await tx.insert(outbox).values({
     worldId: ev.worldId,
@@ -741,6 +914,14 @@ const movementArrival: EventHandler = async (tx, ctx, ev) => {
 };
 
 export const EVENT_HANDLERS: Record<EventType, EventHandler> = {
+  TRADE_ARRIVAL: tradeArrival,
+  TRADE_RETURN: tradeReturn,
+  TRADE_ROUTE: tradeRouteDue,
+  CELEBRATION_COMPLETE: celebrationComplete,
+  STARVATION: applyStarvation,
+  DEVELOPMENT_COMPLETE: developmentComplete,
+  NPC_REGENERATE: npcRegenerate,
+  WALL_REPAIR_COMPLETE: wallRepairComplete,
   CONSTRUCTION_COMPLETE: constructionComplete,
   RECRUITMENT_COMPLETE: recruitmentComplete,
   MOVEMENT_RETURN: movementReturn,

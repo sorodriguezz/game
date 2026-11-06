@@ -1,0 +1,586 @@
+.realm-shell {
+  grid-template-rows: 70px 64px minmax(0, 1fr);
+}
+.realm-shell > .realm-resourcebar {
+  grid-column: 1/-1;
+  grid-row: 1;
+  position: relative;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(125px, 0.8fr);
+  align-items: center;
+  gap: 8px;
+  padding: 8px 24px;
+  min-height: 0;
+  border-bottom: 1px solid #526344;
+  background: #1d3025;
+}
+.realm-shell > .realm-topbar {
+  grid-row: 2;
+  min-height: 0;
+}
+.realm-shell > .realm-sidebar {
+  grid-row: 3;
+  min-height: 0;
+}
+.realm-shell > .realm-workspace {
+  grid-row: 3;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+.realm-resourcebar .realm-resource {
+  padding: 0;
+  min-width: 0;
+  gap: 10px;
+}
+.realm-resourcebar .realm-population {
+  display: flex;
+  min-width: 0;
+  border-left: 1px solid #536247;
+  padding-left: 14px;
+}
+.realm-resourcebar .realm-resource strong {
+  font-size: 18px;
+}
+.realm-resourcebar .resource-medallion {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+.village-switcher {
+  flex-shrink: 0;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+.realm-city-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  flex: 1;
+}
+.realm-city {
+  flex: 1;
+  min-height: 0;
+}
+.realm-city-layout .realm-city-canvas {
+  flex: 1;
+  min-height: 0;
+}
+.city-ring-legend {
+  flex-shrink: 0;
+}
+.realm-content-page {
+  min-height: 0;
+  overflow: auto;
+  flex: 1;
+}
+.realm-forces {
+  position: absolute;
+  right: 14px;
+  top: 192px;
+  width: 210px;
+  z-index: 8;
+  background: #182e23eb;
+  border: 1px solid #6e8055;
+  border-radius: 9px;
+  box-shadow: 0 3px 18px #0005;
+  font-size: 11px;
+  overflow: auto;
+  max-height: calc(100dvh - 240px);
+}
+.forces-troops {
+  padding: 10px 12px;
+  max-height: 150px;
+  overflow: auto;
+}
+.forces-troops h3 {
+  margin: 0 0 8px;
+  color: #decb91;
+  font-size: 12px;
+}
+.forces-troops p {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 4px 0;
+  color: #c6d1ae;
+}
+.force-movement {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 0;
+  border: 0;
+  border-top: 1px solid #48613f;
+  background: transparent;
+  text-align: left;
+  color: #cfdbb7;
+  cursor: pointer;
+  list-style: none;
+}
+.force-movement::-webkit-details-marker {
+  display: none;
+}
+.forces-troops .forces-reinforcement-title {
+  margin-top: 12px;
+}
+.force-march-list {
+  padding: 0 10px 8px;
+}
+.force-march {
+  display: grid;
+  gap: 3px;
+  padding: 8px 0;
+  border-top: 1px solid #526344;
+}
+.force-march span,
+.force-march small {
+  overflow-wrap: anywhere;
+  color: #bbc7a6;
+}
+.force-march time {
+  color: #e3ce93;
+}
+.force-group[open] .force-movement {
+  background: #42533a55;
+}
+.force-movement > span:first-child {
+  font-size: 21px;
+  color: #c6b677;
+}
+.force-movement > span:nth-child(2) {
+  flex: 1;
+}
+.force-movement small {
+  display: block;
+  color: #95a68a;
+  font-size: 10px;
+  margin-top: 2px;
+}
+.force-group.under-attack {
+  background: #743b2a;
+  animation: incoming-pulse 1.4s ease-in-out infinite;
+}
+.realm-construction-status {
+  position: absolute;
+  bottom: 18px;
+  left: 260px;
+  width: min(340px, 35vw);
+  z-index: 7;
+  background: #1b3024eb;
+  border: 1px solid #8c8853;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 11px;
+}
+.realm-construction-status > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 5px 0;
+}
+.realm-construction-status > div > div {
+  flex: 1;
+}
+.realm-construction-status small {
+  display: block;
+  margin-top: 3px;
+  color: #d7ca92;
+}
+.realm-construction-status progress {
+  width: 100%;
+  height: 4px;
+  accent-color: #d5bd67;
+}
+.construction-hammer {
+  display: inline-block;
+  font-size: 23px;
+  animation: construction-hammer 0.65s ease-in-out infinite;
+  transform-origin: 70% 75%;
+}
+.city-level.constructing {
+  border-color: #ffd57b;
+  animation: site-pulse 1.3s ease-in-out infinite;
+}
+.city-build-hammer {
+  position: absolute;
+  right: -13px;
+  top: -13px;
+  color: #ffe6a4;
+  text-shadow: 0 1px 3px #000;
+  display: block;
+  animation: construction-hammer 0.65s ease-in-out infinite;
+}
+.atlas-experience.world-experience {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+.atlas-experience .world-map-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.atlas-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 25px;
+  padding: 10px 18px;
+  flex-shrink: 0;
+  background: #263b2a;
+  border-bottom: 1px solid #4b603d;
+}
+.atlas-toolbar h1 {
+  font-size: 17px;
+  margin: 0;
+  color: #dfd39f;
+}
+.atlas-toolbar .map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 10px;
+}
+.atlas-toolbar .map-legend .own {
+  background: #72b8ea;
+}
+.atlas-toolbar .map-legend .ally {
+  background: #67d9ce;
+}
+.atlas-viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  background: #263c2b;
+  overflow: hidden;
+}
+.atlas-map {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.atlas-map > canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  outline: none;
+}
+.atlas-map > canvas:focus-visible {
+  outline: 2px solid #ffe5a4;
+  outline-offset: -2px;
+}
+.atlas-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  background: radial-gradient(ellipse, #38523a, #203b2b);
+  padding: 25px;
+  text-align: center;
+}
+.atlas-loading strong {
+  color: #e7d093;
+  font-size: 19px;
+}
+.atlas-loading p {
+  color: #a9bd99;
+  font-size: 12px;
+}
+.map-load-error {
+  position: absolute;
+  top: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 12;
+  background: #683f2d;
+  padding: 12px;
+  border: 1px solid #c69872;
+  border-radius: 6px;
+}
+.map-load-error button {
+  margin-left: 10px;
+}
+.map-coordinate-hud {
+  position: absolute;
+  bottom: 12px;
+  left: 14px;
+  z-index: 3;
+  background: #1b3226e8;
+  border: 1px solid #768059;
+  padding: 7px 11px;
+  border-radius: 6px;
+  color: #e3d29c;
+  font-size: 11px;
+  pointer-events: none;
+}
+.map-coordinate-hud strong,
+.map-coordinate-hud output {
+  display: block;
+}
+.map-coordinate-hud output {
+  color: #aebc92;
+  margin-top: 4px;
+}
+.atlas-experience > .atlas-selection {
+  position: absolute;
+  right: 14px;
+  top: 48px;
+  width: 320px;
+  max-width: calc(100% - 28px);
+  max-height: calc(100% - 70px);
+  overflow: auto;
+  background: #1b3026f5;
+  border: 1px solid #687c50;
+  border-radius: 9px;
+  z-index: 12;
+  padding: 16px;
+  box-sizing: border-box;
+}
+.map-detail-close {
+  display: block;
+  margin-left: auto;
+}
+.tile-actions-fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.tile-actions-fieldset > .territory-card {
+  padding: 0;
+  border: 0;
+}
+.trade-cargo {
+  margin: 12px 0;
+  border: 1px solid #62744d;
+  border-radius: 6px;
+}
+.trade-resources {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.trade-resources label,
+.trade-coordinates label {
+  min-width: 0;
+}
+.trade-resources input,
+.trade-coordinates input {
+  width: 100%;
+  box-sizing: border-box;
+}
+.trade-tabs {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+.trade-coordinates {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 300px;
+}
+.trade-items {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0;
+}
+.trade-items article {
+  border: 1px solid #63754d;
+  padding: 12px;
+  border-radius: 7px;
+}
+.trade-items article > strong {
+  color: #e5d6a2;
+}
+.trade-items article small,
+.trade-items article time {
+  display: block;
+  color: #bfccad;
+}
+.trade-items input {
+  max-width: 100px;
+}
+@media (max-width: 560px) {
+  .trade-resources {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@keyframes construction-hammer {
+  0%,
+  100% {
+    transform: rotate(-15deg);
+  }
+  50% {
+    transform: rotate(25deg);
+  }
+}
+@keyframes site-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px #ffd77844;
+  }
+  50% {
+    box-shadow: 0 0 0 7px #ffd77811;
+  }
+}
+@keyframes incoming-pulse {
+  0%,
+  100% {
+    border-color: #a96a46;
+  }
+  50% {
+    border-color: #f7bc72;
+  }
+}
+@media (max-width: 1200px) {
+  .realm-construction-status {
+    left: 210px;
+  }
+  .realm-forces {
+    width: 185px;
+  }
+}
+@media (max-width: 700px) {
+  .realm-shell {
+    grid-template-rows: 62px 55px minmax(0, 1fr);
+  }
+  .realm-shell > .realm-resourcebar {
+    padding: 5px 7px;
+    gap: 4px;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(64px, 0.8fr);
+  }
+  .realm-resourcebar .resource-medallion {
+    display: none;
+  }
+  .realm-resourcebar .realm-resource {
+    display: flex;
+    gap: 3px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .realm-resourcebar .realm-resource strong {
+    font-size: 13px;
+  }
+  .realm-resourcebar .realm-resource small {
+    font-size: 8px;
+  }
+  .realm-resourcebar .realm-resource em {
+    font-size: 8px;
+  }
+  .realm-resourcebar .realm-population {
+    padding-left: 5px;
+    gap: 3px;
+  }
+  .realm-resourcebar .realm-population > span {
+    display: none;
+  }
+  .realm-resourcebar .realm-population small {
+    font-size: 8px;
+  }
+  .realm-resourcebar .realm-population strong {
+    font-size: 12px;
+  }
+  .realm-resourcebar .realm-population em {
+    font-size: 10px;
+  }
+  .realm-forces {
+    top: 166px;
+    right: 7px;
+    width: 153px;
+    font-size: 9px;
+  }
+  .forces-troops {
+    max-height: 88px;
+    padding: 7px 9px;
+  }
+  .forces-troops h3 {
+    font-size: 10px;
+    margin-bottom: 5px;
+  }
+  .force-movement {
+    padding: 5px 8px;
+    gap: 5px;
+  }
+  .force-movement > span:first-child {
+    font-size: 15px;
+  }
+  .force-movement small {
+    font-size: 9px;
+  }
+  .realm-construction-status {
+    left: 77px;
+    bottom: 10px;
+    width: auto;
+    right: 12px;
+    font-size: 10px;
+    padding: 6px 9px;
+  }
+  .atlas-toolbar {
+    padding: 7px 10px;
+    gap: 5px;
+  }
+  .atlas-toolbar h1 {
+    font-size: 12px;
+  }
+  .atlas-toolbar .map-legend {
+    gap: 5px;
+    font-size: 8px;
+  }
+  .atlas-toolbar .map-legend span:nth-child(n + 3) {
+    display: none;
+  }
+  .map-coordinate-hud {
+    font-size: 10px;
+    left: 7px;
+    bottom: 8px;
+    padding: 6px 8px;
+  }
+  .map-zoom-controls {
+    right: 8px;
+    bottom: 8px;
+  }
+  .atlas-experience > .atlas-selection {
+    top: 38px;
+    right: 7px;
+    width: 290px;
+    max-width: calc(100% - 14px);
+    padding: 12px;
+  }
+  .city-ring-legend {
+    font-size: 7px;
+    padding: 8px 7px;
+    gap: 8px;
+  }
+  .city-controls-hint {
+    font-size: 8px;
+    bottom: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .construction-hammer,
+  .city-level.constructing,
+  .city-build-hammer,
+  .force-group.under-attack {
+    animation: none;
+  }
+}

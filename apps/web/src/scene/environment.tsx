@@ -17,6 +17,7 @@ import {
   type RenderComponent,
 } from 'playcanvas';
 import { AssetRuntime } from '../assets/runtime.js';
+import type { VillageLayout } from '@reinos/game-config';
 
 /**
  * Entorno natural generado de forma determinista (semillas fijas): terreno con
@@ -157,10 +158,12 @@ export function CityTerrain({
   coastal,
   paths,
   flatRadius = 58,
+  roads,
 }: {
   coastal: boolean;
   paths: Array<[number, number]>;
   flatRadius?: number;
+  roads?: VillageLayout['roads'];
 }) {
   const app = useApp();
   const water = useMemo(() => ({ t: 0, mat: null as StandardMaterial | null }), []);
@@ -215,7 +218,17 @@ export function CityTerrain({
     }
     // caminos: cintas de tierra desde la plaza a cada parcela, con borde difuso (alfa de vértice)
     const pathMat = rt.material('terrain.dirt', { blend: true });
-    for (const [px, pz] of paths) {
+    const segments = roads
+      ? roads.flatMap((road) =>
+          road.points.slice(1).map((end, i) => ({ from: road.points[i]!, end, width: road.width })),
+        )
+      : paths
+          .filter(([x, z]) => x !== 0 || z !== 0)
+          .map(([x, z]) => ({ from: { x: 0, z: 0 }, end: { x, z }, width: 2.2 }));
+    for (const segment of segments) {
+      const { from, end } = segment;
+      const px = end.x - from.x,
+        pz = end.z - from.z;
       const len = Math.hypot(px, pz);
       const ux = px / len;
       const uz = pz / len;
@@ -232,8 +245,8 @@ export function CityTerrain({
         const t = (s / segs) * len;
         const wob = (fbm(t / 6 + px, pz) - 0.5) * 0.6;
         for (let a = 0; a < 4; a++) {
-          const x = ux * t + rx * (across[a]! + wob);
-          const z = uz * t + rz * (across[a]! + wob);
+          const x = from.x + ux * t + rx * (((across[a]! + wob) * segment.width) / 2.2);
+          const z = from.z + uz * t + rz * (((across[a]! + wob) * segment.width) / 2.2);
           pos.push(x, h(x, z) + 0.035, z);
           nrm.push(0, 1, 0);
           uv.push(x, z);
@@ -245,7 +258,7 @@ export function CityTerrain({
       for (let s = 0; s < segs; s++)
         for (let a = 0; a < 3; a++) {
           const i0 = s * 4 + a;
-          idx.push(i0, i0 + 4, i0 + 1, i0 + 1, i0 + 4, i0 + 5);
+          idx.push(i0, i0 + 1, i0 + 4, i0 + 1, i0 + 5, i0 + 4);
         }
       const mesh = new Mesh(app.graphicsDevice);
       mesh.setPositions(new Float32Array(pos));
@@ -270,7 +283,7 @@ export function CityTerrain({
       app.off('destroy', dispose);
       dispose();
     };
-  }, [app, coastal, paths, water, flatRadius]);
+  }, [app, coastal, paths, water, flatRadius, roads]);
 
   useAppEvent('update', (dt: number) => {
     const m = water.mat;
@@ -294,6 +307,8 @@ export interface PropInstance {
   scale: number;
   /** Escala adicional a lo largo de X local (tramos de muralla recortados). */
   scaleX?: number;
+  scaleY?: number;
+  scaleZ?: number;
 }
 
 /**
@@ -341,7 +356,11 @@ export function InstancedProps({
           m.setTRS(
             new Vec3(it.x, it.y, it.z),
             q,
-            new Vec3(it.scale * (it.scaleX ?? 1), it.scale, it.scale),
+            new Vec3(
+              it.scale * (it.scaleX ?? 1),
+              it.scale * (it.scaleY ?? 1),
+              it.scale * (it.scaleZ ?? 1),
+            ),
           ).mul(local);
           data.set(m.data, i * 16);
         });
@@ -487,5 +506,62 @@ export function wallRing(
   }
   if (level > 0)
     out.push({ url: url(`wall_gate.${civ}.s${stage}`), x: 0, y: 0, z: radius, rotY: 0, scale: 1 });
+  return out;
+}
+
+/** Mismo perímetro persistido que valida el servidor; huecos en ambas puertas. */
+export function organicWall(
+  wall: VillageLayout['walls'][number],
+  level: number,
+  integrity: number,
+  civ: 'STONE' | 'WOOD' | 'EARTH',
+): PropInstance[] {
+  if (level === 0) return [];
+  const stage = level >= 8 ? 3 : level >= 4 ? 2 : 1;
+  const segment =
+    civ === 'STONE'
+      ? `wall_segment.corona.s${stage}`
+      : civ === 'WOOD'
+        ? 'palisade.liga.s1'
+        : `earth_rampart.common.s${stage}`;
+  const out: PropInstance[] = [];
+  for (let i = 0; i < wall.perimeter.length; i++) {
+    const a = wall.perimeter[i]!,
+      b = wall.perimeter[(i + 1) % wall.perimeter.length]!;
+    const x = (a.x + b.x) / 2,
+      z = (a.z + b.z) / 2;
+    if (Math.abs(x) < 7 || Math.abs(z) < 7) continue;
+    // La brecha y el hundimiento visual dependen solo de la integridad registrada.
+    const broken = level > 0 && (i * 73) % 1000 > integrity;
+    out.push({
+      url: `/assets/models/${segment}.glb`,
+      x,
+      z,
+      y: broken ? -2.5 : 0,
+      rotY: (Math.atan2(-(b.z - a.z), b.x - a.x) * 180) / Math.PI,
+      scale: 1,
+      scaleX: (Math.hypot(b.x - a.x, b.z - a.z) + 0.35) / 14.6,
+      ...(civ === 'WOOD' ? { scaleY: 1 + stage * 0.45, scaleZ: 1.7 } : {}),
+    });
+    if (civ !== 'EARTH' && i % 8 === 0 && !broken)
+      out.push({
+        url: `/assets/models/${civ === 'STONE' ? `wall_tower.corona.s${stage}` : `wood_tower.common.s${stage}`}.glb`,
+        x: a.x,
+        z: a.z,
+        y: 0,
+        rotY: 0,
+        scale: 1,
+      });
+  }
+  if (civ !== 'EARTH' && integrity > 0)
+    for (const sign of [-1, 1])
+      out.push({
+        url: `/assets/models/${civ === 'STONE' ? `wall_gate.corona.s${stage}` : `wood_gate.common.s${stage}`}.glb`,
+        x: 0,
+        z: sign * wall.radius,
+        y: 0,
+        rotY: sign === 1 ? 0 : 180,
+        scale: 1,
+      });
   return out;
 }

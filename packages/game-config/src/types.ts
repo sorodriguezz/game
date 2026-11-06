@@ -40,6 +40,17 @@ export const BUILDING_TYPES = [
   'trapper',
   'stable',
   'workshop',
+  'granary',
+  'market',
+  'trade_office',
+  'academy',
+  'smithy',
+  'embassy',
+  'town_hall',
+  'hideout',
+  'wonder',
+  'tournament_square',
+  'treasury',
 ] as const;
 export type BuildingType = (typeof BUILDING_TYPES)[number];
 
@@ -105,6 +116,7 @@ export const buildingDefSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
   maxLevel: posInt,
+  populationByLevel: z.array(nonNegInt).optional(),
   baseCost: resourceBundleSchema,
   baseSeconds: posInt,
   effect: z.enum([
@@ -131,6 +143,7 @@ export const buildingDefSchema = z.object({
 export type BuildingDef = z.infer<typeof buildingDefSchema>;
 
 export const unitDefSchema = z.object({
+  researchRequired: z.boolean().optional(),
   type: z.enum(UNIT_TYPES),
   name: z.string().min(1),
   unitClass: z.enum(['infantry', 'cavalry', 'support']),
@@ -165,6 +178,7 @@ export const civilizationDefSchema = z.object({
   uniqueUnit: z.enum(UNIT_TYPES),
   /** Multiplicadores en tanto por mil (1000 = sin cambio). */
   modifiers: z.object({
+    parallelFieldConstruction: z.boolean().optional(),
     wallBonusPermillePerLevel: nonNegInt,
     wallCostPermille: posInt,
     carryPermille: posInt,
@@ -183,14 +197,50 @@ export const plotDefSchema = z.object({
   allowedTypes: z.array(z.enum(BUILDING_TYPES)).optional(),
   label: z.string().optional(),
   radius: z.number().optional(),
+  precinct: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional(),
+  footprintRadius: z.number().positive().optional(),
 });
 export type PlotDef = z.infer<typeof plotDefSchema>;
 
 export const rulesetSchema = z.object({
+  trade: z
+    .object({
+      version: z.literal('trade-1'),
+      officeCapacityPermillePerLevel: nonNegInt,
+      minRouteSeconds: posInt,
+      merchants: z.object({
+        romans: z.object({ capacity: posInt, speed: posInt }),
+        gauls: z.object({ capacity: posInt, speed: posInt }),
+        teutons: z.object({ capacity: posInt, speed: posInt }),
+      }),
+    })
+    .optional(),
+  culture: z
+    .object({
+      version: z.literal('culture-1'),
+      thresholdBase: posInt,
+      castleLevels: z.tuple([posInt, posInt, posInt]),
+      celebrationPoints: posInt,
+      celebrationSeconds: posInt,
+      celebrationCost: resourceBundleSchema,
+    })
+    .optional(),
+  development: z
+    .object({
+      version: z.literal('development-1'),
+      researchBaseSeconds: posInt,
+      smithyBonusPermille: nonNegInt,
+      maxSmithyLevel: posInt,
+      demolitionBaseSeconds: posInt,
+    })
+    .optional(),
   version: z.string().min(1),
   status: z.enum(['PROPOSAL', 'APPROVED']),
   resources: z.array(z.enum(RESOURCE_KEYS)).length(4),
   economy: z.object({
+    fieldProductionByLevel: z.array(nonNegInt).optional(),
+    cropPopulation: z.boolean().optional(),
+    starvationIntervalSeconds: posInt.optional(),
     startingResources: resourceBundleSchema,
     /** Producción base por hora de un edificio productor nivel 1. */
     baseProductionPerHour: posInt,
@@ -242,8 +292,31 @@ export const rulesetSchema = z.object({
       loyaltyPerChief: posInt,
       oasisBonusPermille: nonNegInt,
       maxOasesPerVillage: posInt,
+      oasisConquest: z
+        .object({ radius: posInt, treasuryLevels: z.tuple([posInt, posInt, posInt]) })
+        .optional(),
+      npcRegeneration: z
+        .object({ oasisSeconds: posInt, villageSeconds: posInt, oasisLoyaltyPerAttack: posInt })
+        .optional(),
       trapsPerLevel: posInt,
       fieldEncounterRadiusMilli: posInt,
+    })
+    .optional(),
+  fortifications: z
+    .object({
+      layoutVersion: z.enum(['organic-1', 'organic-2']),
+      deployment: z.object({
+        BALANCED: z.tuple([nonNegInt, nonNegInt, nonNegInt]),
+        OUTER: z.tuple([nonNegInt, nonNegInt, nonNegInt]),
+        CORE: z.tuple([nonNegInt, nonNegInt, nonNegInt]),
+      }),
+      maxWallBonusPermille: nonNegInt,
+      ramDamagePerUnit: posInt,
+      wallResistancePerLevel: posInt,
+      catapultsPerLevel: posInt,
+      preciseTargetRallyLevel: posInt,
+      repairCostPermille: posInt,
+      repairTimePermille: posInt,
     })
     .optional(),
   cityLayout: z.object({ plots: z.array(plotDefSchema) }),
@@ -252,3 +325,24 @@ export const rulesetSchema = z.object({
   ),
 });
 export type Ruleset = z.infer<typeof rulesetSchema>;
+
+export type Precinct = 1 | 2 | 3;
+export type Deployment = 'BALANCED' | 'OUTER' | 'CORE';
+export interface LayoutPoint {
+  x: number;
+  z: number;
+}
+export interface VillageLayout {
+  version: 'organic-1' | 'organic-2';
+  seed: string;
+  civilization: CivilizationId;
+  plots: PlotDef[];
+  walls: Array<{
+    precinct: Precinct;
+    plot: number;
+    radius: number;
+    perimeter: LayoutPoint[];
+    gate: LayoutPoint;
+  }>;
+  roads: Array<{ id: string; width: number; points: LayoutPoint[] }>;
+}

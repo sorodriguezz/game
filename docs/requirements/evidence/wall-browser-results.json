@@ -1,0 +1,230 @@
+[
+  {
+    "channel": "chrome",
+    "civilization": "stone_wardens",
+    "material": "STONE",
+    "layout": "organic-2",
+    "visibleLevels": 52,
+    "metrics": {
+      "scene": "city",
+      "frames": 499,
+      "windowMs": 5438,
+      "fps": 96.9,
+      "frameMs": {
+        "avg": 10.3,
+        "p50": 7,
+        "p95": 8.2,
+        "p99": 166.6,
+        "max": 602.6
+      },
+      "cpuMs": {
+        "avg": 5,
+        "p95": 3.8
+      },
+      "drawCalls": {
+        "avg": 515,
+        "max": 520
+      },
+      "sceneTriangles": 476906,
+      "meshInstances": 398,
+      "vramMB": {
+        "textures": 68.7,
+        "geometry": 14.4,
+        "total": 83.1
+      },
+      "firstFrameMs": 289,
+      "device": "webgl2"
+    },
+    "errors": []
+  },
+  {
+    "channel": "chrome",
+    "civilization": "forest_kin",
+    "material": "WOOD",
+    "layout": "organic-2",
+    "visibleLevels": 52,
+    "metrics": {
+      "scene": "city",
+      "frames": 497,
+      "windowMs": 3930,
+      "fps": 129.5,
+      "frameMs": {
+        "avg": 7.7,
+        "p50": 6.9,
+        "p95": 7.6,
+        "p99": 36.3,
+        "max": 99.3
+      },
+      "cpuMs": {
+        "avg": 2.2,
+        "p95": 2.3
+      },
+      "drawCalls": {
+        "avg": 467,
+        "max": 470
+      },
+      "sceneTriangles": 483754,
+      "meshInstances": 376,
+      "vramMB": {
+        "textures": 83.7,
+        "geometry": 12.9,
+        "total": 96.5
+      },
+      "firstFrameMs": 89,
+      "device": "webgl2"
+    },
+    "errors": []
+  },
+  {
+    "channel": "chrome",
+    "civilization": "steppe_clans",
+    "material": "EARTH",
+    "layout": "organic-2",
+    "visibleLevels": 52,
+    "metrics": {
+      "scene": "city",
+      "frames": 500,
+      "windowMs": 3888,
+      "fps": 131.4,
+      "frameMs": {
+        "avg": 7.6,
+        "p50": 7,
+        "p95": 7.6,
+        "p99": 31.7,
+        "max": 82.2
+      },
+      "cpuMs": {
+        "avg": 2.1,
+        "p95": 2.3
+      },
+      "drawCalls": {
+        "avg": 479,
+        "max": 482
+      },
+      "sceneTriangles": 212126,
+      "meshInstances": 371,
+      "vramMB": {
+        "textures": 68.7,
+        "geometry": 13.8,
+        "total": 82.5
+      },
+      "firstFrameMs": 78,
+      "device": "webgl2"
+    },
+    "errors": []
+  },
+  {
+    "channel": "msedge",
+    "civilization": "stone_wardens",
+    "material": "STONE",
+    "layout": "organic-2",
+    "visibleLevels": 52,
+    "metrics": {
+      "scene": "city",
+      "frames": 498,
+      "windowMs": 5265,
+      "fps": 100,
+      "frameMs": {
+        "avg": 10,
+        "p50": 7,
+        "p95": 8.3,
+        "p99": 32.7,
+        "max": 582.7
+      },
+      "cpuMs": {
+        "avg": 4.7,
+        "p95": 2.9
+      },
+      "drawCalls": {
+        "avg": 506,
+        "max": 509
+      },
+      "sceneTriangles": 476774,
+      "meshInstances": 398,
+      "vramMB": {
+        "textures": 68.7,
+        "geometry": 14.4,
+        "total": 83.1
+      },
+      "firstFrameMs": 286,
+      "device": "webgl2"
+    },
+    "errors": []
+  },
+  {
+    "channel": "msedge",
+    "civilization": "forest_kin",
+    "material": "WOOD",
+    "layout": "organic-2",
+    "visibleLevels": 52,
+    "metrics": {
+      "scene": "city",
+      "frames": 500,
+      "windowMs": 3900,
+      "fps": 130.8,
+      "frameMs": {
+        "avg": 7.6,
+        "p50": 6.9,
+        "p95": 7.6,
+        "p99": 32.9,
+        "max": 91
+      },
+      "cpuMs": {
+        "avg": 2.2,
+        "p95": 2.3
+      },
+      "drawCalls": {
+        "avg": 488,
+        "max": 490
+      },
+      "sceneTriangles": 483784,
+      "meshInstances": 376,
+      "vramMB": {
+        "textures": 83.7,
+        "geometry": 12.9,
+        "total": 96.5
+      },
+      "firstFrameMs": 78,
+      "device": "webgl2"
+    },
+    "errors": []
+  },
+  {
+    "channel": "msedge",
+    "civilization": "steppe_clans",
+    "material": "EARTH",
+    "layout": "organic-2",
+    "visibleLevels": 52,
+    "metrics": {
+      "scene": "city",
+      "frames": 498,
+      "windowMs": 3901,
+      "fps": 130.4,
+      "frameMs": {
+        "avg": 7.7,
+        "p50": 6.9,
+        "p95": 7.8,
+        "p99": 40.1,
+        "max": 89.4
+      },
+      "cpuMs": {
+        "avg": 2.6,
+        "p95": 2.9
+      },
+      "drawCalls": {
+        "avg": 473,
+        "max": 478
+      },
+      "sceneTriangles": 211982,
+      "meshInstances": 371,
+      "vramMB": {
+        "textures": 68.7,
+        "geometry": 13.8,
+        "total": 82.5
+      },
+      "firstFrameMs": 80,
+      "device": "webgl2"
+    },
+    "errors": []
+  }
+]

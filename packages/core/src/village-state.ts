@@ -10,6 +10,7 @@ import {
   villages,
   woundedStacks,
   worlds,
+  villageLayouts,
   type DbOrTx,
   type Tx,
 } from '@reinos/db';
@@ -21,16 +22,19 @@ import {
   type UnitType,
 } from '@reinos/game-config';
 import {
-  capacityMilli,
   computeRates,
-  levelOf,
   mapResources,
   upkeepPerHour,
+  storageCapacity,
+  inhabitantsOf,
+  oasisBonuses,
+  starvationDueAt,
   type PlacedBuilding,
   type ResourceMap,
   type ResourceState,
 } from '@reinos/game-rules';
 import { DomainError, err } from './context.js';
+import { scheduleEvent } from './events.js';
 
 export type WorldRow = typeof worlds.$inferSelect;
 export type VillageRow = typeof villages.$inferSelect;
@@ -170,6 +174,7 @@ function rowToState(a: AccountRow): ResourceState {
     remainders: { wood: a.woodRem, stone: a.stoneRem, iron: a.ironRem, food: a.foodRem },
     rates: { wood: a.woodRate, stone: a.stoneRate, iron: a.ironRate, food: a.foodRate },
     capacity: a.capacity,
+    ...(a.foodCapacity === null ? {} : { foodCapacity: a.foodCapacity }),
     lastSettledAt: a.lastSettledAt.getTime(),
   };
 }
@@ -198,16 +203,55 @@ export function stateColumns(s: ResourceState) {
     ironRate: s.rates.iron,
     foodRate: s.rates.food,
     capacity: s.capacity,
+    foodCapacity: s.foodCapacity ?? null,
     lastSettledAt: new Date(s.lastSettledAt),
   };
 }
 
 /** Persiste el estado económico (la aldea ya debe estar bloqueada por el llamador). */
 export async function saveEconomy(tx: Tx, villageId: string, s: ResourceState): Promise<void> {
+  const [details] = await tx
+    .select({ world: worlds, village: villages, previous: resourceAccounts.starvationAt })
+    .from(villages)
+    .innerJoin(worlds, eq(worlds.id, villages.worldId))
+    .innerJoin(
+      resourceAccounts,
+      and(
+        eq(resourceAccounts.villageId, villages.id),
+        eq(resourceAccounts.worldId, villages.worldId),
+      ),
+    )
+    .where(eq(villages.id, villageId));
+  const interval = details && rulesetOf(details.world).economy.starvationIntervalSeconds;
+  let next: number | null = null;
+  if (interval && details?.village.kind === 'PLAYER' && s.rates.food < 0n) {
+    const existence = await tx.execute(
+      sql`select exists(select 1 from troop_stacks where village_id=${villageId} and quantity>0) or exists(select 1 from wounded_stacks where village_id=${villageId} and quantity>0) or exists(select 1 from garrisons where village_id=${villageId} and quantity>0) or exists(select 1 from army_movements where origin_village_id=${villageId} and owner_account_id=${details.village.ownerAccountId} and status in ('IN_TRANSIT','RETURNING') and units<>'{}'::jsonb) as present`,
+    );
+    next = starvationDueAt(
+      s,
+      details.previous?.getTime() ?? null,
+      interval,
+      Boolean(existence.rows[0]?.present),
+    );
+  }
   await tx
     .update(resourceAccounts)
-    .set({ ...stateColumns(s), version: sql`${resourceAccounts.version} + 1` })
+    .set({
+      ...stateColumns(s),
+      starvationAt: next === null ? null : new Date(next),
+      version: sql`${resourceAccounts.version} + 1`,
+    })
     .where(eq(resourceAccounts.villageId, villageId));
+  if (next !== null && details)
+    await scheduleEvent(tx, {
+      worldId: details.world.id,
+      villageId,
+      type: 'STARVATION',
+      dueAt: new Date(next),
+      dedupeKey: `starve:${villageId}:${next}`,
+      payload: {},
+    });
 }
 
 /**
@@ -227,26 +271,48 @@ export async function withRecomputedRates(
   const upkeep = upkeepPerHour(r, [
     ...home,
     ...away,
+    ...(r.economy.starvationIntervalSeconds ? await loadWounded(db, villageId) : []),
     ...guests.map((g) => ({ unitType: g.unitType as UnitType, quantity: g.quantity })),
   ]);
   const [village] = await db.select().from(villages).where(eq(villages.id, villageId));
   const world = await loadWorld(db, village!.worldId);
-  const production = computeRates(r, buildings, 0, world.speedMultiplier);
+  const localRules = await rulesetForVillage(db, r, villageId);
+  const production = computeRates(localRules, buildings, 0, world.speedMultiplier);
   const rates = { ...production };
+  const inhabitants = r.economy.cropPopulation ? inhabitantsOf(r, buildings) : 0;
+  rates.food += BigInt(inhabitants) * 1000n;
   if (r.territory) {
     const oases = await db
       .select()
       .from(villages)
       .where(and(eq(villages.parentVillageId, villageId), eq(villages.kind, 'OASIS')));
-    for (const k of ['wood', 'stone', 'iron', 'food'] as const)
-      rates[k] = (rates[k] * BigInt(1000 + oases.length * r.territory.oasisBonusPermille)) / 1000n;
+    for (const k of ['wood', 'stone', 'iron', 'food'] as const) {
+      const bonus = r.territory.oasisConquest
+        ? oases.reduce((sum, o) => sum + (oasisBonuses(world.mapSeed, o.x, o.y)[k] ?? 0), 0)
+        : oases.length * r.territory.oasisBonusPermille;
+      rates[k] = (rates[k] * BigInt(1000 + bonus)) / 1000n;
+    }
   }
-  rates.food -= BigInt(upkeep) * 1000n;
+  rates.food -= BigInt(upkeep + inhabitants) * 1000n;
   return {
     ...state,
     rates,
-    capacity: capacityMilli(r, levelOf(buildings, 'warehouse')),
+    capacity: storageCapacity(r, buildings, 'warehouse'),
+    ...(r.economy.cropPopulation ? { foodCapacity: storageCapacity(r, buildings, 'granary') } : {}),
   };
+}
+
+export async function rulesetForVillage(
+  db: DbOrTx,
+  r: Ruleset,
+  villageId: string,
+): Promise<Ruleset> {
+  if (!r.economy.fieldProductionByLevel) return r;
+  const [row] = await db
+    .select()
+    .from(villageLayouts)
+    .where(eq(villageLayouts.villageId, villageId));
+  return row ? { ...r, cityLayout: { plots: row.layout.plots } } : r;
 }
 
 export async function writeLedger(
@@ -254,7 +320,18 @@ export async function writeLedger(
   entry: {
     worldId: string;
     villageId: string;
-    reason: 'BUILD' | 'TRAIN' | 'LOOT_OUT' | 'LOOT_IN';
+    reason:
+      | 'BUILD'
+      | 'TRAIN'
+      | 'LOOT_OUT'
+      | 'LOOT_IN'
+      | 'WALL_REPAIR'
+      | 'DEVELOPMENT'
+      | 'CELEBRATION'
+      | 'TRADE_OUT'
+      | 'TRADE_IN'
+      | 'TRADE_ESCROW'
+      | 'TRADE_REFUND';
     refId: string;
     deltaMilli: ResourceMap<bigint>;
     at: Date;
@@ -322,4 +399,8 @@ export async function removeFromStacks(
       });
     }
   }
+}
+/** El cambio se activa exclusivamente en el ruleset nuevo, preservando viajes antiguos. */
+export function militarySpeedOf(world: WorldRow): number {
+  return rulesetOf(world).fortifications ? world.movementSpeedMultiplier : world.speedMultiplier;
 }

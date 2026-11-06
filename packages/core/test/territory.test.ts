@@ -101,6 +101,17 @@ async function founding() {
   const key = idem();
   const o = await svc.found({ accountId: a }, w, av, req, key);
   expect(await svc.found({ accountId: a }, w, av, req, key)).toEqual(o);
+  expect(
+    (await h.queries.villageView(a, w, av)).movements.find((m) => m.id === o.id),
+  ).toMatchObject({
+    mission: 'SETTLE',
+    direction: 'OUTGOING',
+    targetName: req.name,
+    targetVillageId: null,
+  });
+  expect((await h.queries.mapAtlas(a, w)).movements.find((m) => m.id === o.id)?.mission).toBe(
+    'SETTLE',
+  );
   await complete(o.arrivesAt);
   return (await svc.view(a, w)).villages.find((v) => v.id !== av)!.id;
 }
@@ -121,6 +132,17 @@ describe('territorio persistente', () => {
       },
       idem(),
     );
+    expect(
+      (await h.queries.villageView(a, w, next)).movements.find((m) => m.id === order.movementId),
+    ).toMatchObject({
+      direction: 'INCOMING',
+      mission: 'TRANSFER',
+      units: [{ unitType: 'militia', quantity: 12 }],
+    });
+    expect(
+      (await h.queries.villageView(a, w, av)).movements.find((m) => m.id === order.movementId)
+        ?.direction,
+    ).toBe('OUTGOING');
     await complete(order.arrivalAt);
     expect(
       (await h.queries.villageView(a, w, next)).troops.find((t) => t.unitType === 'militia')
@@ -182,6 +204,10 @@ describe('territorio persistente', () => {
       { targetVillageId: bv, mission: 'REINFORCE', units: [{ unitType: 'militia', quantity: 10 }] },
       idem(),
     );
+    expect(
+      (await h.queries.villageView(b, w, bv)).movements.find((m) => m.id === march.movementId),
+    ).toMatchObject({ direction: 'INCOMING', mission: 'REINFORCE', units: null });
+    expect((await h.queries.villageView(c, w, cv)).movements).toHaveLength(0);
     await complete(march.arrivalAt);
     expect((await svc.view(a, w)).reinforcements[0]?.quantity).toBe(10);
     expect((await h.queries.villageView(b, w, bv)).troops).toHaveLength(0);
@@ -337,6 +363,12 @@ describe('territorio persistente', () => {
     expect(reports).toHaveLength(1);
     expect(reports[0]!.location).toBe('FIELD');
     expect((await h.queries.listReports(a, w))[0]?.location).toBe('FIELD');
+    const atlas = (await h.queries.mapAtlas(a, w)).movements.find((m) => m.id === first.movementId);
+    expect(atlas?.from).toEqual({
+      x: reports[0]!.fieldX! / 1000 - 16,
+      y: 15 - reports[0]!.fieldY! / 1000,
+    });
+    expect(atlas?.departedAt).toBe(reports[0]!.occurredAt.toISOString());
     await complete(new Date(new Date(first.arrivalAt).getTime() + 10000).toISOString());
     reports = await h.database.db.select().from(battles).where(eq(battles.worldId, w));
     expect(reports).toHaveLength(1);

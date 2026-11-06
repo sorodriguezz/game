@@ -1,0 +1,104 @@
+[
+  {
+    "channel": "chrome",
+    "version": "156.0.8078.80",
+    "worldId": "dc90519d-2bdc-4db0-a7b3-103dfb4e820a",
+    "villageId": "26be6a13-1cec-4e24-9177-740d4a608603",
+    "perf": {
+      "scene": "city",
+      "frames": 423,
+      "windowMs": 3004,
+      "fps": 140.6,
+      "frameMs": {
+        "avg": 7.1,
+        "p50": 7,
+        "p95": 9.2,
+        "p99": 9.8,
+        "max": 47.5
+      },
+      "cpuMs": {
+        "avg": 3.1,
+        "p95": 4.6
+      },
+      "drawCalls": {
+        "avg": 659,
+        "max": 659
+      },
+      "sceneTriangles": 247716,
+      "meshInstances": 464,
+      "vramMB": {
+        "textures": 65.7,
+        "geometry": 4.7,
+        "total": 70.3
+      },
+      "firstFrameMs": 324,
+      "device": "webgl2"
+    },
+    "widths": {
+      "document": 390,
+      "viewport": 390
+    },
+    "consoleErrors": [],
+    "checks": [
+      "3 muros",
+      "plano estable",
+      "reparación",
+      "catálogo y confirmación",
+      "doctrina",
+      "asedio offline",
+      "informe y recreación",
+      "390px"
+    ]
+  },
+  {
+    "channel": "msedge",
+    "version": "156.0.4314.58",
+    "worldId": "dc90519d-2bdc-4db0-a7b3-103dfb4e820a",
+    "villageId": "c1d8226d-ddf9-418e-9cd5-6a2738168a41",
+    "perf": {
+      "scene": "city",
+      "frames": 426,
+      "windowMs": 3001,
+      "fps": 142.1,
+      "frameMs": {
+        "avg": 7,
+        "p50": 6.9,
+        "p95": 7.4,
+        "p99": 8.8,
+        "max": 28.2
+      },
+      "cpuMs": {
+        "avg": 1.7,
+        "p95": 2.1
+      },
+      "drawCalls": {
+        "avg": 659,
+        "max": 659
+      },
+      "sceneTriangles": 247716,
+      "meshInstances": 464,
+      "vramMB": {
+        "textures": 65.7,
+        "geometry": 4.7,
+        "total": 70.3
+      },
+      "firstFrameMs": 277,
+      "device": "webgl2"
+    },
+    "widths": {
+      "document": 390,
+      "viewport": 390
+    },
+    "consoleErrors": [],
+    "checks": [
+      "3 muros",
+      "plano estable",
+      "reparación",
+      "catálogo y confirmación",
+      "doctrina",
+      "asedio offline",
+      "informe y recreación",
+      "390px"
+    ]
+  }
+]

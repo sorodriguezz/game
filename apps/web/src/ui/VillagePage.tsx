@@ -42,7 +42,13 @@ export function liveAmount(v: VillageView, k: ResourceKey, now: number): number 
   const raw = r.amountsMilli[k] + (r.ratesMilliPerHour[k] * elapsed) / 3_600_000;
   const capped =
     r.ratesMilliPerHour[k] >= 0
-      ? Math.min(Math.max(r.capacityMilli, r.amountsMilli[k]), raw)
+      ? Math.min(
+          Math.max(
+            k === 'food' ? (r.foodCapacityMilli ?? r.capacityMilli) : r.capacityMilli,
+            r.amountsMilli[k],
+          ),
+          raw,
+        )
       : Math.max(0, raw);
   return Math.floor(capped / 1000);
 }
@@ -94,13 +100,20 @@ export function VillagePage({
     return () => clearInterval(t);
   }, [refresh]);
 
-  const now = useServerNow(view?.serverTime);
+  const liveNow = useServerNow(view?.serverTime);
+  const now =
+    view?.worldStatus && !['OPEN', 'WONDER_ERA'].includes(view.worldStatus)
+      ? new Date(view.serverTime).getTime()
+      : liveNow;
 
   // Refresca poco después de cada vencimiento conocido (construcción, tropas, llegadas).
   useEffect(() => {
     if (!view) return;
     const dues = [
       view.construction?.completesAt,
+      ...(view.constructions?.map((o) => o.completesAt) ?? []),
+      ...(view.development?.map((o) => o.completesAt) ?? []),
+      view.culture?.celebration?.completesAt,
       ...view.recruitment.map((r) => r.completesAt),
       ...view.movements.map((m) => m.arrivesAt),
     ]

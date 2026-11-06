@@ -1,0 +1,45 @@
+{
+  "at": "2026-11-06T04:12:39.289Z",
+  "initial": [
+    "0000_init",
+    "0001_mvp2_training_matches",
+    "0002_terrestrial_realm",
+    "0003_release_cancelled_settlements",
+    "0004_organic_fortifications",
+    "0005_roman_queues_and_military_speed",
+    "0006_world_identity_and_dimensions",
+    "0007_profiles_and_management",
+    "0008_granary_capacity",
+    "0009_regional_npc",
+    "0010_research_and_demolition",
+    "0011_starvation_timer",
+    "0012_culture_and_expansion",
+    "0013_trade_market"
+  ],
+  "down": [
+    "0013_trade_market",
+    "0012_culture_and_expansion",
+    "0011_starvation_timer",
+    "0010_research_and_demolition",
+    "0009_regional_npc",
+    "0008_granary_capacity",
+    "0007_profiles_and_management",
+    "0006_world_identity_and_dimensions",
+    "0005_roman_queues_and_military_speed",
+    "0004_organic_fortifications"
+  ],
+  "up": [
+    "0004_organic_fortifications",
+    "0005_roman_queues_and_military_speed",
+    "0006_world_identity_and_dimensions",
+    "0007_profiles_and_management",
+    "0008_granary_capacity",
+    "0009_regional_npc",
+    "0010_research_and_demolition",
+    "0011_starvation_timer",
+    "0012_culture_and_expansion",
+    "0013_trade_market"
+  ],
+  "result": "PASS",
+  "tables": 39
+}

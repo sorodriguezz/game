@@ -1,4 +1,4 @@
-import { and, eq, gt, isNull } from 'drizzle-orm';
+import { and, eq, gt, isNull, sql } from 'drizzle-orm';
 import { hash, verify } from '@node-rs/argon2';
 import { accounts, sessions } from '@reinos/db';
 import {
@@ -54,12 +54,24 @@ export class AuthService {
       }
       throw e;
     }
-    return this.createSession({ id, email: req.email, displayName: req.displayName });
+    return this.createSession({
+      id,
+      email: req.email,
+      displayName: req.displayName,
+      role: 'PLAYER',
+    });
   }
 
   async login(input: LoginRequest): Promise<SessionResult> {
     const req = loginRequestSchema.parse(input);
-    const [acc] = await this.ctx.db.select().from(accounts).where(eq(accounts.email, req.email));
+    const [acc] = await this.ctx.db
+      .select()
+      .from(accounts)
+      .where(
+        req.email.includes('@')
+          ? eq(accounts.email, req.email)
+          : sql`lower(${accounts.displayName})=${req.email}`,
+      );
     if (!acc) {
       // Igualar coste temporal para no revelar qué correos existen.
       dummyHash ??= hash('contraseña-de-relleno', ARGON2);
@@ -69,7 +81,12 @@ export class AuthService {
     const ok = await verify(acc.passwordHash, req.password).catch(() => false);
     if (!ok || acc.status !== 'ACTIVE')
       throw new DomainError('INVALID_CREDENTIALS', 401, 'Credenciales inválidas');
-    return this.createSession({ id: acc.id, email: acc.email, displayName: acc.displayName });
+    return this.createSession({
+      id: acc.id,
+      email: acc.email,
+      displayName: acc.displayName,
+      role: acc.role,
+    });
   }
 
   private async createSession(account: AccountView): Promise<SessionResult> {
@@ -100,6 +117,7 @@ export class AuthService {
         email: accounts.email,
         displayName: accounts.displayName,
         status: accounts.status,
+        role: accounts.role,
       })
       .from(sessions)
       .innerJoin(accounts, eq(accounts.id, sessions.accountId))
@@ -115,7 +133,7 @@ export class AuthService {
     return {
       sessionId: s.sessionId,
       csrfToken: s.csrfToken,
-      account: { id: s.id, email: s.email, displayName: s.displayName },
+      account: { id: s.id, email: s.email, displayName: s.displayName, role: s.role },
     };
   }
 

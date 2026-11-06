@@ -1,0 +1,13 @@
+# ADR-0061 — Investigación, mejoras y demolición
+
+Fecha: 2026-11-05. Implementa documento maestro 2.0 §§9.4–9.6, 13, 14 y 2.1 URB-013; complementa ADR-0004/0005/0009/0057. No modifica TRAINING, rankings, premios ni el resultado canónico del combate.
+
+Se añaden `village_research` y `development_orders` con mundo y FK compuesta. Academia desbloquea unidades; Herrería mejora ataque o defensa por tipo y aldea, con máximo 20. Una cola por instalación, independiente de la construcción. Los costes usan el ledger económico existente y se cargan bajo el mismo bloqueo que las demás órdenes. PostgreSQL conserva la orden, el evento y la investigación; cada reintento devuelve la orden original. La propiedad se vuelve a comprobar al completar y la conquista cancela órdenes/investigaciones del propietario anterior.
+
+Los bonus efectivos se incluyen en el snapshot del combate; el dominio los aplica con enteros y las fases conservan ese snapshot. Para refuerzos se pondera la mejora de cada aldea de origen por cantidad del tipo. El informe no expone investigaciones interiores del rival. Los snapshots históricos sin mejoras mantienen su resultado previo.
+
+Demolición: un nivel por orden, confirmación expresa en el diálogo, sin recuperar materiales por defecto. Centro Urbano y Maravilla no se pueden demoler. No se acepta si el solar tiene obra, reparación o producción militar vinculada pendiente. El evento limita al nivel contratado y no causa una demolición adicional si el asedio ya lo dejó por debajo de ese nivel. Al liberar el solar vuelve el catálogo compatible del recinto. Capacidad y consumo se recalculan al terminar.
+
+Balance inicial parametrizado, versión `development-1`: mejora de Herrería +15 por mil por nivel; costes de investigación derivados del coste de una unidad, multiplicados por nivel; duración base 300 segundos multiplicada por nivel y dividida por velocidad económica. Academia mínima 1 y Herrería al menos del nivel objetivo. Demolición 120 segundos por nivel actual, divididos por velocidad. Son propuestas de balance que deben revisarse antes de una temporada competitiva.
+
+Archivos: contratos de desarrollo, reglas puras de presupuesto, tablas/migración aditiva, servicio core y handlers, controlador API, funciones de edificio y pruebas de dominio/integración. Criterios: sin doble gasto ni saldo negativo ante dos órdenes, reintento, mundo/propiedad incorrectos, mejora offline, snapshot determinista y demolición concurrente con asedio. Rollback: bloquear nuevas órdenes y conservar tablas e historial hasta drenar/cancelar las activas; no borrar investigaciones ni ledger.

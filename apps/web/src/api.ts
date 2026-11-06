@@ -28,6 +28,18 @@ import {
   type WorldSummary,
   type TerritoryView,
   type FoundVillageRequest,
+  type RepairWallRequest,
+  type RepairWallResponse,
+  type StaffOverview,
+  type ModerationWorld,
+  type AccountRole,
+  type MapAtlasView,
+  type DevelopmentRequest,
+  type DevelopmentOrderView,
+  type TradeMarketView,
+  type TradeSendRequest,
+  type TradeOfferRequest,
+  type TradeRouteRequest,
 } from '@reinos/contracts';
 
 export class ApiError extends Error {
@@ -107,14 +119,61 @@ const w = (worldId: string) => `/worlds/${worldId}`;
 const v = (worldId: string, villageId: string) => `${w(worldId)}/villages/${villageId}`;
 
 export const api = {
+  market: (worldId: string, villageId: string) =>
+    call<TradeMarketView>('GET', `${v(worldId, villageId)}/market`),
+  tradeSend: (worldId: string, villageId: string, body: TradeSendRequest) =>
+    call('POST', `${v(worldId, villageId)}/market/send`, body, true),
+  tradeOffer: (worldId: string, villageId: string, body: TradeOfferRequest) =>
+    call('POST', `${v(worldId, villageId)}/market/offers`, body, true),
+  tradeAccept: (worldId: string, villageId: string, offerId: string, lots: number) =>
+    call('POST', `${v(worldId, villageId)}/market/accept`, { offerId, lots }, true),
+  tradeCancel: (worldId: string, villageId: string, offerId: string) =>
+    call('POST', `${v(worldId, villageId)}/market/offers/${offerId}/cancel`, {}, true),
+  tradeRoute: (worldId: string, villageId: string, body: TradeRouteRequest) =>
+    call('POST', `${v(worldId, villageId)}/market/routes`, body, true),
+  tradeStopRoute: (worldId: string, villageId: string, routeId: string) =>
+    call('POST', `${v(worldId, villageId)}/market/routes/${routeId}/disable`, {}, true),
+  celebrate: (worldId: string, villageId: string) =>
+    call('POST', `${v(worldId, villageId)}/celebrations`, {}, true),
+  management: () => call<StaffOverview>('GET', '/management'),
+  managedWorld: (id: string) => call<ModerationWorld>('GET', `/management/worlds/${id}`),
+  createUser: (b: { email: string; password: string; displayName: string; role: AccountRole }) =>
+    call('POST', '/management/users', b, true),
+  updateUser: (id: string, b: unknown) => call('PATCH', `/management/users/${id}`, b, true),
+  createWorld: (b: unknown) => call('POST', '/management/worlds', b, true),
+  updateWorld: (id: string, b: unknown) => call('PUT', `/management/worlds/${id}`, b, true),
+  worldAction: (id: string, action: string) =>
+    call('POST', `/management/worlds/${id}/actions`, { action }, true),
+  assignModerator: (id: string, accountId: string, assigned: boolean) =>
+    call('PUT', `/management/worlds/${id}/moderators/${accountId}`, { assigned }, true),
+  announce: (id: string, b: unknown) =>
+    call('POST', `/management/worlds/${id}/announcements`, b, true),
+  reviewComplaint: (worldId: string, id: string, b: unknown) =>
+    call('PATCH', `/management/worlds/${worldId}/complaints/${id}`, b, true),
+  sanction: (id: string, b: unknown) => call('POST', `/management/worlds/${id}/sanctions`, b, true),
+  complain: (id: string, b: unknown) => call('POST', `${w(id)}/complaints`, b, true),
   me: () => call<MeResponse>('GET', '/auth/me'),
   register: (b: RegisterRequest) => call<MeResponse>('POST', '/auth/register', b),
   login: (b: LoginRequest) => call<MeResponse>('POST', '/auth/login', b),
   logout: () => call<void>('POST', '/auth/logout'),
   worlds: () => call<WorldSummary[]>('GET', '/worlds'),
+  worldOverview: (worldId: string) =>
+    call<{ mapSize: number; resolution: number; tiles: string }>('GET', `${w(worldId)}/overview`),
+  atlas: (worldId: string) => call<MapAtlasView>('GET', `${w(worldId)}/atlas`),
+  atlasTerrain: async (worldId: string) => {
+    const response = await fetch(`${API_PREFIX}${w(worldId)}/atlas/terrain`, {
+      credentials: 'same-origin',
+    });
+    if (!response.ok) throw new Error('No se pudo cargar el mapa completo');
+    return new Uint8Array(await response.arrayBuffer());
+  },
   join: (worldId: string, b: JoinWorldRequest) =>
     call<JoinWorldResponse>('POST', `${w(worldId)}/join`, b, true),
   village: (worldId: string, villageId: string) => call<VillageView>('GET', v(worldId, villageId)),
+  repairWall: (worldId: string, villageId: string, b: RepairWallRequest) =>
+    call<RepairWallResponse>('POST', `${v(worldId, villageId)}/wall-repairs`, b, true),
+  develop: (worldId: string, villageId: string, b: DevelopmentRequest) =>
+    call<DevelopmentOrderView>('POST', `${v(worldId, villageId)}/development`, b, true),
   build: (worldId: string, villageId: string, b: BuildRequest) =>
     call<BuildResponse>('POST', `${v(worldId, villageId)}/buildings`, b, true),
   recruit: (worldId: string, villageId: string, b: RecruitRequest) =>
@@ -123,8 +182,17 @@ export const api = {
     call<DoctrineView>('PUT', `${v(worldId, villageId)}/doctrine`, b),
   march: (worldId: string, villageId: string, b: SendMovementRequest) =>
     call<SendMovementResponse>('POST', `${v(worldId, villageId)}/movements`, b, true),
-  map: (worldId: string, x: number, y: number, radius: number) =>
-    call<MapRegionView>('GET', `${w(worldId)}/map?x=${x}&y=${y}&radius=${radius}`),
+  map: (
+    worldId: string,
+    x: number,
+    y: number,
+    radius: number,
+    viewport?: { width: number; height: number },
+  ) =>
+    call<MapRegionView>(
+      'GET',
+      `${w(worldId)}/map?x=${x}&y=${y}&radius=${radius}${viewport ? `&width=${viewport.width}&height=${viewport.height}` : ''}`,
+    ),
   reports: (worldId: string) => call<BattleReportSummary[]>('GET', `${w(worldId)}/reports`),
   report: (worldId: string, battleId: string) =>
     call<BattleReportDetail>('GET', `${w(worldId)}/reports/${battleId}`),

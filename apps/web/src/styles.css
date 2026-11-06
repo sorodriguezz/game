@@ -101,6 +101,8 @@ button.small,
 .small {
   font-size: 0.82em;
 }
+input[type='text'],
+input[type='datetime-local'],
 input[type='email'],
 input[type='password'],
 input[type='number'],
@@ -218,6 +220,16 @@ label.inline {
 .auth-card .primary {
   width: 100%;
   margin-top: 0.8em;
+}
+.auth-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.auth-card input {
+  display: block;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 /* ---- tabs ---- */

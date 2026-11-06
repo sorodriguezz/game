@@ -1111,3 +1111,300 @@
     gap: 12px;
   }
 }
+.construction-catalog {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: #243627;
+  color: #e6dcc2;
+}
+.construction-catalog small {
+  color: #b8bd9f;
+}
+.wall-overview {
+  border-bottom: 1px solid #bdb29a;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+}
+.wall-card {
+  border: 1px solid #526047;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 8px 0;
+  background: #263b2c;
+  color: #e6dcc2;
+}
+.wall-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  margin: 8px 0;
+}
+.wall-card progress {
+  width: 100%;
+  height: 8px;
+  accent-color: #65774a;
+  display: block;
+  margin-bottom: 5px;
+}
+.doctrine-distribution {
+  background: #263b2c;
+  padding: 4px 12px;
+  margin: 8px 0;
+  border-radius: 5px;
+}
+.battle-replay {
+  border-block: 1px solid #bdb29a;
+  margin: 20px 0;
+  padding: 14px 0;
+}
+.replay-scene {
+  position: relative;
+  height: 420px;
+  margin: 12px 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.scene {
+  position: relative;
+}
+.realm-city-layout {
+  position: relative;
+  grid-template-columns: minmax(0, 1fr);
+}
+.realm-city-layout .realm-section-heading {
+  padding-top: 22px;
+  padding-bottom: 12px;
+}
+.realm-city-layout .construction-catalog {
+  margin: 8px 20px 14px;
+}
+.realm-city-layout .realm-city-canvas {
+  min-height: 580px;
+}
+.realm-city-layout .city-building-panel {
+  position: absolute;
+  right: 18px;
+  top: 100px;
+  width: 300px;
+  max-height: 75%;
+  overflow: auto;
+  z-index: 3;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.city-building-panel summary {
+  padding: 0.65rem;
+  background: #1c2d22;
+  border: 1px solid #60764c;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #dbce9b;
+}
+.city-building-panel details[open] {
+  background: #1c2d22;
+  box-shadow: 0 10px 30px #0008;
+}
+.city-building-panel details[open] .panel {
+  padding: 1rem;
+}
+.city-levels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.city-level {
+  visibility: hidden;
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  min-width: 25px;
+  height: 25px;
+  padding: 0 4px;
+  border-radius: 50%;
+  background: #f4f1d7;
+  color: #263729;
+  border: 2px solid #76aeaa;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 2px 5px #0008;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.city-level.empty {
+  background: #25422bcc;
+  color: #e9e3bc;
+  border-color: #a1b178;
+}
+.city-level.field {
+  background: #ecdb99;
+  border-color: #92964b;
+}
+.city-level.selected,
+.city-level:focus-visible {
+  outline: 3px solid #ffd17a;
+  outline-offset: 2px;
+  z-index: 2;
+}
+.plot-dialog {
+  width: min(640px, calc(100vw - 32px));
+  max-height: 85vh;
+  box-sizing: border-box;
+  overflow: auto;
+  background: #203126;
+  color: #e8dfbe;
+  border: 1px solid #a4a06d;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 100px #0009;
+}
+.plot-dialog::backdrop {
+  background: #09110dbb;
+}
+.plot-dialog > header {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: 1px solid #657356;
+  margin-bottom: 1rem;
+}
+.plot-dialog > header h2 {
+  margin: 0.5rem 0 1rem;
+  color: #ecd491;
+}
+.plot-dialog .panel {
+  padding: 0;
+  border: 0;
+}
+.plot-dialog .building-functions {
+  padding: 0.75rem 0;
+}
+.village-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 1rem;
+  border-bottom: 1px solid #46523e;
+  background: #1d3025;
+}
+.village-switcher label {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0;
+  min-width: 0;
+}
+.village-switcher select {
+  min-width: 0;
+  max-width: 380px;
+}
+.village-switcher span {
+  font-size: 0.8rem;
+  color: #a7b38e;
+  white-space: nowrap;
+}
+.village-switcher strong {
+  margin-left: auto;
+  font-size: 0.8rem;
+}
+.realm-village-list {
+  max-height: 38vh;
+  overflow: auto;
+  flex-shrink: 0;
+}
+.realm-village {
+  padding: 3px;
+  gap: 2px;
+}
+.village-open {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 8px 3px;
+  text-align: left;
+}
+.village-open > span:last-child {
+  min-width: 0;
+}
+.village-open strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.village-locate {
+  padding: 5px;
+  background: transparent;
+  border: 0;
+  font-size: 18px;
+}
+.village-search {
+  margin-top: 12px;
+  font-size: 11px;
+}
+@media (max-width: 600px) {
+  .village-switcher {
+    padding: 0.4rem;
+    gap: 0.35rem;
+  }
+  .village-switcher select {
+    max-width: 200px;
+  }
+  .village-search {
+    display: none;
+  }
+  .plot-dialog {
+    padding: 1rem;
+  }
+}
+.replay-scene .scene {
+  width: 100%;
+  height: 100%;
+}
+.replay-caption {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  display: flex;
+  gap: 14px;
+  padding: 10px 14px;
+  color: #f3ead5;
+  background: #293427de;
+  border-radius: 5px;
+}
+.replay-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.replay-controls label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.table-scroll {
+  overflow: auto;
+}
+@media (max-width: 700px) {
+  .replay-scene {
+    height: 300px;
+  }
+  .replay-caption {
+    font-size: 12px;
+    flex-direction: column;
+    gap: 4px;
+  }
+}

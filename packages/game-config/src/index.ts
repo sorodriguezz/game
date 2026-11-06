@@ -1,4 +1,7 @@
 import { rulesetFrontierAlpha1 } from './rulesets/frontier-alpha.1.js';
+import { rulesetFrontierAlpha2 } from './rulesets/frontier-alpha.2.js';
+import { rulesetFrontierAlpha3 } from './rulesets/frontier-alpha.3.js';
+import { rulesetFrontierAlpha4 } from './rulesets/frontier-alpha.4.js';
 import { rulesetMvp1Alpha0 } from './rulesets/mvp1-alpha.0.js';
 import {
   rulesetSchema,
@@ -15,7 +18,13 @@ import {
 export * from './types.js';
 
 const REGISTRY: ReadonlyMap<string, Ruleset> = new Map(
-  [rulesetMvp1Alpha0, rulesetFrontierAlpha1].map((r) => [r.version, Object.freeze(r)]),
+  [
+    rulesetMvp1Alpha0,
+    rulesetFrontierAlpha1,
+    rulesetFrontierAlpha2,
+    rulesetFrontierAlpha3,
+    rulesetFrontierAlpha4,
+  ].map((r) => [r.version, Object.freeze(r)]),
 );
 
 export const DEFAULT_RULESET_VERSION = rulesetMvp1Alpha0.version;
@@ -41,6 +50,10 @@ export function listRulesetVersions(): string[] {
 export function validateRuleset(input: unknown): Ruleset {
   const r = rulesetSchema.parse(input);
   const problems: string[] = [];
+  if (r.fortifications)
+    for (const weights of Object.values(r.fortifications.deployment)) {
+      if (weights.reduce((a, b) => a + b, 0) !== 1000) problems.push('doctrina debe sumar 1000');
+    }
   const bTypes = new Set(r.buildings.map((b) => b.type));
   const uTypes = new Set(r.units.map((u) => u.type));
   if (bTypes.size !== r.buildings.length) problems.push('edificios duplicados');

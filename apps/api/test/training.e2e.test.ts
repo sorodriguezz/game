@@ -87,6 +87,9 @@ async function player(name: string) {
 /** Huella de TODAS las tablas del mundo: un entrenamiento no puede cambiarla (ADR-0037, G1-12). */
 async function worldFingerprint(): Promise<string> {
   const tables = [
+    'village_layouts',
+    'wall_sections',
+    'wall_repair_orders',
     'alliances',
     'alliance_members',
     'garrisons',
@@ -181,7 +184,8 @@ describe('entrenamiento táctico de punta a punta (Gate 1)', () => {
     room.onMessage('*', () => {});
     let recorded = false;
     room.onMessage('battle.result.recorded', (m: { recorded: boolean }) => (recorded = m.recorded));
-    await until(() => recorded, 40_000);
+    // Presupuesto real para timers de Windows; no cambia ticks ni reglas.
+    await until(() => recorded, 90_000);
 
     const view = (await p.agent.get(`/api/v1/training/${id}`).expect(200)).body;
     expect(view.status).toBe('FINISHED');
@@ -234,7 +238,7 @@ describe('entrenamiento táctico de punta a punta (Gate 1)', () => {
           .expect(409)
       ).body.code,
     ).toBe('MATCH_NOT_JOINABLE');
-  }, 60_000);
+  }, 120_000);
 
   it('PvP de entrenamiento: invitación por código, un solo invitado y aislamiento entre cuentas', async () => {
     const host = await player('Anfitriona');

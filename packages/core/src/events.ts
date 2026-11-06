@@ -19,6 +19,14 @@ import { newId } from './util.js';
  */
 
 export const EVENT_TYPES = {
+  TRADE_ARRIVAL: { priority: 18 },
+  TRADE_RETURN: { priority: 19 },
+  TRADE_ROUTE: { priority: 24 },
+  CELEBRATION_COMPLETE: { priority: 13 },
+  DEVELOPMENT_COMPLETE: { priority: 12 },
+  STARVATION: { priority: 22 },
+  NPC_REGENERATE: { priority: 5 },
+  WALL_REPAIR_COMPLETE: { priority: 15 },
   CONSTRUCTION_COMPLETE: { priority: 10 },
   RECRUITMENT_COMPLETE: { priority: 20 },
   MOVEMENT_RETURN: { priority: 30 },
@@ -136,18 +144,21 @@ export async function processEventsUpTo(
   skipEventId?: string,
 ): Promise<number> {
   const ids = [...locked];
-  const res = await tx.execute(sql`
+  let applied = 0;
+  for (;;) {
+    const res = await tx.execute(sql`
     select id, world_id, type, village_id, secondary_village_id, due_at, priority, payload, attempts
     from scheduled_events
     where status in ('PENDING', 'PROCESSING')
+      and id<>${skipEventId ?? '00000000-0000-0000-0000-000000000000'}::uuid
       and (village_id = any(${sql.param(ids)}::uuid[]) or secondary_village_id = any(${sql.param(ids)}::uuid[]) or (payload->'lockVillageIds') ?| ${sql.param(ids)}::text[])
       and (due_at, priority, id) <= (${limit.dueAt.toISOString()}::timestamptz, ${limit.priority ?? 32767}::smallint, ${limit.id ?? MAX_UUID}::uuid)
     order by due_at, priority, id
+    limit 1
   `);
-  let applied = 0;
-  for (const row of res.rows as unknown as RawEventRow[]) {
+    const row = (res.rows as unknown as RawEventRow[])[0];
+    if (!row) break;
     const ev = rowToEvent(row);
-    if (ev.id === skipEventId) continue;
     if (!locksetOf(ev).every((v) => locked.has(v))) throw new EventOrderingConflict(ev.id);
     await handlers[ev.type](tx, ctx, ev);
     await ctx.faults?.afterEventApplied?.({ id: ev.id, type: ev.type });
@@ -171,6 +182,12 @@ export async function processEventsUpTo(
       lag_ms: ctx.clock.now().getTime() - ev.dueAt.getTime(),
     });
     applied++;
+    if (applied > 10000)
+      throw new DomainError(
+        'EVENTS_PENDING',
+        409,
+        'Demasiados eventos pendientes; el worker debe continuar la recuperación',
+      );
   }
   return applied;
 }

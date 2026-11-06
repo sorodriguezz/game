@@ -1,19 +1,18 @@
 import { useEffect, useState } from 'react';
 import type { AccountView, WorldSummary } from '@reinos/contracts';
-import { getRuleset, type CivilizationId } from '@reinos/game-config';
+
 import { api, describeError } from '../api.js';
 import { useToast } from '../App.js';
+import { JoinWorldDialog } from './JoinWorldDialog.js';
 
 export function WorldsPage({
   account,
   onEnter,
   onLogout,
-  onTraining,
 }: {
   account: AccountView;
   onEnter: (worldId: string, villageId: string) => void;
   onLogout: () => void;
-  onTraining: () => void;
 }) {
   const [worlds, setWorlds] = useState<WorldSummary[] | null>(null);
   const [joining, setJoining] = useState<string | null>(null);
@@ -32,13 +31,6 @@ export function WorldsPage({
         <div className="brand">Reinos de la Frontera</div>
         <div className="spacer" />
         <span className="who">{account.displayName}</span>
-        <button
-          className="ghost"
-          onClick={onTraining}
-          title="Batallas RTS de entrenamiento (MVP 2): sin efectos en los mundos"
-        >
-          ⚔ Entrenamiento táctico
-        </button>
         <button className="ghost" onClick={onLogout}>
           Salir
         </button>
@@ -54,8 +46,12 @@ export function WorldsPage({
             <article key={w.id} className="card world">
               <header>
                 <h3>{w.name}</h3>
-                <span className={`badge badge-${w.profile}`}>
-                  {w.profile === 'test' ? 'prueba' : w.profile}
+                <span className="badge">
+                  {w.status === 'PLANNED'
+                    ? 'Próximo'
+                    : w.status === 'PAUSED'
+                      ? 'Pausado'
+                      : 'En curso'}
                 </span>
               </header>
               <dl>
@@ -69,6 +65,14 @@ export function WorldsPage({
                 <dd>
                   {w.mapSize}×{w.mapSize}
                 </dd>
+                {w.status === 'PLANNED' && (
+                  <>
+                    <dt>Apertura</dt>
+                    <dd>
+                      {w.opensAt ? new Date(w.opensAt).toLocaleString('es-CL') : 'Por anunciar'}
+                    </dd>
+                  </>
+                )}
               </dl>
               {w.membership ? (
                 <button
@@ -77,12 +81,6 @@ export function WorldsPage({
                 >
                   Entrar a mi ciudad
                 </button>
-              ) : joining === w.id ? (
-                <JoinForm
-                  world={w}
-                  onCancel={() => setJoining(null)}
-                  onJoined={(villageId) => onEnter(w.id, villageId)}
-                />
               ) : (
                 <button
                   className="primary"
@@ -96,75 +94,13 @@ export function WorldsPage({
           ))}
         </div>
       </main>
-    </div>
-  );
-}
-
-function JoinForm({
-  world,
-  onCancel,
-  onJoined,
-}: {
-  world: WorldSummary;
-  onCancel: () => void;
-  onJoined: (villageId: string) => void;
-}) {
-  const r = getRuleset(world.rulesetVersion);
-  const [civ, setCiv] = useState<CivilizationId>(r.civilizations[0]!.id);
-  const [name, setName] = useState('');
-  const [busy, setBusy] = useState(false);
-  const toast = useToast();
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    try {
-      const res = await api.join(world.id, { civilization: civ, villageName: name });
-      onJoined(res.villageId);
-    } catch (err) {
-      toast('error', describeError(err));
-      setBusy(false);
-    }
-  };
-  return (
-    <form className="join" onSubmit={submit}>
-      <fieldset>
-        <legend>Civilización (no se puede cambiar después)</legend>
-        {r.civilizations.map((c) => (
-          <label key={c.id} className={`civ ${civ === c.id ? 'selected' : ''}`}>
-            <input
-              type="radio"
-              name="civ"
-              value={c.id}
-              checked={civ === c.id}
-              onChange={() => setCiv(c.id)}
-            />
-            <strong>{c.name}</strong>
-            <span>{c.tagline}</span>
-            <small>
-              Único: {r.buildings.find((b) => b.type === c.uniqueBuilding)?.name} ·{' '}
-              {r.units.find((u) => u.type === c.uniqueUnit)?.name}
-            </small>
-          </label>
-        ))}
-      </fieldset>
-      <label>
-        Nombre de tu ciudad
-        <input
-          value={name}
-          minLength={3}
-          maxLength={32}
-          onChange={(e) => setName(e.target.value)}
-          required
+      {worlds?.find((w) => w.id === joining) && (
+        <JoinWorldDialog
+          world={worlds.find((w) => w.id === joining)!}
+          onCancel={() => setJoining(null)}
+          onJoined={(villageId) => onEnter(joining!, villageId)}
         />
-      </label>
-      <div className="row">
-        <button type="button" className="ghost" onClick={onCancel}>
-          Cancelar
-        </button>
-        <button className="primary" disabled={busy}>
-          {busy ? 'Fundando…' : 'Fundar ciudad'}
-        </button>
-      </div>
-    </form>
+      )}
+    </div>
   );
 }

@@ -1,9 +1,23 @@
 import { and, eq } from 'drizzle-orm';
-import { terrainAt, computeRates, capacityMilli, levelOf } from '@reinos/game-rules';
+import {
+  terrainAt,
+  computeRates,
+  capacityMilli,
+  levelOf,
+  generateVillageLayout,
+} from '@reinos/game-rules';
 import { randomUUID } from 'node:crypto';
 import { DEFAULT_RULESET_VERSION, getRuleset } from '@reinos/game-config';
 import type { Db } from './client.js';
-import { worlds, villages, villageBuildings, resourceAccounts, troopStacks } from './schema.js';
+import {
+  worlds,
+  villages,
+  villageBuildings,
+  resourceAccounts,
+  troopStacks,
+  villageLayouts,
+  wallSections,
+} from './schema.js';
 
 export interface WorldSeed {
   slug: string;
@@ -16,37 +30,8 @@ export interface WorldSeed {
   rulesetVersion?: string;
 }
 
-/** Mundos de desarrollo: uno "alfa" a velocidad 1 y uno de prueba acelerado para demostrar aislamiento. */
-export const DEV_WORLDS: WorldSeed[] = [
-  {
-    slug: 'reinos-terrestres',
-    name: 'Reinos Terrestres ×50',
-    profile: 'test',
-    speedMultiplier: 50,
-    mapSeed: 20261105,
-    mapSize: 64,
-    protectionHours: 0,
-    rulesetVersion: 'frontier-alpha.1',
-  },
-  {
-    slug: 'frontera-1',
-    name: 'Frontera I',
-    profile: 'alpha',
-    speedMultiplier: 1,
-    mapSeed: 20261103,
-    mapSize: 128,
-    protectionHours: getRuleset(DEFAULT_RULESET_VERSION).world.newPlayerProtectionHours,
-  },
-  {
-    slug: 'prueba-rapida',
-    name: 'Prueba Rápida ×50',
-    profile: 'test',
-    speedMultiplier: 50,
-    mapSeed: 777,
-    mapSize: 64,
-    protectionHours: 0,
-  },
-];
+/** Los mundos visibles los crea un Administrador. Los tests suministran sus propias semillas. */
+export const DEV_WORLDS: WorldSeed[] = [];
 
 /** Inserta mundos si no existen (idempotente por `slug`). */
 export async function seedWorlds(
@@ -71,7 +56,12 @@ export async function seedWorlds(
         opensAt: now,
       })
       .onConflictDoNothing({ target: worlds.slug });
-    if (s.rulesetVersion === 'frontier-alpha.1') {
+    if (
+      s.rulesetVersion &&
+      getRuleset(s.rulesetVersion).territory &&
+      !getRuleset(s.rulesetVersion).territory?.npcRegeneration &&
+      s.mapSize <= 128
+    ) {
       await db.transaction(async (tx) => {
         const [w] = await tx.select().from(worlds).where(eq(worlds.slug, s.slug)).for('update');
         if (!w) return;
@@ -98,6 +88,29 @@ export async function seedWorlds(
               coastal: false,
               loyalty: npc ? 70 : 100,
             });
+            if (r.fortifications && !oasis) {
+              const layout = generateVillageLayout(r, {
+                worldSeed: w.mapSeed,
+                x,
+                y,
+                civilization: 'stone_wardens',
+              });
+              await tx.insert(villageLayouts).values({
+                worldId: w.id,
+                villageId: id,
+                version: layout.version,
+                seed: layout.seed,
+                layout,
+              });
+              await tx.insert(wallSections).values(
+                ([1, 2, 3] as const).map((precinct) => ({
+                  worldId: w.id,
+                  villageId: id,
+                  precinct,
+                  integrity: 1000,
+                })),
+              );
+            }
             const buildings = oasis ? [] : r.startingBuildings;
             if (buildings.length)
               await tx.insert(villageBuildings).values(

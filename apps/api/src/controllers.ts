@@ -33,9 +33,17 @@ import {
   AuthService,
   GameCommands,
   GameQueries,
+  atlasTerrain,
+  loadWorld,
   type CoreContext,
   type ResolvedSession,
   type SessionResult,
+  indexedMapQuery,
+  publicRegion,
+  publicVillage,
+  publicJoin,
+  publicReport,
+  publicReports,
 } from '@reinos/core';
 import { CurrentSession, Public, uuidParam } from './http.js';
 import {
@@ -122,6 +130,7 @@ export class WorldsController {
   constructor(
     @Inject(GAME_COMMANDS) private readonly commands: GameCommands,
     @Inject(GAME_QUERIES) private readonly queries: GameQueries,
+    @Inject(CORE_CONTEXT) private readonly ctx: CoreContext,
   ) {}
 
   @Get()
@@ -136,25 +145,64 @@ export class WorldsController {
     @Body() body: unknown,
     @Headers(IDEMPOTENCY_HEADER) key: string | undefined,
   ): Promise<JoinWorldResponse> {
-    return this.commands.joinWorld(
-      { accountId: s.account.id },
-      uuidParam(worldId, 'WORLD_NOT_FOUND'),
-      body as never,
-      key,
+    const wid = uuidParam(worldId, 'WORLD_NOT_FOUND');
+    return publicJoin(
+      this.ctx.db,
+      wid,
+      this.commands.joinWorld(
+        { accountId: s.account.id },
+        uuidParam(worldId, 'WORLD_NOT_FOUND'),
+        body as never,
+        key,
+      ),
     );
   }
 
   @Get(':worldId/map')
-  map(
+  async map(
     @CurrentSession() s: ResolvedSession,
     @Param('worldId') worldId: string,
     @Query() query: unknown,
   ): Promise<MapRegionView> {
-    return this.queries.mapRegion(
-      s.account.id,
-      uuidParam(worldId, 'WORLD_NOT_FOUND'),
-      query as never,
+    const wid = uuidParam(worldId, 'WORLD_NOT_FOUND');
+    return publicRegion(
+      this.ctx.db,
+      wid,
+      this.queries.mapRegion(
+        s.account.id,
+        uuidParam(worldId, 'WORLD_NOT_FOUND'),
+        await indexedMapQuery(this.ctx.db, wid, query),
+      ),
     );
+  }
+  @Get(':worldId/overview') overview(
+    @CurrentSession() s: ResolvedSession,
+    @Param('worldId') worldId: string,
+  ) {
+    return this.queries.worldOverview(s.account.id, uuidParam(worldId, 'WORLD_NOT_FOUND'));
+  }
+  @Get(':worldId/atlas') atlas(
+    @CurrentSession() s: ResolvedSession,
+    @Param('worldId') worldId: string,
+  ) {
+    return this.queries.mapAtlas(s.account.id, uuidParam(worldId, 'WORLD_NOT_FOUND'));
+  }
+  @Get(':worldId/atlas/terrain') async terrain(
+    @CurrentSession() s: ResolvedSession,
+    @Param('worldId') worldId: string,
+    @Res() res: Response,
+  ) {
+    const id = uuidParam(worldId, 'WORLD_NOT_FOUND');
+    await this.queries.requireMembership(s.account.id, id);
+    const world = await loadWorld(this.ctx.db, id),
+      file = await atlasTerrain(world);
+    res.set({
+      'Content-Type': 'application/octet-stream',
+      'Content-Encoding': 'gzip',
+      'Cache-Control': 'private, max-age=3600',
+      ETag: file.etag,
+    });
+    res.send(file.data);
   }
 
   @Get(':worldId/reports')
@@ -162,7 +210,8 @@ export class WorldsController {
     @CurrentSession() s: ResolvedSession,
     @Param('worldId') worldId: string,
   ): Promise<BattleReportSummary[]> {
-    return this.queries.listReports(s.account.id, uuidParam(worldId, 'WORLD_NOT_FOUND'));
+    const wid = uuidParam(worldId, 'WORLD_NOT_FOUND');
+    return publicReports(this.ctx.db, wid, this.queries.listReports(s.account.id, wid));
   }
 
   @Get(':worldId/reports/:battleId')
@@ -171,10 +220,15 @@ export class WorldsController {
     @Param('worldId') worldId: string,
     @Param('battleId') battleId: string,
   ): Promise<BattleReportDetail> {
-    return this.queries.getReport(
-      s.account.id,
-      uuidParam(worldId, 'WORLD_NOT_FOUND'),
-      uuidParam(battleId, 'REPORT_NOT_FOUND'),
+    const wid = uuidParam(worldId, 'WORLD_NOT_FOUND');
+    return publicReport(
+      this.ctx.db,
+      wid,
+      this.queries.getReport(
+        s.account.id,
+        uuidParam(worldId, 'WORLD_NOT_FOUND'),
+        uuidParam(battleId, 'REPORT_NOT_FOUND'),
+      ),
     );
   }
 }
@@ -184,6 +238,8 @@ export class VillagesController {
   constructor(
     @Inject(GAME_COMMANDS) private readonly commands: GameCommands,
     @Inject(GAME_QUERIES) private readonly queries: GameQueries,
+    @Inject(FortificationService) private readonly fortifications: FortificationService,
+    @Inject(CORE_CONTEXT) private readonly ctx: CoreContext,
   ) {}
 
   private ids(worldId: string, villageId: string): [string, string] {
@@ -196,7 +252,7 @@ export class VillagesController {
     @Param('worldId') w: string,
     @Param('villageId') v: string,
   ): Promise<VillageView> {
-    return this.queries.villageView(s.account.id, ...this.ids(w, v));
+    return publicVillage(this.ctx.db, w, this.queries.villageView(s.account.id, ...this.ids(w, v)));
   }
 
   @Post('buildings')
@@ -241,6 +297,22 @@ export class VillagesController {
     return this.commands.setDoctrine({ accountId: s.account.id }, ...this.ids(w, v), body as never);
   }
 
+  @Post('wall-repairs')
+  repairWall(
+    @CurrentSession() s: ResolvedSession,
+    @Param('worldId') w: string,
+    @Param('villageId') v: string,
+    @Body() body: unknown,
+    @Headers(IDEMPOTENCY_HEADER) key: string | undefined,
+  ) {
+    return this.fortifications.repair(
+      { accountId: s.account.id },
+      ...this.ids(w, v),
+      body as never,
+      key,
+    );
+  }
+
   @Post('movements')
   march(
     @CurrentSession() s: ResolvedSession,
@@ -257,3 +329,4 @@ export class VillagesController {
     );
   }
 }
+import { FortificationService } from '@reinos/core';

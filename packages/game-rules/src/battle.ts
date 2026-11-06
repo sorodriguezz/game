@@ -6,10 +6,15 @@ import {
   type ResourceBundle,
   type Ruleset,
   type UnitType,
+  type Precinct,
+  type Deployment,
+  type BuildingType,
 } from '@reinos/game-config';
+import { resolveFortifiedBattle, type BattlePhaseResult } from './fortifications.js';
 import { RATIO_SCALE, isqrt, minBig } from './fixed.js';
 import { createPrng, type Prng } from './prng.js';
 import type { TerrainKind } from './map.js';
+import type { CombatModifiers } from './development.js';
 
 /**
  * Motor de combate automático, puro y determinista (ADR-0005, PRD §10.4).
@@ -24,6 +29,7 @@ export interface UnitStack {
 }
 
 export interface DefenseDoctrine {
+  deployment?: Deployment;
   /** % de cada pila que se reserva y no combate (0–maxReservePercent). */
   reservePercent: number;
   /** Retirada si ataque esperado ≥ defensa × umbral/100. `null` = nunca. */
@@ -33,19 +39,32 @@ export interface DefenseDoctrine {
 export type BattleMission = 'ATTACK' | 'RAID';
 
 export interface BattleSnapshot {
+  siegeTargetPlot?: number;
+  fortifications?: {
+    walls: Array<{ precinct: Precinct; level: number; integrity: number }>;
+    buildings: Array<{ plot: number; type: BuildingType; level: number; precinct: Precinct }>;
+    layout?: import('@reinos/game-config').VillageLayout;
+  };
   battleId: string;
   worldId: string;
   seed: string;
   rulesetVersion: string;
   mission: BattleMission;
   location?: 'VILLAGE' | 'FIELD';
-  attacker: { civilization: CivilizationId; units: UnitStack[] };
+  attacker: { civilization: CivilizationId; units: UnitStack[]; improvements?: CombatModifiers };
   defender: {
     civilization: CivilizationId | null;
+    improvements?: CombatModifiers;
     units: UnitStack[];
     doctrine: DefenseDoctrine;
   };
-  defenses: { wallLevel: number; bastionLevel: number; hospitalLevel: number; traps?: number };
+  defenses: {
+    wallLevel: number;
+    bastionLevel: number;
+    hospitalLevel: number;
+    traps?: number;
+    wallBonusPermille?: number;
+  };
   terrain: { kind: TerrainKind };
   /** Recursos (unidades enteras) del defensor liquidados al instante del combate. */
   defenderResources: ResourceBundle;
@@ -67,6 +86,15 @@ export type BattleMilestone =
   | { t: number; kind: 'LOOT'; loot: ResourceBundle };
 
 export interface BattleResult {
+  precincts?: BattlePhaseResult[];
+  reachedPrecinct?: Precinct;
+  buildingDamage?: Array<{
+    plot: number;
+    type: BuildingType;
+    precinct: Precinct;
+    fromLevel: number;
+    toLevel: number;
+  }>;
   battleId: string;
   worldId: string;
   rulesetVersion: string;
@@ -160,6 +188,12 @@ function nonZero(stacks: UnitStack[]): UnitStack[] {
 }
 
 export function resolveBattle(r: Ruleset, snap: BattleSnapshot): BattleResult {
+  if (r.fortifications && snap.location !== 'FIELD') return resolveFortifiedBattle(r, snap);
+  return resolveSingleBattle(r, snap);
+}
+
+/** Una fase matemática; los mundos anteriores conservan exactamente este motor. */
+export function resolveSingleBattle(r: Ruleset, snap: BattleSnapshot): BattleResult {
   if (snap.rulesetVersion !== r.version) {
     throw new RulesetMismatchError(`snapshot ${snap.rulesetVersion} ≠ ruleset ${r.version}`);
   }
@@ -183,7 +217,11 @@ export function resolveBattle(r: Ruleset, snap: BattleSnapshot): BattleResult {
   let attCav = 0n;
   for (const s of sent) {
     const d = unitDef(r, s.unitType);
-    const p = BigInt(d.attack) * BigInt(s.quantity);
+    const p =
+      (BigInt(d.attack) *
+        BigInt(s.quantity) *
+        BigInt(1000 + (snap.attacker.improvements?.[s.unitType]?.attackPermille ?? 0))) /
+      1000n;
     if (d.unitClass === 'cavalry') attCav += p;
     else attInf += p;
   }
@@ -208,16 +246,20 @@ export function resolveBattle(r: Ruleset, snap: BattleSnapshot): BattleResult {
     ? civilizationDef(r, snap.defender.civilization).modifiers.wallBonusPermillePerLevel
     : c.wallBonusPermillePerLevel;
   const wallPermille =
+    snap.defenses.wallBonusPermille ??
     wallPerLevel * snap.defenses.wallLevel +
-    c.bastionBonusPermillePerLevel * snap.defenses.bastionLevel;
+      c.bastionBonusPermillePerLevel * snap.defenses.bastionLevel;
 
   const defenseOf = (units: readonly UnitStack[]): { power: bigint; morale: number } => {
     let inf = 0n;
     let cav = 0n;
     for (const s of units) {
       const d = unitDef(r, s.unitType);
-      inf += BigInt(d.infantryDefense) * BigInt(s.quantity);
-      cav += BigInt(d.cavalryDefense) * BigInt(s.quantity);
+      const modifier = BigInt(
+        1000 + (snap.defender.improvements?.[s.unitType]?.defensePermille ?? 0),
+      );
+      inf += (BigInt(d.infantryDefense) * BigInt(s.quantity) * modifier) / 1000n;
+      cav += (BigInt(d.cavalryDefense) * BigInt(s.quantity) * modifier) / 1000n;
     }
     const unitsPower = attRaw > 0n ? (inf * attInf + cav * attCav) / attRaw : inf;
     const morale = moralePermille(r, units);

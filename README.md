@@ -2,16 +2,15 @@
 
 MMORTS web 3D por temporadas. Este directorio contiene la **documentación de producto/arquitectura** y, desde la iteración 1, el **código del monorepo** que la implementa.
 
+Encargo maestro 2.0/2.1: [estado completo y pendientes](docs/requirements/IMPLEMENTATION.md). Mundo local **Tierras de la Frontera** creado desde administración. Perfiles por credenciales, atlas cuadrado con arrastre, ciudad orgánica, tropas/ataques permanentes, oasis y economía offline. Las reglas nuevas `.4` añaden cultura, celebraciones y Mercado funcional. El encargo completo sigue en desarrollo.
+
 - Estado real de la implementación, pruebas y pendientes: [`docs/IMPLEMENTATION-STATUS.md`](docs/IMPLEMENTATION-STATUS.md)
 - Desglose del MVP 2 (ADR-0021…0037, PRD, backlog y QA contra el código): [`docs/mvp2/DESGLOSE-MVP2.md`](docs/mvp2/DESGLOSE-MVP2.md)
 - Arte 3D: la ciudad usa un **kit procedural de validación ("blockout")**, no arte final. Gate 0 sigue abierto.
 
 ## Nuevo mundo terrestre y rediseño
 
-El encargo del 2026-11-05 añade **Reinos Terrestres ×50**, con reglas propias `frontier-alpha.1`:
-mapa isométrico fijo por coordenadas, todo tierra, tres razas nuevas y aldeas 3D con tres
-recintos. Campos exteriores individuales de madera, barro, hierro y cereal; industria y
-cuarteles; ciudadela con castillo, centro urbano y plaza de reuniones.
+El mapa usa coordenadas cartesianas con 0|0 central y cuadrícula cuadrada. Se carga todo el terreno una vez y se recorre con arrastre local. Romanos, Galos y Germanos tienen murallas de piedra, madera y arcilla. Las aldeas comienzan con Centro Urbano 1 y campos vacíos de nivel 0. Construcción, investigación, hambre, movimientos y combate AUTO se resuelven offline en PostgreSQL.
 
 Para actualizar una instalación existente:
 
@@ -22,22 +21,14 @@ pnpm db:seed
 pnpm dev
 ```
 
-Abre http://localhost:5173 y entra en **Reinos Terrestres ×50**. Los mundos anteriores
-conservan sus reglas. Desde el mapa selecciona una casilla libre para fundar (centro urbano 5,
-plaza 1, tres colonos y recursos), o una aldea para atacar, saquear, conquistar, trasladar o
-reforzar según propiedad y alianza. Los emisarios reducen lealtad; las capitales y últimas
-aldeas están protegidas. Los oasis tienen animales persistentes y se vinculan a una aldea.
+Abre http://localhost:5173. Usuario/correo y contraseña determinan el perfil: Jugador, Moderador o Administrador. El administrador local separado se configura con `apps/api/src/bootstrap-admin.ts` y guarda sus credenciales en `.env.admin.local`, ignorado por Git. El seed no crea mundos públicos. El Administrador crea, edita y publica borradores; el Jugador ve mundos próximos/en curso y se registra con un modal de raza, cuadrante y nombres. Si ya participa en un único mundo abierto, entra directamente.
 
 Los traslados propios pasan a ser tropas desplegables de la aldea receptora; los refuerzos
 aliados conservan dueño y solo defienden. El servidor filtra las marchas visibles. Dos
 marchas enemigas que coinciden en espacio y tiempo combaten en campo sin murallas ni botín;
 los supervivientes regresan. Si no se interceptan, el combate sucede en el destino.
 
-Diseño, balance propuesto y validación: [`docs/territory/DESIGN.md`](docs/territory/DESIGN.md).
-Es una implementación alfa propia inspirada en el género: no pretende reproducir todas
-las versiones, tablas ni sistemas de Travian. Los NPC son aldeas defensoras persistentes;
-las patrullas autónomas, la regeneración de animales, la curación y el asedio dirigido
-quedan fuera de esta entrega. Los modelos nuevos siguen pendientes de aprobación artística.
+Diseño histórico: [`docs/territory/DESIGN.md`](docs/territory/DESIGN.md). Estado vigente: [`IMPLEMENTATION.md`](docs/requirements/IMPLEMENTATION.md). Oasis y aldeas libres regeneran defensas; los oasis requieren Tesoro 10/15/20, alcance 5×5 y ataques hasta lealtad 0. Las temporadas nuevas pueden habilitar cultura/cupos y Mercado/Oficina de Comercio; los mundos publicados conservan su versión. Quedan pendientes el catálogo militar completo, espionaje, diplomacia, competición/Maravilla, mensajería y arte definitivo, entre otros bloques documentados.
 
 ## Documentación
 
@@ -51,19 +42,19 @@ quedan fuera de esta entrega. Los modelos nuevos siguen pendientes de aprobació
 
 ## Arquitectura del código
 
-| Ruta | Rol |
-|---|---|
-| `apps/web` | React 19 + PlayCanvas (`@playcanvas/react`): ciudad 3D, HUD, ejército, campaña, informes |
-| `apps/api` | NestJS 12, monolito modular: auth, mundos, aldeas, mapa, informes (`/api/v1`) |
-| `apps/worker` | Procesa eventos vencidos desde PostgreSQL (`FOR UPDATE SKIP LOCKED` + leases) |
-| `packages/game-rules` | Reglas puras y deterministas (economía entera, combate BigInt + PRNG sembrado, viaje, mapa) |
-| `packages/game-config` | Ruleset versionado `mvp1-alpha.0` (propuesta de balance, no aprobado) |
-| `packages/contracts` | DTO zod y códigos de error compartidos |
-| `packages/db` | Esquema Drizzle con `world_id` en FKs compuestas, migraciones SQL, seed |
-| `packages/core` | Casos de uso transaccionales usados por API y worker |
-| `packages/asset-pipeline` | Contrato de manifest de assets e inspección automática de GLB |
-| `apps/battle-server` | **MVP 2.** Salas tácticas Colyseus 0.18 (ADR-0022): tick fijo 10 Hz, tickets de un uso, niebla de guerra, reconexión; sin acceso a la BD del mundo |
-| `packages/tactical-sim` | **MVP 2.** Simulación táctica pura y entera por formaciones, navegación 2.5D, doctrina, replay y tickets HMAC |
+| Ruta                      | Rol                                                                                                                                                |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/web`                | React 19 + PlayCanvas (`@playcanvas/react`): ciudad 3D, HUD, ejército, campaña, informes                                                           |
+| `apps/api`                | NestJS 12, monolito modular: auth, mundos, aldeas, mapa, informes (`/api/v1`)                                                                      |
+| `apps/worker`             | Procesa eventos vencidos desde PostgreSQL (`FOR UPDATE SKIP LOCKED` + leases)                                                                      |
+| `packages/game-rules`     | Reglas puras y deterministas (economía entera, combate BigInt + PRNG sembrado, viaje, mapa)                                                        |
+| `packages/game-config`    | Ruleset versionado `mvp1-alpha.0` (propuesta de balance, no aprobado)                                                                              |
+| `packages/contracts`      | DTO zod y códigos de error compartidos                                                                                                             |
+| `packages/db`             | Esquema Drizzle con `world_id` en FKs compuestas, migraciones SQL, seed                                                                            |
+| `packages/core`           | Casos de uso transaccionales usados por API y worker                                                                                               |
+| `packages/asset-pipeline` | Contrato de manifest de assets e inspección automática de GLB                                                                                      |
+| `apps/battle-server`      | **MVP 2.** Salas tácticas Colyseus 0.18 (ADR-0022): tick fijo 10 Hz, tickets de un uso, niebla de guerra, reconexión; sin acceso a la BD del mundo |
+| `packages/tactical-sim`   | **MVP 2.** Simulación táctica pura y entera por formaciones, navegación 2.5D, doctrina, replay y tickets HMAC                                      |
 
 ## Arranque local
 
@@ -115,7 +106,7 @@ pnpm dev:battle
 
 Abre http://localhost:5173, crea una cuenta y únete a **Prueba Rápida ×50** (mundo acelerado para probar) o a **Frontera I** (velocidad 1, protección de principiante de 72 h).
 
-**Entrenamiento táctico (MVP 2, Gate 1):** con el battle-server levantado (:2567; Vite lo expone bajo `/battle` con WebSocket), pulsa **⚔ Entrenamiento táctico** en la pantalla de mundos. Puedes luchar contra la doctrina (IA de reglas) o crear un duelo con código para otro jugador. El entrenamiento **nunca** modifica un mundo (ADR-0037). Variables en `.env.example` (`TACTICAL_*`, `BATTLE_*`); las claves de ejemplo son solo de desarrollo.
+**Entrenamiento táctico (MVP 2, Gate 1):** se conserva separado en `#/training` para QA y desarrollo, sin acceso desde el listado de mundos. Con el battle-server levantado, permite entrenar contra doctrina o mediante un código de duelo. No modifica el mundo persistente (ADR-0037); `WORLD_PVP` sigue cerrado.
 
 Controles de la arena: clic izquierdo selecciona (Mayús añade), clic derecho mueve o ataca, `H` mantener, `R` retirada, `F` apoyo, `1`/`2`/`3` línea/cuña/escaramuza, `WASD`/flechas desplazan la cámara, `Q`/`E` giran y la rueda acerca.
 

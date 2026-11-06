@@ -7,7 +7,15 @@ export * from './auth.js';
 export * from './commands.js';
 export * from './queries.js';
 export * from './worker.js';
-export { loadEconomy, loadTroops, loadBuildings } from './village-state.js';
+export { loadEconomy, loadTroops, loadBuildings, loadWorld } from './village-state.js';
 export * from './training.js';
 
 export * from './territory.js';
+export * from './fortifications.js';
+export * from './presentation.js';
+export * from './administration.js';
+export * from './access.js';
+export * from './atlas.js';
+export * from './development.js';
+export * from './culture.js';
+export * from './trade.js';

@@ -1,0 +1,29 @@
+[
+  {
+    "size": 1000,
+    "cells": 1000000,
+    "bytes": 1000000,
+    "compressedBytes": 217513,
+    "generationMs": 97,
+    "maxLoopDelayMs": 1,
+    "rssDeltaMiB": 4
+  },
+  {
+    "size": 2000,
+    "cells": 4000000,
+    "bytes": 4000000,
+    "compressedBytes": 871230,
+    "generationMs": 371,
+    "maxLoopDelayMs": 1,
+    "rssDeltaMiB": 11
+  },
+  {
+    "size": 5000,
+    "cells": 25000000,
+    "bytes": 25000000,
+    "compressedBytes": 5444856,
+    "generationMs": 2277,
+    "maxLoopDelayMs": 5,
+    "rssDeltaMiB": 78
+  }
+]

@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { WallsPanel, PRECINCT_NAME } from './WallsPanel.js';
+import { BattleReplay } from './BattleReplay.js';
 import type {
   BattleReportDetail,
   BattleReportSummary,
@@ -15,6 +17,7 @@ import {
   type ResourceBundle,
   type Ruleset,
   type UnitType,
+  type Deployment,
 } from '@reinos/game-config';
 import {
   buildingCost,
@@ -26,6 +29,10 @@ import {
   unitTrainingSeconds,
   validateConstruction,
   validateRecruitment,
+  distributeGarrison,
+  constructionLane,
+  coordinateBounds,
+  productionMilliPerHour,
   type BattleResult,
   type UnitStack,
 } from '@reinos/game-rules';
@@ -83,18 +90,34 @@ export function CityPanel({
   selectedPlot,
   onSelectPlot,
   onChanged,
+  previewType,
+  onPreview,
+  compact = false,
 }: {
   view: VillageView;
   now: number;
   selectedPlot: number | null;
   onSelectPlot: (p: number) => void;
   onChanged: () => void;
+  previewType?: BuildingType | null;
+  onPreview?: (type: BuildingType | null) => void;
+  compact?: boolean;
 }) {
   const r = getRuleset(view.rulesetVersion);
   const toast = useToast();
   const [busy, setBusy] = useState(false);
-  const plot = r.cityLayout.plots.find((p) => p.id === selectedPlot);
+  const [confirmDemolition, setConfirmDemolition] = useState(false);
+  useEffect(() => setConfirmDemolition(false), [selectedPlot]);
+  const plots = view.layout?.plots ?? r.cityLayout.plots;
+  const plot = plots.find((p) => p.id === selectedPlot);
   const existing = view.buildings.find((b) => b.plot === selectedPlot);
+  const queues = view.constructions ?? (view.construction ? [view.construction] : []);
+  const queueBusy = (type: BuildingType) =>
+    queues.some(
+      (o) =>
+        constructionLane(r, view.civilization, o.type) ===
+        constructionLane(r, view.civilization, type),
+    );
 
   const build = async (type: BuildingType) => {
     if (selectedPlot === null) return;
@@ -106,6 +129,7 @@ export function CityPanel({
       });
       toast('info', `Obra iniciada: nivel ${res.targetLevel}`);
       onChanged();
+      onPreview?.(null);
     } catch (e) {
       toast('error', describeError(e));
     } finally {
@@ -128,17 +152,18 @@ export function CityPanel({
 
   return (
     <div className="panel">
-      {view.construction ? (
-        <div className="queue-item">
-          <strong>
-            🏗 {buildingDef(r, view.construction.type).name} → nivel {view.construction.targetLevel}
-          </strong>
-          <Progress
-            start={view.construction.startedAt}
-            end={view.construction.completesAt}
-            now={now}
-          />
-        </div>
+      {!compact && view.walls && (
+        <WallsPanel view={view} now={now} onChanged={onChanged} onSelectPlot={onSelectPlot} />
+      )}
+      {queues.length ? (
+        queues.map((order) => (
+          <div className="queue-item" key={order.id}>
+            <strong>
+              🏗 {buildingDef(r, order.type).name} → nivel {order.targetLevel}
+            </strong>
+            <Progress start={order.startedAt} end={order.completesAt} now={now} />
+          </div>
+        ))
       ) : (
         <p className="muted">Sin construcción en curso. Selecciona una parcela en la vista 3D.</p>
       )}
@@ -152,6 +177,46 @@ export function CityPanel({
             <small> (parcela {plot.id})</small>
           </h3>
           {existing && <p className="muted">{buildingDef(r, existing.type).description}</p>}
+          {existing && r.development && !['city_hall', 'wonder'].includes(existing.type) && (
+            <details className="demolition-option">
+              <summary>Demoler un nivel</summary>
+              <p>
+                Reducir {buildingDef(r, existing.type).name} de {existing.level} a{' '}
+                {existing.level - 1}. {existing.level === 1 ? 'El solar quedará libre.' : ''} No
+                recuperas materiales.
+              </p>
+              {confirmDemolition ? (
+                <>
+                  <p className="warn">Confirma la demolición de este edificio.</p>
+                  <button
+                    disabled={busy}
+                    onClick={async () => {
+                      setBusy(true);
+                      try {
+                        await api.develop(view.worldId, view.id, {
+                          kind: 'DEMOLISH',
+                          plot: existing.plot,
+                          confirmed: true,
+                        });
+                        onChanged();
+                        setConfirmDemolition(false);
+                        toast('info', 'Demolición programada');
+                      } catch (e) {
+                        toast('error', describeError(e));
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                  >
+                    Confirmar demolición
+                  </button>
+                  <button onClick={() => setConfirmDemolition(false)}>Cancelar</button>
+                </>
+              ) : (
+                <button onClick={() => setConfirmDemolition(true)}>Revisar demolición</button>
+              )}
+            </details>
+          )}
           {plot.kind === 'coastal' && !view.coastal && (
             <p className="warn">Tu aldea no es costera: aquí no puede haber puerto.</p>
           )}
@@ -162,6 +227,8 @@ export function CityPanel({
               buildings: view.buildings,
               plot: plot.id,
               type,
+              layout: view.layout,
+              speed: view.speedMultiplier,
             });
             const level = (existing?.level ?? 0) + 1;
             const def = buildingDef(r, type);
@@ -175,6 +242,26 @@ export function CityPanel({
                   {!maxed && <span className="muted">⏱ {duration(secs)}</span>}
                 </div>
                 {!existing && <p className="muted small">{def.description}</p>}
+                {def.populationByLevel && (
+                  <p className="muted small">
+                    Habitantes: {def.populationByLevel[Math.min(level, def.maxLevel)]} · Consumo
+                    adicional de cereal:{' '}
+                    {(def.populationByLevel[Math.min(level, def.maxLevel)] ?? 0) -
+                      (def.populationByLevel[existing?.level ?? 0] ?? 0)}
+                    /h
+                  </p>
+                )}
+                {def.effect === 'production' && (
+                  <p className="muted small">
+                    Producción base:{' '}
+                    {Number(productionMilliPerHour(r, existing?.level ?? 0) / 1000n) *
+                      view.speedMultiplier}
+                    /h →{' '}
+                    {Number(productionMilliPerHour(r, Math.min(level, def.maxLevel)) / 1000n) *
+                      view.speedMultiplier}
+                    /h
+                  </p>
+                )}
                 {cost && <Cost cost={cost} view={view} now={now} />}
                 {!check.ok && (
                   <p className="warn small">
@@ -186,16 +273,32 @@ export function CityPanel({
                 <button
                   className="primary"
                   disabled={
-                    busy ||
-                    !check.ok ||
-                    !!view.construction ||
-                    !cost ||
-                    !canAffordNow(cost, view, now)
+                    busy || !check.ok || queueBusy(type) || !cost || !canAffordNow(cost, view, now)
                   }
-                  onClick={() => build(type)}
+                  onClick={() => {
+                    if (onPreview && !existing && previewType !== type) onPreview(type);
+                    else void build(type);
+                  }}
                 >
-                  {existing ? 'Mejorar' : 'Construir'}
+                  {existing
+                    ? 'Mejorar'
+                    : onPreview
+                      ? previewType === type
+                        ? 'Confirmar construcción'
+                        : 'Previsualizar'
+                      : 'Construir'}
                 </button>
+                {onPreview && !existing && previewType === type && (
+                  <>
+                    <p className="muted small">
+                      Vista previa en el solar {plot.id}. Orientación {plot.rotationY.toFixed(0)}° ·
+                      acceso por el camino existente.
+                    </p>
+                    <button className="ghost small" onClick={() => onPreview(null)}>
+                      Cancelar vista previa
+                    </button>
+                  </>
+                )}
               </div>
             );
           })}
@@ -204,36 +307,40 @@ export function CityPanel({
         <p className="muted">Ninguna parcela seleccionada.</p>
       )}
 
-      <h4>Edificios</h4>
-      <ul className="list">
-        {[...view.buildings]
-          .sort((a, b) => a.plot - b.plot)
-          .map((b) => (
-            <li key={b.plot}>
-              <button className="link" onClick={() => onSelectPlot(b.plot)}>
-                {buildingDef(r, b.type).name}
-              </button>
-              <span>nivel {b.level}</span>
-            </li>
-          ))}
-      </ul>
-      <h4>Parcelas libres</h4>
-      <ul className="list">
-        {r.cityLayout.plots
-          .filter(
-            (p) =>
-              !view.buildings.some((b) => b.plot === p.id) &&
-              (p.kind !== 'coastal' || view.coastal),
-          )
-          .map((p) => (
-            <li key={p.id}>
-              <button className="link" onClick={() => onSelectPlot(p.id)}>
-                {PLOT_KIND_LABEL[p.kind]} {p.id}
-              </button>
-              <span className="muted">libre</span>
-            </li>
-          ))}
-      </ul>
+      {!compact && (
+        <>
+          <h4>Edificios</h4>
+          <ul className="list">
+            {[...view.buildings]
+              .sort((a, b) => a.plot - b.plot)
+              .map((b) => (
+                <li key={b.plot}>
+                  <button className="link" onClick={() => onSelectPlot(b.plot)}>
+                    {buildingDef(r, b.type).name}
+                  </button>
+                  <span>nivel {b.level}</span>
+                </li>
+              ))}
+          </ul>
+          <h4>Parcelas libres</h4>
+          <ul className="list">
+            {plots
+              .filter(
+                (p) =>
+                  !view.buildings.some((b) => b.plot === p.id) &&
+                  (p.kind !== 'coastal' || view.coastal),
+              )
+              .map((p) => (
+                <li key={p.id}>
+                  <button className="link" onClick={() => onSelectPlot(p.id)}>
+                    {PLOT_KIND_LABEL[p.kind]} {p.id}
+                  </button>
+                  <span className="muted">libre</span>
+                </li>
+              ))}
+          </ul>
+        </>
+      )}
     </div>
   );
 }
@@ -273,6 +380,7 @@ export function ArmyPanel({
   const toast = useToast();
   const [qty, setQty] = useState<Record<string, number>>({});
   const [reserve, setReserve] = useState(view.doctrine.reservePercent);
+  const [deployment, setDeployment] = useState<Deployment>(view.doctrine.deployment ?? 'BALANCED');
   const [retreat, setRetreat] = useState<number | null>(view.doctrine.retreatThresholdPercent);
   const [busy, setBusy] = useState(false);
 
@@ -297,6 +405,7 @@ export function ArmyPanel({
     try {
       await api.doctrine(view.worldId, view.id, {
         reservePercent: reserve,
+        ...(r.fortifications ? { deployment } : {}),
         retreatThresholdPercent: retreat,
       });
       toast('info', 'Doctrina defensiva guardada');
@@ -338,6 +447,7 @@ export function ArmyPanel({
           civilization: view.civilization,
           buildings: view.buildings,
           unitType: u.type,
+          research: view.research,
         });
         const n = qty[u.type] ?? 0;
         const cost = unitCost(r, u.type, Math.max(1, n));
@@ -382,6 +492,40 @@ export function ArmyPanel({
         );
       })}
       <h3>Doctrina defensiva</h3>
+      {r.fortifications && (
+        <>
+          <label>
+            Distribución por recintos
+            <select
+              aria-label="Doctrina por recintos"
+              value={deployment}
+              onChange={(e) => setDeployment(e.target.value as Deployment)}
+            >
+              <option value="BALANCED">Defensa equilibrada</option>
+              <option value="OUTER">Defender producción</option>
+              <option value="CORE">Defender núcleo</option>
+            </select>
+          </label>
+          <div className="doctrine-distribution">
+            {distributeGarrison(
+              r,
+              [
+                ...view.troops,
+                ...(view.garrisons ?? []).map((g) => ({
+                  unitType: g.unitType,
+                  quantity: g.quantity,
+                })),
+              ],
+              deployment,
+            ).map((g) => (
+              <p key={g.precinct}>
+                <strong>{PRECINCT_NAME[g.precinct]}</strong> ·{' '}
+                {g.units.reduce((s, u) => s + u.quantity, 0)} tropas
+              </p>
+            ))}
+          </div>
+        </>
+      )}
       <p className="muted small">
         Se aplica automáticamente aunque estés desconectado (combate offline justo).
       </p>
@@ -484,7 +628,7 @@ function MapCanvas({
       }
     for (const v of region.villages) {
       const cx = (v.x - region.originX) * cell + cell / 2;
-      const cy = (v.y - region.originY) * cell + cell / 2;
+      const cy = (region.originY - v.y) * cell + cell / 2;
       g.beginPath();
       g.arc(cx, cy, cell * 0.55, 0, Math.PI * 2);
       g.fillStyle = v.isMine ? '#f2c94c' : v.civilization === 'sea_league' ? '#3d8fd1' : '#c0392b';
@@ -506,7 +650,7 @@ function MapCanvas({
         const x =
           Math.floor(((e.clientX - rect.left) / rect.width) * region.width) + region.originX;
         const y =
-          Math.floor(((e.clientY - rect.top) / rect.height) * region.height) + region.originY;
+          region.originY - Math.floor(((e.clientY - rect.top) / rect.height) * region.height);
         const hit = region.villages.find(
           (v) => Math.abs(v.x - x) <= 1 && Math.abs(v.y - y) <= 1 && !v.isMine,
         );
@@ -543,7 +687,13 @@ export function CampaignPanel({
   }, [view.worldId, center.x, center.y, toast]);
 
   const pan = (dx: number, dy: number) =>
-    setCenter((c) => ({ x: Math.max(0, c.x + dx), y: Math.max(0, c.y + dy) }));
+    setCenter((c) => {
+      const b = coordinateBounds(view.mapSize ?? 128);
+      return {
+        x: Math.max(b.min, Math.min(b.max, c.x + dx)),
+        y: Math.max(b.min, Math.min(b.max, c.y + dy)),
+      };
+    });
 
   const targetVillage = region?.villages.find((v) => v.id === target);
   const chosen: UnitStack[] = view.troops
@@ -554,7 +704,7 @@ export function CampaignPanel({
     return travelSeconds(
       distanceMilli(view, targetVillage),
       slowestSpeed(r, chosen),
-      view.speedMultiplier,
+      view.movementSpeedMultiplier ?? view.speedMultiplier,
     );
   }, [targetVillage, chosen, view, r]);
 
@@ -629,7 +779,16 @@ export function CampaignPanel({
           e.preventDefault();
           const x = Number(goto.x);
           const y = Number(goto.y);
-          if (Number.isInteger(x) && Number.isInteger(y) && x >= 0 && y >= 0) setCenter({ x, y });
+          const b = coordinateBounds(view.mapSize ?? 128);
+          if (
+            Number.isInteger(x) &&
+            Number.isInteger(y) &&
+            x >= b.min &&
+            y >= b.min &&
+            x <= b.max &&
+            y <= b.max
+          )
+            setCenter({ x, y });
         }}
       >
         <input
@@ -822,6 +981,52 @@ function ReportDetail({ report, onBack }: { report: BattleReportDetail; onBack: 
         </p>
       )}
       {res.trapsUsed ? <p className="muted small">Trampas utilizadas: {res.trapsUsed}</p> : null}
+      {res.precincts && (
+        <>
+          <h4>Desarrollo por recintos</h4>
+          <div className="table-scroll">
+            <table className="units">
+              <thead>
+                <tr>
+                  <th>Recinto</th>
+                  <th>Resultado</th>
+                  <th>Integridad</th>
+                  <th>Bajas atacantes</th>
+                  <th>Bajas defensoras</th>
+                </tr>
+              </thead>
+              <tbody>
+                {res.precincts.map((p) => (
+                  <tr key={p.precinct}>
+                    <td>{PRECINCT_NAME[p.precinct]}</td>
+                    <td>{p.advanced ? 'Superado' : 'Resiste'}</td>
+                    <td>
+                      {p.integrityBefore / 10}% → {p.integrityAfter / 10}%
+                    </td>
+                    <td>{p.attacker.lost.reduce((s, u) => s + u.quantity, 0)}</td>
+                    <td>
+                      {[...p.defender.killed, ...p.defender.wounded].reduce(
+                        (s, u) => s + u.quantity,
+                        0,
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {!!res.buildingDamage?.length && (
+            <ul>
+              {res.buildingDamage.map((d) => (
+                <li key={d.plot}>
+                  {buildingDef(r, d.type).name} · solar {d.plot}: nivel {d.fromLevel} → {d.toLevel}
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+      <BattleReplay report={report} />
       <h4>Atacante — {report.attackerName}</h4>
       <table className="units">
         <thead>
@@ -844,9 +1049,19 @@ function ReportDetail({ report, onBack }: { report: BattleReportDetail; onBack: 
         </tbody>
       </table>
       <h4>Defensor — {report.defenderName}</h4>
+      {report.defenderInformationLimited && (
+        <p className="muted small">
+          Solo se muestran tropas observadas en los recintos alcanzados. Las reservas y los
+          distritos no alcanzados permanecen ocultos.
+        </p>
+      )}
       {res.defender.retreated && <p className="warn">El defensor se retiró según su doctrina.</p>}
       {res.defender.present.length === 0 ? (
-        <p className="muted">Sin tropas defensoras.</p>
+        <p className="muted">
+          {report.defenderInformationLimited
+            ? 'Sin tropas defensoras observadas.'
+            : 'Sin tropas defensoras.'}
+        </p>
       ) : (
         <table className="units">
           <thead>
@@ -903,9 +1118,6 @@ function ReportDetail({ report, onBack }: { report: BattleReportDetail; onBack: 
           </li>
         ))}
       </ol>
-      <p className="muted small">
-        La repetición 3D (Gate 2) dramatizará estos hitos sin recalcular el resultado.
-      </p>
     </div>
   );
 }

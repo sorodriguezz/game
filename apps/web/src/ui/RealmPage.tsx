@@ -1,16 +1,19 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import type { AccountView, TerritoryView, VillageView } from '@reinos/contracts';
-import { civilizationDef, getRuleset, RESOURCE_KEYS } from '@reinos/game-config';
-import { WorldMap } from './WorldMap.js';
-import { ArmyPanel, CityPanel, ReportsPanel } from './panels.js';
-import { ResourceIcon, liveAmount, GraphicsSelect } from './VillagePage.js';
+import { civilizationDef, getRuleset, RESOURCE_KEYS, type BuildingType } from '@reinos/game-config';
+import { validateConstruction } from '@reinos/game-rules';
+import { WorldMap } from './WorldAtlasMap.js';
+import { ReportsPanel } from './panels.js';
+import { ResourceIcon, liveAmount } from './VillagePage.js';
 import { api, describeError } from '../api.js';
-import { duration, fmt } from '../format.js';
+import { fmt } from '../format.js';
 import { useToast } from '../App.js';
+import { PlotDialog } from './PlotDialog.js';
+import { RealmForces } from './RealmForces.js';
 const CityScene = lazy(() =>
   import('../scene/CityScene.js').then((m) => ({ default: m.CityScene })),
 );
-type Section = 'world' | 'city' | 'army' | 'reports' | 'alliance';
+type Section = 'world' | 'city' | 'reports' | 'alliance';
 const LABEL = { wood: 'Madera', stone: 'Barro', iron: 'Hierro', food: 'Cereal' };
 export function RealmPage({
   account,
@@ -30,11 +33,19 @@ export function RealmPage({
   onLogout: () => void;
 }) {
   const [section, setSection] = useState<Section>('world'),
-    [selectedPlot, setSelectedPlot] = useState<number | null>(0),
+    [selectedPlot, setSelectedPlot] = useState<number | null>(null),
     [territory, setTerritory] = useState<TerritoryView | null>(null),
     [allianceName, setAllianceName] = useState(''),
     [invite, setInvite] = useState(''),
     [busy, setBusy] = useState(false);
+  const [previewType, setPreviewType] = useState<BuildingType | null>(null);
+  const [mapFocus, setMapFocus] = useState<{ x: number; y: number } | undefined>();
+  const [villageSearch, setVillageSearch] = useState('');
+  const [tradeTarget, setTradeTarget] = useState<{ x: number; y: number } | undefined>();
+  const myVillages = territory?.villages ?? [
+    { id: view.id, name: view.name, x: view.x, y: view.y, isCapital: !!view.isCapital },
+  ];
+  const activeIndex = myVillages.findIndex((v) => v.id === view.id);
   const r = getRuleset(view.rulesetVersion),
     civ = civilizationDef(r, view.civilization),
     toast = useToast();
@@ -72,6 +83,8 @@ export function RealmPage({
   };
   return (
     <div className="realm-shell">
+      <RealmResources view={view} now={now} />
+      <RealmForces view={view} now={now} onMap={() => setSection('world')} />
       <header className="realm-topbar">
         <button className="realm-logo" onClick={onBack}>
           <span>♜</span>
@@ -80,12 +93,14 @@ export function RealmPage({
           </div>
         </button>
         <div className="realm-season">
-          <i /> REINOS TERRESTRES <span>×{view.speedMultiplier}</span>
+          <i /> {view.worldName ?? 'TIERRAS DE LA FRONTERA'} <span>×{view.speedMultiplier}</span>
         </div>
         <div className="realm-account">
-          <span className="account-avatar">{account.displayName.slice(0, 1)}</span>
+          <span className="account-avatar">
+            {(view.characterName ?? account.displayName).slice(0, 1)}
+          </span>
           <div>
-            {account.displayName}
+            {view.characterName ?? account.displayName}
             <small>{civ.name}</small>
           </div>
           <button className="ghost small" onClick={onLogout}>
@@ -97,29 +112,50 @@ export function RealmPage({
         <div className="domain-label">
           TU DOMINIO <span>{territory?.villages.length ?? 1} aldeas</span>
         </div>
+        {myVillages.length > 5 && (
+          <input
+            className="village-search"
+            aria-label="Buscar aldea"
+            placeholder="Buscar aldea o coordenadas"
+            value={villageSearch}
+            onChange={(e) => setVillageSearch(e.target.value)}
+          />
+        )}
         <div className="realm-village-list">
-          {(
-            territory?.villages ?? [
-              { id: view.id, name: view.name, x: view.x, y: view.y, isCapital: !!view.isCapital },
-            ]
-          ).map((v) => (
-            <button
-              key={v.id}
-              className={`realm-village ${v.id === view.id ? 'active' : ''}`}
-              onClick={() => {
-                if (v.id !== view.id) onOpenVillage(v.id);
-              }}
-            >
-              <span className="village-emblem">♜</span>
-              <span>
-                <strong>{v.name}</strong>
-                <small>
-                  {v.isCapital ? 'Capital' : 'Aldea'} · ({v.x}|{v.y})
-                </small>
-              </span>
-              {v.id === view.id && <i />}
-            </button>
-          ))}
+          {myVillages
+            .filter((v) =>
+              `${v.name} ${v.x}|${v.y}`.toLowerCase().includes(villageSearch.toLowerCase()),
+            )
+            .map((v) => (
+              <div key={v.id} className={`realm-village ${v.id === view.id ? 'active' : ''}`}>
+                <button
+                  className="village-open"
+                  onClick={() => {
+                    if (v.id !== view.id) onOpenVillage(v.id);
+                  }}
+                  aria-current={v.id === view.id ? 'page' : undefined}
+                >
+                  <span className="village-emblem">♜</span>
+                  <span>
+                    <strong>{v.name}</strong>
+                    <small>
+                      {v.isCapital ? 'Capital' : 'Aldea'} · ({v.x}|{v.y})
+                    </small>
+                  </span>
+                </button>
+                <button
+                  className="village-locate"
+                  aria-label={`Localizar ${v.name} en el mapa`}
+                  title="Ver en mapa"
+                  onClick={() => {
+                    setMapFocus({ x: v.x, y: v.y });
+                    setSection('world');
+                  }}
+                >
+                  ⌖
+                </button>
+              </div>
+            ))}
         </div>
         <div className="realm-nav-label">ADMINISTRACIÓN</div>
         <nav aria-label="Administración de la aldea">
@@ -127,7 +163,6 @@ export function RealmPage({
             [
               ['world', '⌖', 'Mapa del mundo'],
               ['city', '♜', 'Mi aldea 3D'],
-              ['army', '⚔', 'Ejército'],
               ['reports', '▤', 'Informes'],
               ['alliance', '♧', 'Alianza'],
             ] as const
@@ -159,73 +194,73 @@ export function RealmPage({
         </div>
       </aside>
       <div className="realm-workspace">
-        <div className="realm-resourcebar">
-          {RESOURCE_KEYS.map((k) => (
-            <div
-              key={k}
-              className={`realm-resource ${k}`}
-              title={`Capacidad: ${fmt(Math.floor(view.resources.capacityMilli / 1000))}`}
+        <div className="village-switcher">
+          <button
+            disabled={myVillages.length < 2}
+            aria-label="Aldea anterior"
+            onClick={() =>
+              onOpenVillage(
+                myVillages[(activeIndex - 1 + myVillages.length) % myVillages.length]!.id,
+              )
+            }
+          >
+            ‹
+          </button>
+          <label>
+            Aldea
+            <select
+              aria-label="Seleccionar aldea"
+              value={view.id}
+              onChange={(e) => onOpenVillage(e.target.value)}
             >
-              <span className="resource-medallion">
-                <ResourceIcon k={k} />
-              </span>
-              <div>
-                <small>{LABEL[k]}</small>
-                <strong>{fmt(liveAmount(view, k, now))}</strong>
-              </div>
-              <em>
-                {view.resources.ratesMilliPerHour[k] >= 0 ? '+' : ''}
-                {fmt(Math.floor(view.resources.ratesMilliPerHour[k] / 1000))}
-                <small>/h</small>
-              </em>
-            </div>
-          ))}
-          <div className="realm-population">
-            <span>♙</span>
-            <div>
-              <small>Población militar</small>
-              <strong>
-                {view.population.used}
-                <em> / {view.population.capacity}</em>
-              </strong>
-            </div>
-          </div>
+              {myVillages.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.name} ({v.x}|{v.y}){v.isCapital ? ' · Capital' : ''}
+                </option>
+              ))}
+            </select>
+          </label>
+          <span>
+            {activeIndex + 1} / {myVillages.length}
+          </span>
+          <button
+            disabled={myVillages.length < 2}
+            aria-label="Aldea siguiente"
+            onClick={() => onOpenVillage(myVillages[(activeIndex + 1) % myVillages.length]!.id)}
+          >
+            ›
+          </button>
+          {view.worldStatus && !['OPEN', 'WONDER_ERA'].includes(view.worldStatus) && (
+            <strong>
+              {view.worldStatus === 'PAUSED' ? 'Mundo pausado' : 'Temporada finalizada'}
+            </strong>
+          )}
         </div>
         {section === 'world' && (
           <WorldMap
+            focus={mapFocus}
             key={view.id}
             view={view}
             now={now}
             onRefresh={refresh}
             onOpenVillage={onOpenVillage}
+            onTradeTo={
+              r.trade
+                ? (point) => {
+                    const market = view.buildings.find((b) => b.type === 'market');
+                    if (market) {
+                      setTradeTarget(point);
+                      setSelectedPlot(market.plot);
+                      setSection('city');
+                    }
+                  }
+                : undefined
+            }
           />
         )}
         {section === 'city' && (
           <div className="realm-city-layout">
             <div className="realm-city">
-              <div className="realm-section-heading">
-                <div>
-                  <span className="eyebrow">TRES RECINTOS, UN REINO</span>
-                  <h1>{view.name}</h1>
-                  <p>Campos exteriores · distrito productivo · ciudadela</p>
-                </div>
-                <span className="land-chip">
-                  ({view.x}|{view.y})
-                </span>
-                <GraphicsSelect />
-              </div>
-              <div className="district-tabs">
-                {[
-                  ['Campos', 22],
-                  ['Distrito', 3],
-                  ['Ciudadela', 0],
-                  ['Murallas', 19],
-                ].map(([label, plot]) => (
-                  <button key={label} onClick={() => setSelectedPlot(Number(plot))}>
-                    {label}
-                  </button>
-                ))}
-              </div>
               <div className="realm-city-canvas">
                 <Suspense fallback={<div className="splash">Levantando las murallas…</div>}>
                   <CityScene
@@ -234,8 +269,59 @@ export function RealmPage({
                     coastal={false}
                     buildings={view.buildings}
                     construction={view.construction}
+                    constructions={view.constructions}
+                    layout={view.layout}
+                    walls={view.walls}
+                    previewType={
+                      previewType &&
+                      selectedPlot !== null &&
+                      validateConstruction(r, {
+                        civilization: view.civilization,
+                        coastal: false,
+                        buildings: view.buildings,
+                        plot: selectedPlot,
+                        type: previewType,
+                        layout: view.layout,
+                        speed: view.speedMultiplier,
+                      }).ok
+                        ? previewType
+                        : null
+                    }
+                    highlightedPlots={
+                      previewType
+                        ? (view.layout?.plots ?? [])
+                            .filter(
+                              (p) =>
+                                validateConstruction(r, {
+                                  civilization: view.civilization,
+                                  coastal: false,
+                                  buildings: view.buildings,
+                                  plot: p.id,
+                                  type: previewType,
+                                  layout: view.layout,
+                                  speed: view.speedMultiplier,
+                                }).ok,
+                            )
+                            .map((p) => p.id)
+                        : []
+                    }
                     selectedPlot={selectedPlot}
-                    onSelectPlot={setSelectedPlot}
+                    onSelectPlot={(p) => {
+                      setSelectedPlot(p);
+                      if (
+                        previewType &&
+                        !validateConstruction(r, {
+                          civilization: view.civilization,
+                          coastal: false,
+                          buildings: view.buildings,
+                          plot: p,
+                          type: previewType,
+                          layout: view.layout,
+                          speed: view.speedMultiplier,
+                        }).ok
+                      )
+                        setPreviewType(null);
+                    }}
                   />
                 </Suspense>
                 <div className="city-controls-hint">
@@ -244,91 +330,34 @@ export function RealmPage({
               </div>
               <div className="city-ring-legend">
                 <span>
-                  <b>01</b> Campos de madera, barro, hierro y cereal
+                  <b>III</b> Campos de madera, barro, hierro y cereal
                 </span>
                 <span>
-                  <b>02</b> Producción y ejército
+                  <b>II</b> Producción y ejército
                 </span>
                 <span>
-                  <b>03</b> Castillo y gobierno
+                  <b>I</b> Castillo y gobierno
                 </span>
               </div>
             </div>
-            <aside className="territory-detail city-building-panel">
-              <CityPanel
-                view={view}
-                now={now}
-                selectedPlot={selectedPlot}
-                onSelectPlot={setSelectedPlot}
-                onChanged={refresh}
-              />
-            </aside>
           </div>
         )}
-        {section === 'army' && (
-          <div className="realm-content-page">
-            <div className="realm-section-heading">
-              <div>
-                <span className="eyebrow">LA FUERZA DE TU REINO</span>
-                <h1>Ejército y guarniciones</h1>
-                <p>Recluta, distribuye y reúne tropas entre tus aldeas.</p>
-              </div>
-              <button onClick={() => setSection('world')}>Preparar expedición ↗</button>
-            </div>
-            <div className="army-page-grid">
-              <ArmyPanel view={view} now={now} onChanged={refresh} />
-              <aside className="territory-card">
-                <span className="eyebrow">BAJO TU MANDO</span>
-                <h2>Refuerzos desplegados</h2>
-                {!territory?.reinforcements.length && (
-                  <p className="muted">No tienes tropas defendiendo aldeas aliadas.</p>
-                )}
-                {Array.from(
-                  new Set(
-                    territory?.reinforcements.map((g) => `${g.villageId}:${g.originVillageId}`),
-                  ),
-                ).map((key) => {
-                  const troops = territory!.reinforcements.filter(
-                      (g) => `${g.villageId}:${g.originVillageId}` === key,
-                    ),
-                    first = troops[0]!;
-                  return (
-                    <div className="reinforcement-card" key={key}>
-                      <h4>{first.villageName}</h4>
-                      {troops.map((t) => (
-                        <p key={t.unitType}>
-                          {r.units.find((u) => u.type === t.unitType)?.name}{' '}
-                          <strong>{t.quantity}</strong>
-                        </p>
-                      ))}
-                      <button
-                        onClick={async () => {
-                          try {
-                            await api.recall(view.worldId, first.villageId, first.originVillageId);
-                            refresh();
-                            toast('info', 'Tus refuerzos están regresando.');
-                          } catch (e) {
-                            toast('error', describeError(e));
-                          }
-                        }}
-                      >
-                        Retirar refuerzos
-                      </button>
-                    </div>
-                  );
-                })}
-                <h3>Aliados en esta aldea</h3>
-                {!view.garrisons?.length && <p className="muted small">Sin refuerzos aliados.</p>}
-                {view.garrisons
-                  ?.filter((g) => g.quantity > 0)
-                  .map((g) => (
-                    <p key={`${g.originVillageId}:${g.unitType}`}>
-                      {r.units.find((u) => u.type === g.unitType)?.name} · {g.quantity}
-                    </p>
-                  ))}
-              </aside>
-            </div>
-          </div>
+        {section === 'city' && selectedPlot !== null && (
+          <PlotDialog
+            key={view.id}
+            view={view}
+            now={now}
+            plot={selectedPlot}
+            onSelect={setSelectedPlot}
+            onClose={() => {
+              setSelectedPlot(null);
+              setPreviewType(null);
+            }}
+            onChanged={refresh}
+            previewType={previewType}
+            onPreview={setPreviewType}
+            tradeTarget={tradeTarget}
+          />
         )}
         {section === 'reports' && (
           <div className="realm-content-page">
@@ -427,16 +456,58 @@ export function RealmPage({
           </div>
         )}
       </div>
-      {view.construction && (
-        <div className="realm-global-queue">
-          <span>⚒</span>
-          <strong>
-            {r.buildings.find((b) => b.type === view.construction!.type)?.name} · nivel{' '}
-            {view.construction.targetLevel}
-          </strong>
-          <time>{duration((new Date(view.construction.completesAt).getTime() - now) / 1000)}</time>
+    </div>
+  );
+}
+
+function RealmResources({ view, now }: { view: VillageView; now: number }) {
+  return (
+    <div className="realm-resourcebar">
+      {RESOURCE_KEYS.map((k) => (
+        <div
+          key={k}
+          className={`realm-resource ${k}`}
+          title={`Capacidad: ${fmt(Math.floor((k === 'food' ? (view.resources.foodCapacityMilli ?? view.resources.capacityMilli) : view.resources.capacityMilli) / 1000))}`}
+        >
+          <span className="resource-medallion">
+            <ResourceIcon k={k} />
+          </span>
+          <div>
+            <small>{LABEL[k]}</small>
+            <strong>{fmt(liveAmount(view, k, now))}</strong>
+          </div>
+          <em>
+            {view.resources.ratesMilliPerHour[k] >= 0 ? '+' : ''}
+            {fmt(Math.floor(view.resources.ratesMilliPerHour[k] / 1000))}
+            <small>/h</small>
+          </em>
         </div>
-      )}
+      ))}
+      <div
+        className="realm-population"
+        title={
+          view.population.inhabitants === undefined
+            ? undefined
+            : `Cereal bruto: ${view.population.grossCropPerHour}/h · Habitantes: −${view.population.buildingConsumption}/h · Tropas: −${view.population.troopConsumption}/h · Cereal libre: ${view.population.freeCropPerHour}/h`
+        }
+      >
+        <span>♙</span>
+        <div>
+          <small>
+            {view.population.inhabitants === undefined
+              ? 'Población militar'
+              : 'Habitantes · Tropas'}
+          </small>
+          <strong>
+            {view.population.inhabitants ?? view.population.used}
+            <em>
+              {view.population.inhabitants === undefined
+                ? ` / ${view.population.capacity}`
+                : ` · ${view.population.used}`}
+            </em>
+          </strong>
+        </div>
+      </div>
     </div>
   );
 }

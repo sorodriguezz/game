@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json",
     "e2e": "node e2e/vertical-slice.e2e.mjs",
-    "e2e:tactical": "node e2e/tactical-training.e2e.mjs"
+    "e2e:tactical": "node e2e/tactical-training.e2e.mjs",
+    "e2e:organic": "node e2e/season-experience.e2e.mjs && node e2e/wall-materials.e2e.mjs",
+    "e2e:season": "node e2e/season-experience.e2e.mjs",
+    "e2e:walls": "node e2e/wall-materials.e2e.mjs"
   },
   "dependencies": {
     "@colyseus/schema": "5.0.43",

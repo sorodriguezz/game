@@ -1,0 +1,14 @@
+ WARN  Unsupported engine: wanted: {"node":">=22.23.2"} (current: {"node":"v22.14.0","pnpm":"10.28.0"})
+
+> reinos-de-la-frontera@0.1.0 test C:\Users\sebas\Desktop\game
+> vitest run
+
+
+ RUN  v5.1.0 C:/Users/sebas/Desktop/game
+
+
+ Test Files  27 passed (27)
+      Tests  186 passed (186)
+   Start at  01:12:08
+   Duration  115.74s (tests 92%, import 8%)
+

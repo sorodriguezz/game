@@ -1,0 +1,29 @@
+ WARN  Unsupported engine: wanted: {"node":">=22.23.2"} (current: {"node":"v22.14.0","pnpm":"10.28.0"})
+
+> reinos-de-la-frontera@0.1.0 typecheck C:\Users\sebas\Desktop\game
+> pnpm -r --parallel typecheck
+
+.                                        |  WARN  Unsupported engine: wanted: {"node":">=22.23.2"} (current: {"node":"v22.14.0","pnpm":"10.28.0"})
+Scope: 11 of 12 workspace projects
+apps/battle-server typecheck$ tsc -p tsconfig.json
+apps/api typecheck$ tsc -p tsconfig.json
+apps/web typecheck$ tsc -p tsconfig.json
+apps/worker typecheck$ tsc -p tsconfig.json
+packages/asset-pipeline typecheck$ tsc -p tsconfig.json
+packages/db typecheck$ tsc -p tsconfig.json
+packages/contracts typecheck$ tsc -p tsconfig.json
+packages/core typecheck$ tsc -p tsconfig.json
+packages/game-config typecheck$ tsc -p tsconfig.json
+packages/game-rules typecheck$ tsc -p tsconfig.json
+packages/tactical-sim typecheck$ tsc -p tsconfig.json
+packages/asset-pipeline typecheck: Done
+packages/game-config typecheck: Done
+packages/contracts typecheck: Done
+packages/tactical-sim typecheck: Done
+packages/game-rules typecheck: Done
+apps/battle-server typecheck: Done
+packages/db typecheck: Done
+apps/worker typecheck: Done
+packages/core typecheck: Done
+apps/api typecheck: Done
+apps/web typecheck: Done

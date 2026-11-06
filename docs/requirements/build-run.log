@@ -1,0 +1,46 @@
+ WARN  Unsupported engine: wanted: {"node":">=22.23.2"} (current: {"node":"v22.14.0","pnpm":"10.28.0"})
+
+> reinos-de-la-frontera@0.1.0 build C:\Users\sebas\Desktop\game
+> pnpm -r build
+
+.                                        |  WARN  Unsupported engine: wanted: {"node":">=22.23.2"} (current: {"node":"v22.14.0","pnpm":"10.28.0"})
+Scope: 11 of 12 workspace projects
+apps/battle-server build$ node ../../scripts/bundle.mjs src/main.ts dist/main.js
+apps/web build$ tsc -p tsconfig.json && vite build
+apps/battle-server build: bundle → dist/main.js
+apps/battle-server build: Done
+apps/web build: vite v8.3.5 building client environment for production...
+apps/web build: transforming...
+apps/web build: ✓ 1536 modules transformed.
+apps/web build: rendering chunks...
+apps/web build: computing gzip size...
+apps/web build: dist/index.html                                                0.61 kB │ gzip:   0.36 kB
+apps/web build: dist/assets/cinzel-latin-ext-700-normal-C24KFjuG.woff2         8.25 kB
+apps/web build: dist/assets/cinzel-latin-ext-600-normal-BEFdM_VE.woff2         8.35 kB
+apps/web build: dist/assets/cinzel-latin-ext-600-normal-BY9Mq9iK.woff          9.78 kB
+apps/web build: dist/assets/cinzel-latin-ext-700-normal-CORa-yIv.woff          9.81 kB
+apps/web build: dist/assets/inter-vietnamese-wght-normal-CBcvBZtf.woff2       10.25 kB
+apps/web build: dist/assets/inter-greek-ext-wght-normal-DlzME5K_.woff2        11.23 kB
+apps/web build: dist/assets/cinzel-latin-700-normal-Dkw14w9r.woff2            15.18 kB
+apps/web build: dist/assets/cinzel-latin-600-normal-Dd5YO2UX.woff2            15.20 kB
+apps/web build: dist/assets/cinzel-latin-600-normal-CH_LB4su.woff             17.50 kB
+apps/web build: dist/assets/cinzel-latin-700-normal-C-gK7hA8.woff             17.52 kB
+apps/web build: dist/assets/inter-cyrillic-wght-normal-DqGufNeO.woff2         18.74 kB
+apps/web build: dist/assets/inter-greek-wght-normal-CkhJZR-_.woff2            18.99 kB
+apps/web build: dist/assets/inter-cyrillic-ext-wght-normal-BOeWTOD4.woff2     25.96 kB
+apps/web build: dist/assets/inter-latin-wght-normal-Dx4kXJAl.woff2            48.25 kB
+apps/web build: dist/assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2        85.06 kB
+apps/web build: dist/assets/index-DY67OYNc.css                                50.40 kB │ gzip:  12.46 kB
+apps/web build: dist/assets/react-C9fjN-h7.js                                  0.16 kB │ gzip:   0.16 kB │ map:     0.34 kB
+apps/web build: dist/assets/ArenaScene-Bu7-T31W.js                            10.45 kB │ gzip:   4.30 kB │ map:    41.33 kB
+apps/web build: dist/assets/CityScene-C0_M_ii9.js                            196.19 kB │ gzip:  49.03 kB │ map:   499.51 kB
+apps/web build: dist/assets/index-WFJcYaZ_.js                                674.25 kB │ gzip: 205.96 kB │ map: 3,276.56 kB
+apps/web build: dist/assets/kit-BIBMIlIe.js                                2,122.38 kB │ gzip: 547.68 kB │ map: 5,681.16 kB
+apps/web build: ✓ built in 1.05s
+apps/web build: Done
+apps/api build$ node ../../scripts/bundle.mjs src/main.ts dist/main.js
+apps/worker build$ node ../../scripts/bundle.mjs src/main.ts dist/main.js
+apps/api build: bundle → dist/main.js
+apps/worker build: bundle → dist/main.js
+apps/api build: Done
+apps/worker build: Done

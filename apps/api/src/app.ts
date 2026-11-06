@@ -1,4 +1,8 @@
 import { TerritoryController } from './territory.controllers.js';
+import { AdministrationController, ComplaintsController } from './administration.controllers.js';
+import { DevelopmentController } from './development.controllers.js';
+import { CultureController } from './culture.controllers.js';
+import { TradeController } from './trade.controllers.js';
 import 'reflect-metadata';
 import { Module, type INestApplication } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, NestFactory, Reflector } from '@nestjs/core';
@@ -18,6 +22,7 @@ import {
   GameCommands,
   GameQueries,
   TrainingService,
+  FortificationService,
   type CoreContext,
 } from '@reinos/core';
 import {
@@ -63,6 +68,11 @@ export async function createApp(
     controllers: [
       HealthController,
       TerritoryController,
+      AdministrationController,
+      ComplaintsController,
+      DevelopmentController,
+      CultureController,
+      TradeController,
       AuthController,
       WorldsController,
       VillagesController,
@@ -77,6 +87,7 @@ export async function createApp(
       { provide: AUTH_SERVICE, useValue: new AuthService(ctx) },
       { provide: GAME_COMMANDS, useValue: new GameCommands(ctx) },
       { provide: GAME_QUERIES, useValue: new GameQueries(ctx) },
+      { provide: FortificationService, useValue: new FortificationService(ctx) },
       {
         provide: TRAINING_SERVICE,
         useValue:

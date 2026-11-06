@@ -1,4 +1,6 @@
 import { EVENT_HANDLERS } from './handlers.js';
+import { refreshCulture, assertExpansion } from './culture.js';
+import { initializeFortifications } from './fortification-state.js';
 import { randomBytes } from 'node:crypto';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import {
@@ -45,6 +47,7 @@ import { prepareVillage, type Actor } from './commands.js';
 import { addSeconds, iso, newId } from './util.js';
 import {
   loadBuildings,
+  rulesetForVillage,
   loadEconomy,
   loadWorld,
   lockVillages,
@@ -53,6 +56,7 @@ import {
   rulesetOf,
   saveEconomy,
   stateColumns,
+  militarySpeedOf,
   withRecomputedRates,
   writeLedger,
   type WorldRow,
@@ -95,6 +99,17 @@ export async function initializeVillage(
     coastal: false,
     isCapital,
   });
+  const [player] = await tx
+    .select()
+    .from(worldPlayers)
+    .where(and(eq(worldPlayers.worldId, world.id), eq(worldPlayers.accountId, owner)));
+  await initializeFortifications(
+    tx,
+    r,
+    world,
+    { id, x, y },
+    player!.civilization as import('@reinos/game-config').CivilizationId,
+  );
   await tx.insert(villageBuildings).values(
     r.startingBuildings.map((b) => ({
       worldId: world.id,
@@ -111,11 +126,13 @@ export async function initializeVillage(
     ...stateColumns({
       amounts: bundleToMilli(r.economy.startingResources),
       remainders: { wood: 0n, stone: 0n, iron: 0n, food: 0n },
-      rates: computeRates(r, buildings, 0, world.speedMultiplier),
+      rates: computeRates(await rulesetForVillage(tx, r, id), buildings, 0, world.speedMultiplier),
       capacity: capacityMilli(r, levelOf(buildings, 'warehouse')),
+      ...(r.economy.cropPopulation ? { foodCapacity: capacityMilli(r, 0) } : {}),
       lastSettledAt: at.getTime(),
     }),
   });
+  await refreshCulture(tx, world, id, at);
   return id;
 }
 export class TerritoryService {
@@ -235,7 +252,7 @@ export class TerritoryService {
         { accountId: actor.accountId, worldId, command: `found:${originId}`, key: idem },
         req,
         async () => {
-          await tx.select().from(worlds).where(eq(worlds.id, worldId)).for('update');
+          await tx.select().from(worlds).where(eq(worlds.id, worldId)).for('no key update');
           const { world, village, state, now } = await prepareVillage(
             tx,
             this.ctx,
@@ -250,6 +267,8 @@ export class TerritoryService {
           if (
             req.x >= world.mapSize ||
             req.y >= world.mapSize ||
+            (r.economy.cropPopulation &&
+              terrainAt(world.mapSeed, world.mapSize, req.x, req.y, 'LAND') !== 'PLAIN') ||
             !isSettleable(terrainAt(world.mapSeed, world.mapSize, req.x, req.y, 'LAND'))
           )
             throw err.unprocessable('TARGET_INVALID', 'Selecciona una casilla de tierra habitable');
@@ -282,6 +301,7 @@ export class TerritoryService {
               `Necesitas centro urbano ${t.foundingHallLevel} y plaza de reuniones`,
             );
           const cost = bundleToMilli(t.foundingCost);
+          await assertExpansion(tx, world, actor.accountId, originId, now);
           if (!canAfford(state, cost))
             throw err.conflict('INSUFFICIENT_RESOURCES', 'Recursos insuficientes');
           await removeFromStacks(tx, originId, [
@@ -290,7 +310,7 @@ export class TerritoryService {
           const id = newId(),
             arrivesAt = addSeconds(
               now,
-              travelSeconds(distanceMilli(village, req), 5, world.speedMultiplier),
+              travelSeconds(distanceMilli(village, req), 5, militarySpeedOf(world)),
             );
           await tx.insert(settlementOrders).values({
             id,
@@ -340,7 +360,7 @@ export class TerritoryService {
         { accountId: actor.accountId, worldId, command: 'alliance', key: idem },
         req,
         async () => {
-          await tx.select().from(worlds).where(eq(worlds.id, worldId)).for('update');
+          await tx.select().from(worlds).where(eq(worlds.id, worldId)).for('no key update');
           const [existing] = await tx
             .select()
             .from(allianceMembers)
@@ -407,7 +427,7 @@ export class TerritoryService {
           },
           { targetId, originId },
           async () => {
-            await tx.select().from(worlds).where(eq(worlds.id, worldId)).for('update');
+            await tx.select().from(worlds).where(eq(worlds.id, worldId)).for('no key update');
             const locked = await lockVillages(tx, worldId, [targetId, originId]);
             await processEventsUpTo(tx, this.ctx, EVENT_HANDLERS, new Set([targetId, originId]), {
               dueAt: this.ctx.clock.now(),
@@ -461,7 +481,7 @@ export class TerritoryService {
             );
             const returnsAt = addSeconds(
                 now,
-                travelSeconds(distanceMilli(origin, target), speed, world.speedMultiplier),
+                travelSeconds(distanceMilli(origin, target), speed, militarySpeedOf(world)),
               ),
               id = newId();
             await tx.insert(armyMovements).values({

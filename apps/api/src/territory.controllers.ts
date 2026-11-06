@@ -1,18 +1,28 @@
 import { Body, Controller, Get, Headers, Inject, Param, Post } from '@nestjs/common';
 import { IDEMPOTENCY_HEADER, type FoundVillageRequest } from '@reinos/contracts';
-import { TerritoryService, type CoreContext, type ResolvedSession } from '@reinos/core';
+import {
+  TerritoryService,
+  type CoreContext,
+  type ResolvedSession,
+  publicTerritory,
+  indexedFoundRequest,
+} from '@reinos/core';
 import { CurrentSession, uuidParam } from './http.js';
 import { CORE_CONTEXT } from './tokens.js';
 @Controller('worlds/:worldId')
 export class TerritoryController {
   private readonly territory: TerritoryService;
-  constructor(@Inject(CORE_CONTEXT) ctx: CoreContext) {
+  constructor(@Inject(CORE_CONTEXT) private readonly ctx: CoreContext) {
     this.territory = new TerritoryService(ctx);
   }
   @Get('territory') view(@CurrentSession() s: ResolvedSession, @Param('worldId') world: string) {
-    return this.territory.view(s.account.id, uuidParam(world, 'WORLD_NOT_FOUND'));
+    return publicTerritory(
+      this.ctx.db,
+      world,
+      this.territory.view(s.account.id, uuidParam(world, 'WORLD_NOT_FOUND')),
+    );
   }
-  @Post('villages/:villageId/settlements') found(
+  @Post('villages/:villageId/settlements') async found(
     @CurrentSession() s: ResolvedSession,
     @Param('worldId') world: string,
     @Param('villageId') village: string,
@@ -23,7 +33,7 @@ export class TerritoryController {
       { accountId: s.account.id },
       uuidParam(world, 'WORLD_NOT_FOUND'),
       uuidParam(village, 'VILLAGE_NOT_FOUND'),
-      body,
+      await indexedFoundRequest(this.ctx.db, world, body),
       key,
     );
   }

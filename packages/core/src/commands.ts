@@ -1,4 +1,7 @@
 import { areAllies, hostile, scheduleInterceptions } from './territory.js';
+import { initializeFortifications } from './fortification-state.js';
+import { refreshCulture, assertExpansion } from './culture.js';
+import { requirePlayer } from './access.js';
 import { and, desc, eq, sql } from 'drizzle-orm';
 import {
   armyMovements,
@@ -9,7 +12,12 @@ import {
   villages,
   worldPlayers,
   worlds,
+  villageLayouts,
+  wallRepairOrders,
+  developmentOrders,
+  villageResearch,
   type Tx,
+  accounts,
 } from '@reinos/db';
 import {
   buildRequestSchema,
@@ -36,6 +44,8 @@ import {
   canAfford,
   capacityMilli,
   computeRates,
+  createPrng,
+  constructionLane,
   debit,
   distanceMilli,
   isCoastal,
@@ -54,6 +64,7 @@ import {
   unitTrainingSeconds,
   validateConstruction,
   validateRecruitment,
+  oasisEligibility,
   type ResourceState,
 } from '@reinos/game-rules';
 import { DomainError, err, type CoreContext } from './context.js';
@@ -76,6 +87,8 @@ import {
   rulesetOf,
   saveEconomy,
   stateColumns,
+  militarySpeedOf,
+  rulesetForVillage,
   writeLedger,
   type VillageRow,
   type WorldRow,
@@ -99,10 +112,12 @@ export async function prepareVillage(
   worldId: string,
   villageId: string,
 ): Promise<{ world: WorldRow; village: VillageRow; state: ResourceState; now: Date }> {
+  await requirePlayer(tx, actor.accountId, worldId, ctx.clock.now());
+  await tx.select().from(worlds).where(eq(worlds.id, worldId)).for('no key update');
   const world = await loadWorld(tx, worldId);
   assertWorldActive(world);
-  if (rulesetOf(world).territory)
-    await tx.select().from(worlds).where(eq(worlds.id, worldId)).for('update');
+  if (world.endsAt && world.endsAt <= ctx.clock.now())
+    throw err.conflict('WORLD_NOT_OPEN', 'La temporada ha terminado');
   const village = await lockOwnedVillage(tx, worldId, villageId, actor.accountId);
   const now = ctx.clock.now();
   try {
@@ -143,6 +158,7 @@ export class GameCommands {
     input: JoinWorldRequest,
     idemKey: string | undefined,
   ): Promise<JoinWorldResponse> {
+    await requirePlayer(this.ctx.db, actor.accountId, worldId, this.ctx.clock.now());
     const req = joinWorldRequestSchema.parse(input);
     const key = assertIdempotencyKey(idemKey);
     await loadWorld(this.ctx.db, worldId); // 404 antes de abrir transacción
@@ -157,7 +173,7 @@ export class GameCommands {
             .select()
             .from(worlds)
             .where(eq(worlds.id, worldId))
-            .for('update');
+            .for('no key update');
           if (!world) throw err.notFound('WORLD_NOT_FOUND');
           assertWorldActive(world);
           const r = rulesetOf(world);
@@ -179,16 +195,23 @@ export class GameCommands {
             .from(worldPlayers)
             .where(eq(worldPlayers.worldId, worldId))) as [{ count: number }];
           const now = this.ctx.clock.now();
+          const selectedQuadrant = req.quadrant ?? (['NW', 'NE', 'SW', 'SE'] as const)[count % 4]!;
+          const [account] = await tx
+            .select({ name: accounts.displayName })
+            .from(accounts)
+            .where(eq(accounts.id, actor.accountId));
           await tx.insert(worldPlayers).values({
             worldId,
             accountId: actor.accountId,
             civilization: req.civilization,
+            characterName: r.fortifications ? (req.characterName ?? account!.name) : null,
+            quadrant: r.fortifications ? selectedQuadrant : null,
             joinOrdinal: count,
             joinedAt: now,
             protectionUntil: new Date(now.getTime() + world.protectionHours * 3600_000),
           });
 
-          const spot = await this.findSpawn(tx, world, count);
+          const spot = await this.findSpawn(tx, world, count, selectedQuadrant);
           const villageId = newId();
           const coastal = !r.territory && isCoastal(world.mapSeed, world.mapSize, spot.x, spot.y);
           await tx.insert(villages).values({
@@ -211,6 +234,14 @@ export class GameCommands {
               level: b.level,
             })),
           );
+          await initializeFortifications(
+            tx,
+            r,
+            world,
+            { id: villageId, ...spot },
+            req.civilization,
+            true,
+          );
           const buildings = r.startingBuildings.map((b) => ({
             plot: b.plot,
             type: b.type,
@@ -219,11 +250,18 @@ export class GameCommands {
           const state: ResourceState = {
             amounts: bundleToMilli(r.economy.startingResources),
             remainders: { wood: 0n, stone: 0n, iron: 0n, food: 0n },
-            rates: computeRates(r, buildings, 0, world.speedMultiplier),
+            rates: computeRates(
+              await rulesetForVillage(tx, r, villageId),
+              buildings,
+              0,
+              world.speedMultiplier,
+            ),
             capacity: capacityMilli(r, levelOf(buildings, 'warehouse')),
+            ...(r.economy.cropPopulation ? { foodCapacity: capacityMilli(r, 0) } : {}),
             lastSettledAt: now.getTime(),
           };
           await tx.insert(resourceAccounts).values({ worldId, villageId, ...stateColumns(state) });
+          await refreshCulture(tx, world, villageId, now);
           this.ctx.log.info('world.joined', {
             world_id: worldId,
             account_id: actor.accountId,
@@ -244,6 +282,7 @@ export class GameCommands {
     tx: Tx,
     world: WorldRow,
     ordinal: number,
+    quadrant: 'NW' | 'NE' | 'SW' | 'SE' = 'NW',
   ): Promise<{ x: number; y: number }> {
     const r = rulesetOf(world);
     const d = r.world.spawnMinDistance;
@@ -252,12 +291,37 @@ export class GameCommands {
       cands.push(...spawnCandidates(world.mapSeed, world.mapSize, ordinal + round * 1000, 50));
     if (r.territory) {
       cands.length = 0;
-      for (let i = 0; i < world.mapSize * world.mapSize; i++) {
+      for (
+        let i = 0;
+        i < Math.min(world.mapSize * world.mapSize, r.fortifications ? 4096 : 65536);
+        i++
+      ) {
         const n =
           (i * 97 + ordinal * 173 + Math.abs(world.mapSeed)) % (world.mapSize * world.mapSize);
         const x = n % world.mapSize,
           y = Math.floor(n / world.mapSize);
-        if (isSettleable(terrainAt(world.mapSeed, world.mapSize, x, y, 'LAND')))
+        if (
+          isSettleable(terrainAt(world.mapSeed, world.mapSize, x, y, 'LAND')) &&
+          (!r.economy.cropPopulation ||
+            terrainAt(world.mapSeed, world.mapSize, x, y, 'LAND') === 'PLAIN')
+        )
+          cands.push({ x, y });
+      }
+    }
+    if (r.fortifications) {
+      const rng = createPrng(`${world.mapSeed}:spawn:${ordinal}:${quadrant}`),
+        half = Math.floor(world.mapSize / 2);
+      const startX = quadrant.endsWith('E') ? half : 0,
+        startY = quadrant.startsWith('S') ? half : 0;
+      cands.length = 0;
+      for (let i = 0; i < 4096; i++) {
+        const x = startX + rng.nextInt(quadrant.endsWith('E') ? world.mapSize - half : half),
+          y = startY + rng.nextInt(quadrant.startsWith('S') ? world.mapSize - half : half);
+        if (
+          isSettleable(terrainAt(world.mapSeed, world.mapSize, x, y, 'LAND')) &&
+          (!r.economy.cropPopulation ||
+            terrainAt(world.mapSeed, world.mapSize, x, y, 'LAND') === 'PLAIN')
+        )
           cands.push({ x, y });
       }
     }
@@ -307,6 +371,17 @@ export class GameCommands {
             villageId,
           );
           const r = rulesetOf(world);
+          const [member] = await tx
+            .select()
+            .from(worldPlayers)
+            .where(
+              and(eq(worldPlayers.worldId, worldId), eq(worldPlayers.accountId, actor.accountId)),
+            );
+          const lane = constructionLane(
+            r,
+            member!.civilization as CivilizationId,
+            req.buildingType,
+          );
           const [busy] = await tx
             .select({ id: constructionOrders.id })
             .from(constructionOrders)
@@ -314,10 +389,33 @@ export class GameCommands {
               and(
                 eq(constructionOrders.villageId, villageId),
                 eq(constructionOrders.status, 'IN_PROGRESS'),
+                eq(constructionOrders.lane, lane),
               ),
             );
           if (busy)
             throw err.conflict('CONSTRUCTION_QUEUE_BUSY', 'Ya hay una construcción en curso');
+          const [repair] = await tx
+            .select()
+            .from(wallRepairOrders)
+            .where(
+              and(
+                eq(wallRepairOrders.worldId, worldId),
+                eq(wallRepairOrders.villageId, villageId),
+                eq(
+                  wallRepairOrders.precinct,
+                  req.buildingType === 'wall'
+                    ? 3
+                    : req.buildingType === 'middle_wall'
+                      ? 2
+                      : req.buildingType === 'inner_wall'
+                        ? 1
+                        : 0,
+                ),
+                eq(wallRepairOrders.status, 'IN_PROGRESS'),
+              ),
+            );
+          if (repair)
+            throw err.conflict('CONSTRUCTION_QUEUE_BUSY', 'Esta muralla se está reparando');
 
           const [player] = await tx
             .select()
@@ -327,12 +425,52 @@ export class GameCommands {
             );
           const civilization = player!.civilization as CivilizationId;
           const buildings = await loadBuildings(tx, villageId);
+          const [demolition] = await tx
+            .select()
+            .from(developmentOrders)
+            .where(
+              and(
+                eq(developmentOrders.worldId, worldId),
+                eq(developmentOrders.villageId, villageId),
+                eq(developmentOrders.plot, req.plot),
+                eq(developmentOrders.status, 'IN_PROGRESS'),
+              ),
+            );
+          if (demolition)
+            throw err.conflict('CONSTRUCTION_QUEUE_BUSY', 'El solar se está demoliendo');
+          const [layoutRow] = r.fortifications
+            ? await tx
+                .select()
+                .from(villageLayouts)
+                .where(
+                  and(eq(villageLayouts.worldId, worldId), eq(villageLayouts.villageId, villageId)),
+                )
+            : [];
+          if (r.fortifications && !layoutRow)
+            throw err.conflict('CONCURRENT_MODIFICATION', 'Plano de aldea ausente');
           const check = validateConstruction(r, {
             civilization,
             coastal: village.coastal,
             buildings,
             plot: req.plot,
             type: req.buildingType,
+            layout: layoutRow?.layout,
+            speed: world.speedMultiplier,
+            pending: (
+              await tx
+                .select()
+                .from(constructionOrders)
+                .where(
+                  and(
+                    eq(constructionOrders.villageId, villageId),
+                    eq(constructionOrders.status, 'IN_PROGRESS'),
+                  ),
+                )
+            ).map((o) => ({
+              plot: o.plot,
+              type: o.buildingType as import('@reinos/game-config').BuildingType,
+              level: o.targetLevel,
+            })),
           });
           if (!check.ok)
             throw err.unprocessable(
@@ -358,6 +496,7 @@ export class GameCommands {
             villageId,
             plot: req.plot,
             buildingType: req.buildingType,
+            lane,
             targetLevel,
             costWood: cost.wood,
             costStone: cost.stone,
@@ -435,6 +574,17 @@ export class GameCommands {
             civilization: player!.civilization as CivilizationId,
             buildings,
             unitType: req.unitType,
+            research: (
+              await tx
+                .select()
+                .from(villageResearch)
+                .where(
+                  and(
+                    eq(villageResearch.worldId, worldId),
+                    eq(villageResearch.villageId, villageId),
+                  ),
+                )
+            ).map((s) => ({ unitType: s.unitType as UnitType, kind: s.kind, level: s.level })),
           });
           if (!check.ok)
             throw err.unprocessable(
@@ -449,9 +599,25 @@ export class GameCommands {
             ...(await loadTrainingTroops(tx, villageId)),
             ...(await loadWounded(tx, villageId)),
           ]);
+          const [removing] = await tx
+            .select()
+            .from(developmentOrders)
+            .where(
+              and(
+                eq(developmentOrders.villageId, villageId),
+                eq(developmentOrders.kind, 'DEMOLISH'),
+                eq(developmentOrders.target, check.value.trainedAt),
+                eq(developmentOrders.status, 'IN_PROGRESS'),
+              ),
+            );
+          if (removing)
+            throw err.conflict(
+              'CONSTRUCTION_QUEUE_BUSY',
+              'El edificio de entrenamiento se está demoliendo',
+            );
           const capacity = populationCapacity(r, levelOf(buildings, 'city_hall'));
           const needed = populationOf(r, [{ unitType: req.unitType, quantity: req.quantity }]);
-          if (used + needed > capacity) {
+          if (!r.economy.cropPopulation && used + needed > capacity) {
             throw err.conflict('POPULATION_LIMIT', 'Población insuficiente', {
               used,
               capacity,
@@ -539,6 +705,8 @@ export class GameCommands {
     return this.inTx(async (tx) => {
       const { world } = await prepareVillage(tx, this.ctx, actor, worldId, villageId);
       const r = rulesetOf(world);
+      if (req.deployment && !r.fortifications)
+        throw err.unprocessable('FEATURE_DISABLED', 'Este mundo no usa guarniciones por recinto');
       if (req.reservePercent > r.combat.maxReservePercent) {
         throw err.unprocessable(
           'VALIDATION_FAILED',
@@ -559,6 +727,7 @@ export class GameCommands {
         .set({
           doctrineReservePercent: req.reservePercent,
           doctrineRetreatThresholdPercent: req.retreatThresholdPercent,
+          ...(req.deployment ? { doctrineDeployment: req.deployment } : {}),
         })
         .where(and(eq(villages.worldId, worldId), eq(villages.id, villageId)));
       return req;
@@ -583,7 +752,7 @@ export class GameCommands {
         { accountId: actor.accountId, worldId, command: `march:${originVillageId}`, key },
         req,
         async (): Promise<SendMovementResponse> => {
-          await tx.select().from(worlds).where(eq(worlds.id, worldId)).for('update');
+          await tx.select().from(worlds).where(eq(worlds.id, worldId)).for('no key update');
           const {
             world,
             village: origin,
@@ -644,10 +813,40 @@ export class GameCommands {
           }
           // Gate 3: aquí se validarán PNA/confederaciones (PACT_RESTRICTS_ATTACK).
 
+          if (req.units.some((s) => !r.units.some((u) => u.type === s.unitType)))
+            throw err.unprocessable('UNIT_NOT_AVAILABLE', 'Unidad no disponible en este mundo');
           const units = normalizeStacks(
             r,
             req.units as Array<{ unitType: UnitType; quantity: number }>,
           );
+          if (req.siegeTargetPlot !== undefined) {
+            if (!r.fortifications || req.mission !== 'ATTACK')
+              throw err.unprocessable(
+                'FEATURE_DISABLED',
+                'Objetivos de asedio solo en ataque normal de versión 2.1',
+              );
+            const ownBuildings = await loadBuildings(tx, origin.id);
+            if (
+              levelOf(ownBuildings, 'rally_point') < r.fortifications.preciseTargetRallyLevel ||
+              !units.some((u) => u.unitType === 'catapult')
+            )
+              throw err.unprocessable(
+                'REQUIREMENTS_NOT_MET',
+                'Requiere catapultas y Plaza de Reuniones mejorada',
+              );
+            const [targetLayout] = await tx
+              .select()
+              .from(villageLayouts)
+              .where(
+                and(eq(villageLayouts.worldId, worldId), eq(villageLayouts.villageId, target.id)),
+              );
+            if (
+              !targetLayout?.layout.plots.some(
+                (p) => p.id === req.siegeTargetPlot && p.kind !== 'fortification',
+              )
+            )
+              throw err.unprocessable('TARGET_INVALID', 'Solar de asedio inválido');
+          }
           if (units.length === 0)
             throw err.unprocessable('NO_UNITS_SELECTED', 'Selecciona al menos una unidad');
           if (
@@ -656,13 +855,41 @@ export class GameCommands {
             !units.some((u) => u.unitType === 'chieftain')
           )
             throw err.unprocessable('REQUIREMENTS_NOT_MET', 'La conquista requiere emisarios');
+          if (req.mission === 'CONQUER' && target.kind === 'OASIS' && r.territory?.oasisConquest) {
+            throw err.unprocessable(
+              'TARGET_INVALID',
+              'Los oasis se conquistan mediante ataques normales, reduciendo su lealtad a 0',
+            );
+          }
+          if (req.mission === 'CONQUER' && target.kind === 'OASIS' && !r.territory?.oasisConquest) {
+            const owned = await tx
+              .select({ n: sql<number>`count(*)::int` })
+              .from(villages)
+              .where(
+                and(
+                  eq(villages.worldId, worldId),
+                  eq(villages.parentVillageId, origin.id),
+                  eq(villages.kind, 'OASIS'),
+                ),
+              );
+            const reason = oasisEligibility(
+              r,
+              origin,
+              target,
+              levelOf(await loadBuildings(tx, origin.id), 'treasury'),
+              owned[0]?.n ?? 0,
+            );
+            if (reason) throw err.unprocessable('REQUIREMENTS_NOT_MET', reason);
+          }
+          if (req.mission === 'CONQUER' && target.kind !== 'OASIS')
+            await assertExpansion(tx, world, actor.accountId, origin.id, now, target.id);
           // Compromete tropas: UPDATE condicional + CHECK >= 0 ⇒ nunca doble gasto.
           await removeFromStacks(tx, origin.id, units);
 
           const secs = travelSeconds(
             distanceMilli(origin, target),
             slowestSpeed(r, units),
-            world.speedMultiplier,
+            militarySpeedOf(world),
           );
           const arrivesAt = addSeconds(now, secs);
           const movementId = newId();
@@ -675,6 +902,7 @@ export class GameCommands {
             mission: req.mission,
             status: 'IN_TRANSIT',
             units: Object.fromEntries(units.map((u) => [u.unitType, u.quantity])),
+            siegeTargetPlot: req.siegeTargetPlot,
             departedAt: now,
             arrivesAt,
           });
@@ -727,6 +955,8 @@ export class GameCommands {
       if (code === '23505' && pgConstraint(e) === 'construction_orders_one_active_uq') {
         throw err.conflict('CONSTRUCTION_QUEUE_BUSY', 'Ya hay una construcción en curso');
       }
+      if (code === '23505' && pgConstraint(e) === 'world_players_character_uq')
+        throw err.conflict('DISPLAY_NAME_TAKEN', 'Este nombre de personaje ya existe en el mundo');
       if (code === '23514' && pgConstraint(e) === 'troop_stacks_qty_ck') {
         throw err.conflict('INSUFFICIENT_TROOPS', 'Tropas insuficientes');
       }

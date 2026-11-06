@@ -6,6 +6,7 @@ import { WorldsPage } from './ui/WorldsPage.js';
 import { VillagePage } from './ui/VillagePage.js';
 import { TrainingPage } from './ui/TrainingPage.js';
 import { TacticalArenaPage } from './ui/TacticalArenaPage.js';
+import { StaffPage } from './ui/StaffPage.js';
 
 type Route =
   | { name: 'worlds' }
@@ -88,9 +89,27 @@ export function App() {
         onAuthenticated={(me) => {
           setCsrf(me.csrfToken);
           setAccount(me.account);
+          if (me.account.role === 'PLAYER')
+            void api
+              .worlds()
+              .then((worlds) => {
+                const joined = worlds.filter(
+                  (w) =>
+                    w.membership?.villageIds.length && ['OPEN', 'WONDER_ERA'].includes(w.status),
+                );
+                if (joined.length === 1)
+                  go({
+                    name: 'village',
+                    worldId: joined[0]!.id,
+                    villageId: joined[0]!.membership!.villageIds[0]!,
+                  });
+              })
+              .catch(() => {});
         }}
       />
     );
+  else if (account.role === 'ADMIN' || account.role === 'MODERATOR')
+    page = <StaffPage account={account} onLogout={logout} />;
   else if (route.name === 'training')
     page = (
       <TrainingPage
@@ -117,7 +136,6 @@ export function App() {
       <WorldsPage
         account={account}
         onEnter={(worldId, villageId) => go({ name: 'village', worldId, villageId })}
-        onTraining={() => go({ name: 'training' })}
         onLogout={logout}
       />
     );

@@ -1,0 +1,269 @@
+.join-dialog {
+  width: min(1000px, calc(100vw - 32px));
+  max-height: 94vh;
+  overflow: auto;
+  border: 1px solid #9a9665;
+  border-radius: 14px;
+  padding: 2rem;
+  background: #1e2e23;
+  color: #e8dfbe;
+  box-shadow: 0 20px 100px #000b;
+  box-sizing: border-box;
+}
+.join-dialog::backdrop {
+  background: #090f0cdf;
+}
+.join-dialog header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+.join-dialog h1 {
+  font-size: 1.8rem;
+  margin: 0.6rem 0;
+}
+.join-dialog h2 {
+  font-size: 1.4rem;
+}
+.join-steps {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+  padding: 1rem 0;
+  border-bottom: 1px solid #566346;
+}
+.join-steps li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #859478;
+}
+.join-steps li > span {
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+}
+.join-steps .active {
+  color: #f3d184;
+}
+.join-steps .complete {
+  color: #9bbd80;
+}
+.join-civilizations {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.join-civilizations label {
+  position: relative;
+  cursor: pointer;
+  padding: 1.5rem;
+  border: 1px solid #647451;
+  border-radius: 10px;
+  background: #283c2c;
+}
+.join-civilizations label.selected {
+  border-color: #f0ca74;
+  background: #405332;
+  box-shadow: inset 0 0 0 1px #f0ca74;
+}
+.join-civilizations input {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  accent-color: #dfbe70;
+}
+.tribe-emblem {
+  font-size: 3rem;
+  color: #d3c38b;
+  display: block;
+}
+.join-identity {
+  max-width: 560px;
+  margin: auto;
+}
+.join-identity label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.join-confirm {
+  padding: 1.2rem;
+  border: 1px solid #5a6d4d;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+}
+.join-confirm span {
+  display: block;
+  margin-top: 0.6rem;
+}
+.join-dialog footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  border-top: 1px solid #566346;
+  margin-top: 1.5rem;
+  padding-top: 1.2rem;
+}
+.join-dialog footer > span {
+  font-size: 0.8rem;
+  color: #9aa783;
+}
+.join-location {
+  width: calc(100vw - 32px);
+  max-width: 1500px;
+}
+.quadrant-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 230px;
+  gap: 2rem;
+  align-items: center;
+}
+.quadrant-map {
+  position: relative;
+  aspect-ratio: 1;
+  max-height: none;
+  max-width: 100%;
+  margin: auto;
+  width: min(100%, 54vh);
+  background: #839d62;
+  border: 2px solid #c2bc84;
+  overflow: hidden;
+}
+.quadrant-map canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+.quadrant-grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+.quadrant-grid button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  background: #172b1a24;
+  border: 1px solid #e0e4b899;
+  border-radius: 0;
+  color: #fff7dc;
+  text-shadow: 0 2px 4px #000;
+}
+.quadrant-grid button.selected {
+  background: #edd07c44;
+  box-shadow: inset 0 0 0 4px #f6d87c;
+}
+.quadrant-grid strong {
+  font-size: clamp(12px, 1.6vw, 23px);
+}
+.quadrant-grid span {
+  font-size: clamp(18px, 2.5vw, 38px);
+}
+.quadrant-grid small {
+  font-size: clamp(8px, 1vw, 13px);
+}
+.map-origin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #172a20;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #eed894;
+  border-radius: 20px;
+  pointer-events: none;
+}
+.map-axis {
+  position: absolute;
+  pointer-events: none;
+  color: #fff6da;
+  font-size: 11px;
+  background: #172a20cc;
+  padding: 0.3rem;
+}
+.map-axis.north {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.map-axis.south {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.map-axis.east {
+  right: 0;
+  top: 50%;
+}
+.map-axis.west {
+  left: 0;
+  top: 50%;
+}
+.map-loading {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: #172a20;
+  padding: 0.5rem;
+}
+.quadrant-layout aside {
+  color: #b9c59e;
+}
+.quadrant-layout aside > strong {
+  font-size: 2rem;
+  color: #efce83;
+}
+@media (max-width: 700px) {
+  .join-dialog {
+    padding: 1rem;
+  }
+  .join-civilizations {
+    grid-template-columns: 1fr;
+  }
+  .join-civilizations label {
+    padding: 1rem;
+  }
+  .tribe-emblem {
+    float: left;
+    margin-right: 1rem;
+  }
+  .join-steps {
+    gap: 0.6rem;
+    justify-content: space-between;
+    font-size: 0.75rem;
+  }
+  .join-steps li {
+    gap: 0.25rem;
+  }
+  .join-steps li > span {
+    width: 24px;
+    height: 24px;
+  }
+  .quadrant-layout {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  .quadrant-layout aside {
+    font-size: 0.8rem;
+  }
+  .quadrant-layout aside p {
+    margin: 0.4rem 0;
+  }
+  .quadrant-layout aside > strong {
+    font-size: 1rem;
+  }
+  .join-dialog h1 {
+    font-size: 1.2rem;
+  }
+}

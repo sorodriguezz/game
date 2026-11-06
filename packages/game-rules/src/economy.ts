@@ -26,6 +26,7 @@ export interface ResourceState {
   remainders: ResourceMap<bigint>;
   rates: ResourceMap<bigint>;
   capacity: bigint;
+  foodCapacity?: bigint;
   lastSettledAt: number;
 }
 
@@ -53,14 +54,15 @@ export function settle(state: ResourceState, atMs: number): ResourceState {
   const amounts = { ...state.amounts };
   const remainders = { ...state.remainders };
   for (const k of RESOURCE_KEYS) {
+    const capacity = k === 'food' ? (state.foodCapacity ?? state.capacity) : state.capacity;
     const total = state.rates[k] * elapsed + state.remainders[k];
     const gained = floorDiv(total, MS_PER_HOUR);
     let rem = total - gained * MS_PER_HOUR;
     let amount = state.amounts[k] + gained;
-    if (state.rates[k] >= 0n && amount >= state.capacity) {
+    if (state.rates[k] >= 0n && amount >= capacity) {
       // En capacidad no se acumula producción (ni resto fraccionario); si ya
       // estaba por encima (p. ej. capacidad reducida) no se recorta.
-      amount = state.amounts[k] > state.capacity ? state.amounts[k] : state.capacity;
+      amount = state.amounts[k] > capacity ? state.amounts[k] : capacity;
       rem = 0n;
     }
     if (amount < 0n) {
@@ -94,7 +96,8 @@ export function credit(
   amountMilli: ResourceMap<bigint>,
 ): { state: ResourceState; credited: ResourceMap<bigint> } {
   const credited = mapResources((k) => {
-    const room = state.capacity - state.amounts[k];
+    const room =
+      (k === 'food' ? (state.foodCapacity ?? state.capacity) : state.capacity) - state.amounts[k];
     const add = amountMilli[k];
     if (add <= 0n) return 0n;
     return room <= 0n ? 0n : add < room ? add : room;
@@ -110,6 +113,7 @@ export function credit(
 // ---------------------------------------------------------------------------
 
 export interface BuildingLevel {
+  plot?: number;
   type: BuildingType;
   level: number;
 }
@@ -120,6 +124,8 @@ export function levelOf(buildings: readonly BuildingLevel[], type: BuildingType)
 
 /** Producción por hora (milésimas) de un edificio productor de nivel `level`. */
 export function productionMilliPerHour(r: Ruleset, level: number): bigint {
+  if (r.economy.fieldProductionByLevel)
+    return BigInt(r.economy.fieldProductionByLevel[Math.max(0, level)] ?? 0) * MILLI;
   if (level <= 0) return 0n;
   const base = BigInt(r.economy.baseProductionPerHour) * BigInt(level) * MILLI;
   return floorGrowth(base, r.economy.productionGrowth, level - 1);
@@ -142,9 +148,17 @@ export function computeRates(
 ): ResourceMap<bigint> {
   const base = BigInt(r.economy.villageBaseProductionPerHour) * MILLI;
   const rates = mapResources(() => base);
+  if (r.economy.fieldProductionByLevel) {
+    for (const plot of r.cityLayout.plots.filter((p) => p.kind === 'field')) {
+      const building = buildings.find((b) => b.plot === plot.id),
+        type = building?.type ?? plot.allowedTypes?.[0];
+      const def = r.buildings.find((b) => b.type === type);
+      if (def?.produces) rates[def.produces] += productionMilliPerHour(r, building?.level ?? 0);
+    }
+  }
   for (const b of buildings) {
     const def = buildingDef(r, b.type);
-    if (def.effect === 'production' && def.produces) {
+    if (!r.economy.fieldProductionByLevel && def.effect === 'production' && def.produces) {
       rates[def.produces] += productionMilliPerHour(r, b.level);
     }
   }
@@ -161,11 +175,30 @@ export function computeRates(
     rates[k] = (rates[k] * BigInt(1000 + bonus)) / 1000n;
   }
   if (r.territory) for (const k of RESOURCE_KEYS) rates[k] *= BigInt(speed);
-  rates.food -= BigInt(upkeep) * MILLI;
+  rates.food -=
+    BigInt(upkeep + (r.economy.cropPopulation ? inhabitantsOf(r, buildings) : 0)) * MILLI;
   return rates;
 }
 
 /** Capacidad por recurso en milésimas según el nivel de almacén. */
+export function inhabitantsOf(r: Ruleset, buildings: readonly BuildingLevel[]): number {
+  return buildings.reduce(
+    (sum, b) => sum + (buildingDef(r, b.type).populationByLevel?.[b.level] ?? 0),
+    0,
+  );
+}
+export function storageCapacity(
+  r: Ruleset,
+  buildings: readonly BuildingLevel[],
+  type: 'warehouse' | 'granary',
+): bigint {
+  if (!r.economy.cropPopulation) return capacityMilli(r, levelOf(buildings, 'warehouse'));
+  const stores = buildings.filter((b) => b.type === type && b.level > 0);
+  return stores.length
+    ? stores.reduce((sum, b) => sum + capacityMilli(r, b.level), 0n)
+    : capacityMilli(r, 0);
+}
+
 export function capacityMilli(r: Ruleset, warehouseLevel: number): bigint {
   if (warehouseLevel <= 0) return BigInt(r.economy.baseCapacity) * MILLI;
   return (

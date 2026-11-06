@@ -9,7 +9,8 @@ import {
   type GameEvent,
 } from './events.js';
 import { EVENT_HANDLERS } from './handlers.js';
-import { lockVillages, loadWorld, rulesetOf } from './village-state.js';
+import { lockVillages, loadWorld } from './village-state.js';
+import { AdministrationService } from './administration.js';
 
 export interface WorkerOptions {
   workerId: string;
@@ -63,8 +64,10 @@ export class EventWorker {
           lease_until = ${leaseUntil.toISOString()}::timestamptz, attempts = e.attempts + 1
       where e.id in (
         select id from scheduled_events
-        where (status = 'PENDING' and available_at <= ${now.toISOString()}::timestamptz)
-           or (status = 'PROCESSING' and lease_until < ${now.toISOString()}::timestamptz)
+        where ((status = 'PENDING' and available_at <= ${now.toISOString()}::timestamptz)
+           or (status = 'PROCESSING' and lease_until < ${now.toISOString()}::timestamptz))
+           and exists(select 1 from worlds w where w.id=scheduled_events.world_id and
+             (w.status in ('OPEN','WONDER_ERA') or (w.status='FINALIZING' and scheduled_events.due_at<=w.ends_at)))
         order by due_at, priority, id
         limit ${this.batchSize}
         for update skip locked
@@ -85,9 +88,13 @@ export class EventWorker {
   async process(ev: GameEvent): Promise<'applied' | 'skipped' | 'deferred' | 'failed'> {
     try {
       const applied = await this.ctx.db.transaction(async (tx) => {
+        await tx.select().from(worlds).where(eq(worlds.id, ev.worldId)).for('no key update');
         const world = await loadWorld(tx, ev.worldId);
-        if (rulesetOf(world).territory)
-          await tx.select().from(worlds).where(eq(worlds.id, ev.worldId)).for('update');
+        if (
+          !['OPEN', 'WONDER_ERA', 'FINALIZING'].includes(world.status) ||
+          (world.endsAt && ev.dueAt > world.endsAt)
+        )
+          return 0;
         const lockset = locksetOf(ev);
         await lockVillages(tx, ev.worldId, lockset);
         return processEventsUpTo(tx, this.ctx, EVENT_HANDLERS, new Set(lockset), {
@@ -140,6 +147,7 @@ export class EventWorker {
   }
 
   async tick(): Promise<TickResult> {
+    await new AdministrationService(this.ctx).advanceWorlds();
     const claimed = await this.claim();
     const out: TickResult = {
       claimed: claimed.length,

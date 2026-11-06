@@ -214,7 +214,9 @@ describe('battle-server Colyseus (Gate 1, TRAINING)', () => {
     let resultMsg: { recorded: boolean; result: { resultHash: string; mode: string } } | undefined;
     room.onMessage('battle.result.recorded', (m) => (resultMsg = m));
     // Ataque general del jugador cuando haya enemigos visibles.
-    await until(() => resultMsg !== undefined, 25_000);
+    // Windows puede redondear intervalos de 2 ms a ~16 ms. Mantener los mismos
+    // ticks e invariantes y presupuestar el reloj real, sin acelerar la simulación.
+    await until(() => resultMsg !== undefined, 90_000);
     expect(resultMsg!.recorded).toBe(true);
     expect(resultMsg!.result.mode).toBe('TRAINING');
     const payload = delivered.get(snap.encounterId)!;
@@ -231,7 +233,7 @@ describe('battle-server Colyseus (Gate 1, TRAINING)', () => {
     // Al terminar se revela todo el campo (llega en el siguiente parche de estado).
     await until(() => visible().some((f) => f.side === 'DEFENDER'));
     await room.leave();
-  }, 40_000);
+  }, 120_000);
 
   it('desconexión: la doctrina toma el mando y la reconexión lo devuelve (NET-010/011, ADR-0028)', async () => {
     const snap = snapshot({ defender: 'PLAYER' });

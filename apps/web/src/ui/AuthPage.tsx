@@ -63,10 +63,10 @@ export function AuthPage({ onAuthenticated }: { onAuthenticated: (me: MeResponse
           </button>
         </div>
         <label>
-          Correo
+          {mode === 'login' ? 'Usuario o correo' : 'Correo'}
           <input
-            type="email"
-            autoComplete="email"
+            type={mode === 'login' ? 'text' : 'email'}
+            autoComplete={mode === 'login' ? 'username' : 'email'}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required

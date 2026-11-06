@@ -1,0 +1,5 @@
+ WARN  Unsupported engine: wanted: {"node":">=22.23.2"} (current: {"node":"v22.14.0","pnpm":"10.28.0"})
+
+> reinos-de-la-frontera@0.1.0 lint C:\Users\sebas\Desktop\game
+> eslint .
+

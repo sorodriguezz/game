@@ -12,25 +12,63 @@ import {
   Vec3,
   type Entity as PcEntity,
 } from 'playcanvas';
-import { getRuleset, type BuildingType, type CivilizationId } from '@reinos/game-config';
+import {
+  getRuleset,
+  type BuildingType,
+  type CivilizationId,
+  type VillageLayout,
+} from '@reinos/game-config';
 import { visualStage } from '@reinos/game-rules';
-import type { BuildingView, ConstructionOrderView } from '@reinos/contracts';
+import type { BuildingView, ConstructionOrderView, WallSectionView } from '@reinos/contracts';
 import { BuildingModel, EmptyPlot, Scaffold } from './buildings.js';
 import { GlbModel } from '../assets/GlbModel.js';
 import { AssetRuntime, findVariant, loadManifest, type ManifestAsset } from '../assets/runtime.js';
-import { CityTerrain, InstancedProps, cityScenery, wallRing } from './environment.js';
+import { CityTerrain, InstancedProps, cityScenery, wallRing, organicWall } from './environment.js';
 import { SceneLighting } from './SceneLighting.js';
 import { useGraphicsProfile } from './graphics.js';
 import { Cyl, KitProvider, useKit, type Kit, type V3 } from './kit.js';
 
 export interface CitySceneProps {
+  layout?: VillageLayout;
+  walls?: WallSectionView[];
+  previewType?: BuildingType | null;
+  highlightedPlots?: number[];
   rulesetVersion: string;
   civilization: CivilizationId;
   coastal: boolean;
   buildings: BuildingView[];
   construction: ConstructionOrderView | null;
+  constructions?: ConstructionOrderView[];
   selectedPlot: number | null;
   onSelectPlot: (plot: number) => void;
+}
+
+function PersistentWall({
+  wall,
+  level,
+  integrity,
+  civilization,
+}: {
+  wall: VillageLayout['walls'][number];
+  level: number;
+  integrity: number;
+  civilization: CivilizationId;
+}) {
+  const items = useMemo(
+    () =>
+      organicWall(
+        wall,
+        level,
+        integrity,
+        civilization === 'forest_kin'
+          ? 'WOOD'
+          : civilization === 'steppe_clans'
+            ? 'EARTH'
+            : 'STONE',
+      ),
+    [wall, level, integrity, civilization],
+  );
+  return <InstancedProps items={items} lod="LOD0" attachToParent />;
 }
 
 const WALL_RADIUS = 46;
@@ -242,12 +280,25 @@ function BuildingSlot({
 }) {
   if (!manifest) return null;
   const newCiv = ['stone_wardens', 'steppe_clans', 'forest_kin'].includes(civilization);
+  const supporting: Partial<Record<BuildingType, string>> = {
+    granary: 'warehouse',
+    market: 'war_camp',
+    trade_office: 'city_hall',
+    academy: 'temple',
+    smithy: 'workshop',
+    embassy: 'city_hall',
+    town_hall: 'city_hall',
+    hideout: 'warehouse',
+    wonder: 'castle',
+    tournament_square: 'rally_point',
+    treasury: 'castle',
+  };
   const visualType =
     type === 'quarry' && newCiv
       ? 'clay_pit'
       : type === 'middle_wall' || type === 'inner_wall'
         ? 'wall'
-        : type;
+        : (supporting[type] ?? type);
   const visualCiv =
     civilization === 'stone_wardens' || civilization === 'steppe_clans'
       ? 'imperial_crown'
@@ -263,7 +314,7 @@ function City(props: CitySceneProps & { dragGuard: React.MutableRefObject<boolea
   const k = useKit();
   const manifest = useManifest();
   const r = getRuleset(props.rulesetVersion);
-  const plots = r.cityLayout.plots;
+  const plots = props.layout?.plots ?? r.cityLayout.plots;
   const terrestrial = !!r.territory;
   const pathTargets = useMemo<Array<[number, number]>>(
     () =>
@@ -273,8 +324,16 @@ function City(props: CitySceneProps & { dragGuard: React.MutableRefObject<boolea
     [plots, props.coastal],
   );
   const scenery = useMemo(
-    () => cityScenery(props.coastal, terrestrial ? 99 : WALL_RADIUS),
-    [props.coastal, terrestrial],
+    () =>
+      cityScenery(
+        props.coastal,
+        props.layout
+          ? Math.max(...props.layout.walls.map((w) => w.radius)) + 15
+          : terrestrial
+            ? 99
+            : WALL_RADIUS,
+      ),
+    [props.coastal, terrestrial, props.layout],
   );
   const byPlot = new Map(props.buildings.map((b) => [b.plot, b]));
   const wallLevel = props.buildings.find((b) => b.type === 'wall')?.level ?? 0;
@@ -294,7 +353,14 @@ function City(props: CitySceneProps & { dragGuard: React.MutableRefObject<boolea
       <CityTerrain
         coastal={props.coastal}
         paths={pathTargets}
-        flatRadius={terrestrial ? 105 : 58}
+        flatRadius={
+          props.layout
+            ? Math.max(...props.layout.walls.map((w) => w.radius)) + 5
+            : terrestrial
+              ? 105
+              : 58
+        }
+        roads={props.layout?.roads}
       />
       <InstancedProps items={scenery} />
       {props.coastal && (
@@ -308,7 +374,18 @@ function City(props: CitySceneProps & { dragGuard: React.MutableRefObject<boolea
           <Wall level={wallLevel} coastal={props.coastal} civilization={props.civilization} />
         </Entity>
       )}
+      {props.layout?.walls.map((w) => (
+        <Entity key={w.precinct} onClick={click(w.plot)}>
+          <PersistentWall
+            wall={w}
+            level={byPlot.get(w.plot)?.level ?? 0}
+            integrity={props.walls?.find((s) => s.precinct === w.precinct)?.integrity ?? 1000}
+            civilization={props.civilization}
+          />
+        </Entity>
+      ))}
       {terrestrial &&
+        !props.layout &&
         plots
           .filter((p) => p.kind === 'fortification')
           .map((p) => (
@@ -330,7 +407,9 @@ function City(props: CitySceneProps & { dragGuard: React.MutableRefObject<boolea
         )
         .map((p) => {
           const b = byPlot.get(p.id);
-          const building = props.construction?.plot === p.id;
+          const building = (
+            props.constructions ?? (props.construction ? [props.construction] : [])
+          ).some((o) => o.plot === p.id);
           return (
             <Entity
               key={p.id}
@@ -349,6 +428,17 @@ function City(props: CitySceneProps & { dragGuard: React.MutableRefObject<boolea
                 <EmptyPlot k={k} size={p.kind === 'coastal' ? 9 : 7} />
               )}
               {building && <Scaffold k={k} size={p.kind === 'center' ? 12 : 8} h={b ? 7 : 4} />}
+              {!b && props.selectedPlot === p.id && props.previewType && (
+                <BuildingSlot
+                  manifest={manifest}
+                  type={props.previewType}
+                  civilization={props.civilization}
+                  stage={1}
+                />
+              )}
+              {props.highlightedPlots?.includes(p.id) && (
+                <SelectionMarker k={k} p={[0, 0, 0]} size={(p.footprintRadius ?? 5) * 2} />
+              )}
             </Entity>
           );
         })}
@@ -373,6 +463,13 @@ export function CityScene(props: CitySceneProps) {
   const dragGuard = useRef(false);
   const cameraRef = useRef<PcEntity | null>(null);
   const profile = useGraphicsProfile();
+  const badgeRefs = useRef(new Map<number, HTMLButtonElement>());
+  const plots = props.layout?.plots ?? getRuleset(props.rulesetVersion).cityLayout.plots;
+  const radius = props.layout
+    ? Math.max(...props.layout.walls.map((w) => w.radius))
+    : getRuleset(props.rulesetVersion).territory
+      ? 112
+      : 46;
   return (
     <div
       className="scene"
@@ -397,7 +494,7 @@ export function CityScene(props: CitySceneProps) {
           profile={profile}
           camera={cameraRef}
           fog={
-            props.rulesetVersion === 'frontier-alpha.1'
+            getRuleset(props.rulesetVersion).territory
               ? { color: '#a7b89a', start: 450, end: 1000 }
               : { color: '#c4d3dc', start: 170, end: 560 }
           }
@@ -422,7 +519,11 @@ export function CityScene(props: CitySceneProps) {
           </Entity>
           <Entity
             name="camera"
-            position={props.rulesetVersion === 'frontier-alpha.1' ? [0, 155, 210] : [0, 70, 95]}
+            position={
+              getRuleset(props.rulesetVersion).territory
+                ? [0, radius * 1.4, radius * 1.8]
+                : [0, 70, 95]
+            }
             ref={(e) => void (cameraRef.current = e)}
           >
             <Camera clearColor="#b9cdd9" fov={42} farClip={1400} nearClip={0.5} />
@@ -432,15 +533,97 @@ export function CityScene(props: CitySceneProps) {
               enableFly={false}
               enablePan
               pitchRange={PITCH_RANGE}
-              zoomRange={ZOOM_RANGE}
+              zoomRange={radius > 150 ? new Vec2(40, radius * 4) : ZOOM_RANGE}
               rotateDamping={0.92}
               zoomDamping={0.92}
               moveDamping={0.92}
             />
           </Entity>
           <City {...props} dragGuard={dragGuard} />
+          <ProjectedLevels
+            plots={plots}
+            buildings={props.buildings}
+            camera={cameraRef}
+            elements={badgeRefs}
+          />
         </KitProvider>
       </Application>
+      <div className="city-levels" aria-label="Niveles y solares de la aldea">
+        {plots
+          .filter((p) => p.kind !== 'coastal' || props.coastal)
+          .map((p) => {
+            const b = props.buildings.find((b) => b.plot === p.id),
+              name = b
+                ? getRuleset(props.rulesetVersion).buildings.find((d) => d.type === b.type)?.name
+                : (p.label ?? 'Solar vacío');
+            const order = (
+              props.constructions ?? (props.construction ? [props.construction] : [])
+            ).find((o) => o.plot === p.id);
+            return (
+              <button
+                key={p.id}
+                ref={(e) => {
+                  if (e) badgeRefs.current.set(p.id, e);
+                  else badgeRefs.current.delete(p.id);
+                }}
+                className={`city-level ${b ? 'built' : p.kind === 'field' ? 'field' : 'empty'} ${props.selectedPlot === p.id ? 'selected' : ''} ${order ? 'constructing' : ''}`}
+                data-plot={p.id}
+                data-level={b?.level ?? 0}
+                aria-label={`${name} · nivel ${b?.level ?? 0} · solar ${p.id}${order ? ' · En construcción' : ''}`}
+                title={`${name} · nivel ${b?.level ?? 0}${order ? ` → ${order.targetLevel}` : ''}`}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  props.onSelectPlot(p.id);
+                }}
+              >
+                {b?.level ?? (p.kind === 'field' ? 0 : '+')}
+                {order && (
+                  <span className="city-build-hammer" aria-hidden>
+                    ⚒
+                  </span>
+                )}
+              </button>
+            );
+          })}
+      </div>
     </div>
   );
+}
+
+function ProjectedLevels({
+  plots,
+  buildings,
+  camera,
+  elements,
+}: {
+  plots: VillageLayout['plots'];
+  buildings: BuildingView[];
+  camera: React.RefObject<PcEntity | null>;
+  elements: React.RefObject<Map<number, HTMLButtonElement>>;
+}) {
+  const app = useApp(),
+    point = useMemo(() => new Vec3(), []),
+    screen = useMemo(() => new Vec3(), []);
+  useAppEvent('update', () => {
+    if (!app || !camera.current?.camera) return;
+    const canvas = app.graphicsDevice.canvas,
+      sx = canvas.clientWidth / app.graphicsDevice.width,
+      sy = canvas.clientHeight / app.graphicsDevice.height;
+    for (const p of plots) {
+      const el = elements.current?.get(p.id);
+      if (!el) continue;
+      const b = buildings.find((b) => b.plot === p.id),
+        height = b ? (p.kind === 'field' ? 5 : 12) : 1;
+      camera.current.camera.worldToScreen(point.set(p.x, height, p.z), screen);
+      const x = screen.x * sx,
+        y = screen.y * sy;
+      el.style.visibility =
+        screen.z > 0 && x >= 0 && x <= canvas.clientWidth && y >= 0 && y <= canvas.clientHeight
+          ? 'visible'
+          : 'hidden';
+      el.style.transform = `translate(${x}px,${y}px) translate(-50%,-100%)`;
+    }
+  });
+  return null;
 }

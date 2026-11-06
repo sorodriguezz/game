@@ -1,9 +1,18 @@
 import { z } from 'zod';
-import { BUILDING_TYPES, CIVILIZATION_IDS, UNIT_TYPES } from '@reinos/game-config';
+import {
+  BUILDING_TYPES,
+  CIVILIZATION_IDS,
+  UNIT_TYPES,
+  type VillageLayout,
+  type Precinct,
+  type Deployment,
+} from '@reinos/game-config';
 
 // ---------------------------------------------------------------------------
 // Auth
 // ---------------------------------------------------------------------------
+export const ACCOUNT_ROLES = ['ADMIN', 'MODERATOR', 'PLAYER'] as const;
+export type AccountRole = (typeof ACCOUNT_ROLES)[number];
 export const registerRequestSchema = z.object({
   email: z.string().trim().toLowerCase().max(254).pipe(z.email()),
   displayName: z
@@ -17,12 +26,13 @@ export const registerRequestSchema = z.object({
 export type RegisterRequest = z.infer<typeof registerRequestSchema>;
 
 export const loginRequestSchema = z.object({
-  email: z.string().trim().toLowerCase().max(254),
+  email: z.string().trim().toLowerCase().min(1).max(254),
   password: z.string().min(1).max(200),
 });
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
 
 export interface AccountView {
+  role: AccountRole;
   id: string;
   email: string;
   displayName: string;
@@ -36,13 +46,25 @@ export interface MeResponse {
 // ---------------------------------------------------------------------------
 // Mundos
 // ---------------------------------------------------------------------------
-export const WORLD_STATUSES = ['PLANNED', 'OPEN', 'WONDER_ERA', 'FINALIZING', 'ARCHIVED'] as const;
+export const WORLD_STATUSES = [
+  'DRAFT',
+  'PLANNED',
+  'OPEN',
+  'WONDER_ERA',
+  'PAUSED',
+  'FINALIZING',
+  'FINISHED',
+  'ARCHIVED',
+  'CANCELLED',
+] as const;
 export type WorldStatus = (typeof WORLD_STATUSES)[number];
 
 export const WORLD_PROFILES = ['test', 'alpha', 'seasonal'] as const;
 export type WorldProfile = (typeof WORLD_PROFILES)[number];
 
 export interface WorldSummary {
+  opensAt?: string;
+  endsAt?: string | null;
   id: string;
   slug: string;
   name: string;
@@ -50,6 +72,7 @@ export interface WorldSummary {
   profile: WorldProfile;
   rulesetVersion: string;
   speedMultiplier: number;
+  movementSpeedMultiplier?: number;
   mapSize: number;
   playerCount: number;
   membership: null | {
@@ -60,6 +83,8 @@ export interface WorldSummary {
 }
 
 export const joinWorldRequestSchema = z.object({
+  characterName: z.string().trim().min(3).max(24).optional(),
+  quadrant: z.enum(['NW', 'NE', 'SW', 'SE']).optional(),
   civilization: z.enum(CIVILIZATION_IDS),
   villageName: z.string().trim().min(3).max(32),
 });
@@ -80,11 +105,13 @@ export interface ResourceSnapshotView {
   amountsMilli: Record<'wood' | 'stone' | 'iron' | 'food', number>;
   ratesMilliPerHour: Record<'wood' | 'stone' | 'iron' | 'food', number>;
   capacityMilli: number;
+  foodCapacityMilli?: number;
   settledAt: string;
   starving: boolean;
 }
 
 export interface BuildingView {
+  inhabitants?: number;
   plot: number;
   type: (typeof BUILDING_TYPES)[number];
   level: number;
@@ -118,11 +145,11 @@ export type MovementMission = (typeof MOVEMENT_MISSIONS)[number];
 export interface MovementView {
   id: string;
   direction: 'OUTGOING' | 'RETURNING' | 'INCOMING';
-  mission: MovementMission;
+  mission: MovementMission | 'SETTLE';
   status: 'IN_TRANSIT' | 'RETURNING' | 'COMPLETED';
   originVillageId: string;
   originName: string;
-  targetVillageId: string;
+  targetVillageId: string | null;
   targetName: string;
   departedAt: string;
   arrivesAt: string;
@@ -132,11 +159,24 @@ export interface MovementView {
 }
 
 export interface DoctrineView {
+  deployment?: Deployment;
   reservePercent: number;
   retreatThresholdPercent: number | null;
 }
 
 export interface VillageView {
+  culture?: import('./culture.js').CultureView;
+  research?: import('./development.js').ResearchView[];
+  development?: import('./development.js').DevelopmentOrderView[];
+  worldName?: string;
+  oases?: { owned: number; slots: number; radius: number };
+  worldStatus?: (typeof WORLD_STATUSES)[number];
+  mapSize?: number;
+  characterName?: string;
+  movementSpeedMultiplier?: number;
+  constructions?: ConstructionOrderView[];
+  layout?: VillageLayout;
+  walls?: WallSectionView[];
   id: string;
   worldId: string;
   name: string;
@@ -148,7 +188,15 @@ export interface VillageView {
   speedMultiplier: number;
   serverTime: string;
   resources: ResourceSnapshotView;
-  population: { used: number; capacity: number };
+  population: {
+    used: number;
+    capacity: number;
+    inhabitants?: number;
+    grossCropPerHour?: number;
+    buildingConsumption?: number;
+    troopConsumption?: number;
+    freeCropPerHour?: number;
+  };
   buildings: BuildingView[];
   construction: ConstructionOrderView | null;
   recruitment: RecruitmentOrderView[];
@@ -195,12 +243,14 @@ export interface RecruitResponse {
 }
 
 export const doctrineRequestSchema = z.object({
+  deployment: z.enum(['BALANCED', 'OUTER', 'CORE']).optional(),
   reservePercent: z.number().int().min(0).max(100),
   retreatThresholdPercent: z.number().int().min(100).max(10_000).nullable(),
 });
 export type DoctrineRequest = z.infer<typeof doctrineRequestSchema>;
 
 export const sendMovementRequestSchema = z.object({
+  siegeTargetPlot: z.number().int().min(0).max(63).optional(),
   targetVillageId: z.uuid(),
   mission: z.enum(MOVEMENT_MISSIONS),
   units: z
@@ -227,13 +277,19 @@ export interface SendMovementResponse {
 // Mapa
 // ---------------------------------------------------------------------------
 export const mapQuerySchema = z.object({
-  x: z.coerce.number().int().min(0).max(4096),
-  y: z.coerce.number().int().min(0).max(4096),
+  x: z.coerce.number().int().min(-5000).max(4999),
+  y: z.coerce.number().int().min(-5000).max(4999),
   radius: z.coerce.number().int().min(1).max(24).default(12),
+  width: z.coerce.number().int().min(1).max(95).optional(),
+  height: z.coerce.number().int().min(1).max(95).optional(),
 });
 export type MapQuery = z.infer<typeof mapQuerySchema>;
 
 export interface MapVillageView {
+  construction?: { count: number; startedAt: string; completesAt: string };
+  oasisBonuses?: Partial<Record<'wood' | 'stone' | 'iron' | 'food', number>>;
+  parentVillageId?: string | null;
+  ownerColor?: string;
   id: string;
   name: string;
   x: number;
@@ -249,6 +305,9 @@ export interface MapVillageView {
 }
 
 export interface MapRegionView {
+  fieldDistributions?: number[][];
+  /** Origen NO; las filas avanzan hacia Y decreciente en coordenadas cartesianas. */
+  coordinateSystem?: 'CARTESIAN';
   originX: number;
   originY: number;
   width: number;
@@ -261,6 +320,15 @@ export interface MapRegionView {
   mapSize?: number;
   serverTime?: string;
   movements?: MapMovementView[];
+}
+export interface MapAtlasView {
+  worldId: string;
+  mapSize: number;
+  mapSeed: number;
+  serverTime: string;
+  running?: boolean;
+  villages: MapVillageView[];
+  movements: MapMovementView[];
 }
 
 // ---------------------------------------------------------------------------
@@ -281,6 +349,16 @@ export interface BattleReportSummary {
 }
 
 export interface BattleReportDetail extends BattleReportSummary {
+  defenderInformationLimited?: boolean;
+  layout?: VillageLayout;
+  replay?: {
+    version: 'auto-replay-1';
+    visualSeed: string;
+    layout: VillageLayout;
+    civilization: (typeof CIVILIZATION_IDS)[number];
+    buildings: BuildingView[];
+    walls: WallSectionView[];
+  };
   rulesetVersion: string;
   seed: string;
   result: unknown;
@@ -297,8 +375,8 @@ export interface MapMovementView {
   units: UnitStackView[] | null;
 }
 export const foundVillageRequestSchema = z.object({
-  x: z.number().int().min(0).max(1023),
-  y: z.number().int().min(0).max(1023),
+  x: z.number().int().min(-5000).max(4999),
+  y: z.number().int().min(-5000).max(4999),
   name: z.string().trim().min(3).max(32),
 });
 export type FoundVillageRequest = z.infer<typeof foundVillageRequestSchema>;
@@ -323,3 +401,22 @@ export const allianceRequestSchema = z.union([
   z.object({ name: z.string().trim().min(3).max(32) }),
   z.object({ inviteCode: z.string().trim().min(6).max(32) }),
 ]);
+
+export interface WallSectionView {
+  precinct: Precinct;
+  plot: number;
+  level: number;
+  integrity: number;
+  material: 'STONE' | 'WOOD' | 'EARTH';
+  bonusPermille: number;
+  repair: null | { id: string; restoreIntegrity: number; startedAt: string; completesAt: string };
+}
+export const repairWallRequestSchema = z.object({
+  precinct: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+});
+export type RepairWallRequest = z.infer<typeof repairWallRequestSchema>;
+export interface RepairWallResponse {
+  orderId: string;
+  completesAt: string;
+  restoreIntegrity: number;
+}

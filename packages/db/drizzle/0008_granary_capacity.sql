@@ -1,0 +1,1 @@
+ALTER TABLE "resource_accounts" ADD COLUMN "food_capacity_milli" bigint;

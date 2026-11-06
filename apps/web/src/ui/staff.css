@@ -1,0 +1,208 @@
+.staff-app {
+  min-height: 100vh;
+  background: #101c19;
+  color: #eadfbe;
+}
+.staff-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid #405145;
+  background: #182820;
+  flex-wrap: wrap;
+}
+.staff-header a {
+  color: #e1bd65;
+  font-family: Georgia, serif;
+  text-decoration: none;
+  font-weight: bold;
+}
+.staff-shell {
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+}
+.staff-nav {
+  padding: 2rem 1rem;
+  border-right: 1px solid #405145;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.staff-nav button {
+  text-align: left;
+  padding: 0.9rem;
+}
+.staff-nav .active,
+.profile-options .active {
+  background: #415c3f;
+  border-color: #cfb46a;
+}
+.staff-main {
+  padding: 2rem;
+  min-width: 0;
+  max-width: 1800px;
+}
+.staff-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.staff-metrics .card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.staff-metrics strong {
+  font-size: 1.8rem;
+  color: #edcc7f;
+}
+.staff-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+.staff-app .card {
+  background: #203326;
+  border: 1px solid #495b42;
+  padding: 1.2rem;
+}
+.staff-app h1,
+.staff-app h2 {
+  color: #edcc7f;
+}
+.staff-app .world-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 370px), 1fr));
+  align-items: start;
+  gap: 1.2rem;
+}
+.managed-world header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.managed-world dl {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 0.5rem;
+}
+.managed-world dd {
+  margin: 0;
+}
+.staff-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+.staff-form {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+.staff-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+.staff-app label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.staff-app textarea {
+  min-height: 90px;
+  resize: vertical;
+  background: #13221b;
+  color: inherit;
+  border: 1px solid #5d6947;
+  padding: 0.6rem;
+}
+.staff-app input,
+.staff-app select {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.staff-app .staff-check {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0.6rem 0;
+}
+.staff-check input {
+  width: auto;
+}
+.staff-table {
+  overflow: auto;
+  margin: 1rem 0;
+}
+.staff-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.staff-table th,
+.staff-table td {
+  text-align: left;
+  padding: 1rem;
+  border-bottom: 1px solid #405145;
+}
+.staff-table small {
+  display: block;
+  margin-top: 0.4rem;
+}
+.staff-table pre {
+  max-width: 480px;
+  white-space: pre-wrap;
+}
+.profile-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.4rem;
+  padding: 0.8rem;
+}
+.profile-options button {
+  padding: 0.7rem 0.3rem;
+}
+.profile-options small {
+  display: block;
+  font-size: 0.7rem;
+  margin-top: 0.4rem;
+}
+.auth-card {
+  width: min(480px, 100%);
+}
+@media (max-width: 800px) {
+  .staff-shell {
+    grid-template-columns: 1fr;
+  }
+  .staff-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-right: 0;
+    border-bottom: 1px solid #405145;
+    padding: 1rem;
+  }
+  .staff-nav p {
+    width: 100%;
+    margin: 0.2rem;
+  }
+  .staff-main {
+    padding: 1rem;
+  }
+  .staff-header {
+    padding: 1rem;
+  }
+  .staff-title {
+    align-items: flex-start;
+  }
+  .profile-options {
+    grid-template-columns: 1fr;
+  }
+  .profile-options small {
+    display: inline;
+    margin-left: 0.5rem;
+  }
+}

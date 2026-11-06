@@ -1,4 +1,6 @@
 import { and, eq } from 'drizzle-orm';
+import { combatResearch } from './development.js';
+import { completeExpansion } from './culture.js';
 import { armyMovements, battles, settlementOrders, villages, worldPlayers } from '@reinos/db';
 import type { CivilizationId, UnitType } from '@reinos/game-config';
 import { addSeconds, iso, newId } from './util.js';
@@ -9,6 +11,7 @@ import {
   rulesetOf,
   saveEconomy,
   withRecomputedRates,
+  militarySpeedOf,
 } from './village-state.js';
 import {
   settle,
@@ -42,7 +45,16 @@ export const settlementComplete: EventHandler = async (tx, _ctx, ev) => {
       .where(eq(settlementOrders.id, o.id));
     return;
   }
-  await initializeVillage(tx, world, o.ownerAccountId, o.name, o.x, o.y, ev.dueAt);
+  const foundedId = await initializeVillage(
+    tx,
+    world,
+    o.ownerAccountId,
+    o.name,
+    o.x,
+    o.y,
+    ev.dueAt,
+  );
+  await completeExpansion(tx, world, origin.id, foundedId, ev.dueAt);
   await tx
     .update(settlementOrders)
     .set({ status: 'COMPLETED' })
@@ -111,9 +123,18 @@ export const fieldEncounter: EventHandler = async (tx, ctx, ev) => {
     rulesetVersion: r.version,
     mission: 'ATTACK',
     location: 'FIELD',
-    attacker: { civilization: await civ(a.ownerAccountId), units: units(a) },
+    attacker: {
+      civilization: await civ(a.ownerAccountId),
+      units: units(a),
+      ...(r.development
+        ? { improvements: await combatResearch(tx, ev.worldId, a.originVillageId) }
+        : {}),
+    },
     defender: {
       civilization: await civ(d.ownerAccountId),
+      ...(r.development
+        ? { improvements: await combatResearch(tx, ev.worldId, d.originVillageId) }
+        : {}),
       units: units(d),
       doctrine: { reservePercent: 0, retreatThresholdPercent: null },
     },
@@ -155,7 +176,7 @@ export const fieldEncounter: EventHandler = async (tx, ctx, ev) => {
           travelSeconds(
             distanceMilli(point, origin!),
             slowestSpeed(r, survivors),
-            world.speedMultiplier,
+            militarySpeedOf(world),
           ),
         )
       : null;
